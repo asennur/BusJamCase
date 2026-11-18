@@ -16,6 +16,8 @@ durur ve sorar. Kararlar Asen'in (18 Kasım 2026).
 
 ## 1. Platform: dikey mobil
 
+- Render: **URP** (Universal Render Pipeline, 2022.3 için 14.x). Tek mobil ayarlı URP asset'i: HDR kapalı, MSAA 2x, gölge tek directional ve kısa mesafe, ek ışık yok, SRP Batcher açık. Materyaller `Universal Render Pipeline/Simple Lit`.
+
 - Player Settings: Default Orientation **Portrait**, yalnız portrait izinli.
 - Game view referansı **1080×1920**. `Application.targetFrameRate = 60` (GameManager Awake).
 - UI: Canvas Scaler **Scale With Screen Size**, referans 1080×1920, match 0.5. HUD bir `SafeArea` paneli içinde.
