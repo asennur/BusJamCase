@@ -28,8 +28,13 @@ namespace BusJam.Gameplay
         private readonly List<Transform> activeTiles = new List<Transform>();
         private int width;
 
-        private void Awake()
+        // GameManager.Awake, Board sahne sırasında daha önce gelse bile Build'den önce çalışabilir;
+        // bu yüzden havuzlar Awake yerine ilk Build çağrısında kurulur.
+        private void EnsurePools()
         {
+            if (passengerPool != null)
+                return;
+
             passengerPool = new ObjectPool<Passenger>(
                 () => Instantiate(passengerPrefab, transform),
                 p => p.gameObject.SetActive(true),
@@ -44,6 +49,7 @@ namespace BusJam.Gameplay
         /// <summary>Önceki leveli havuza geri verir, yenisini kurar ve yolcuları board'a yazar.</summary>
         public void Build(LevelData level, Board board)
         {
+            EnsurePools();
             Clear();
             width = level.width;
 

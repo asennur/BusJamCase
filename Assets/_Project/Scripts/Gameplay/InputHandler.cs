@@ -30,10 +30,7 @@ namespace BusJam.Gameplay
             {
                 var passenger = hit.collider.GetComponent<Passenger>();
                 if (passenger != null)
-                {
                     PassengerTapped?.Invoke(passenger);
-                    return;
-                }
             }
 
             ScreenTapped?.Invoke();
