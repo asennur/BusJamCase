@@ -170,7 +170,7 @@ MonoBehaviour:
   passengerPrefab: {fileID: 2193731836056189059, guid: 3e2ab979d65836442b9cb5a7766e53d8, type: 3}
   tilePrefab: {fileID: 1312243618980957560, guid: 8e9b40f9869eb974d90c91bdeb625e6d, type: 3}
   tunnelPrefab: {fileID: 4711668801961494322, guid: d5bbb84b6b01e3944a8b0df4a1af3bea, type: 3}
-  obstaclePrefab: {fileID: 0}
+  obstaclePrefab: {fileID: 3110265379363359241, guid: 412c5557e83b3db4cb378a2612de869f, type: 3}
   colorMaterials:
   - {fileID: 2100000, guid: 8704c296d4af58c4396adb0a4e87ce9c, type: 2}
   - {fileID: 2100000, guid: 78ca3a4aed7b08c4f93012ada5fcc88c, type: 2}
