@@ -45,7 +45,7 @@ namespace BusJam.Gameplay
 
         private void OnPassengerTapped(Passenger passenger)
         {
-            if (gameManager.State != GameState.Playing)
+            if (gameManager.State != GameState.Playing || passenger.State != PassengerState.Idle)
                 return;
 
             if (!reachable[board.ToIndex(passenger.Cell)])
@@ -72,7 +72,7 @@ namespace BusJam.Gameplay
         private void RefreshReachable()
         {
             board.ComputeReachable(reachable);
-            for (int i = 0; i < reachable.Length; i++)
+            for (int i = 0; i < board.CellCount; i++)
             {
                 Passenger p = board.GetOccupant(i);
                 if (p != null)

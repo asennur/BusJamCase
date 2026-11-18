@@ -18,16 +18,18 @@ namespace BusJam.Gameplay
                 HandleTap();
         }
 
+        // Önce PassengerTapped, sonra ScreenTapped: Start ekranında bir yolcuya denk gelen başlatma
+        // dokunuşu önce oyunu başlatırsa (ScreenTapped önce olsaydı) aynı dokunuş yolcuyu da koşturur.
         private void HandleTap()
         {
-            ScreenTapped?.Invoke();
-
             var ray = cam.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit, 1000f, passengerMask) &&
                 hit.collider.TryGetComponent(out Passenger passenger))
             {
                 PassengerTapped?.Invoke(passenger);
             }
+
+            ScreenTapped?.Invoke();
         }
     }
 }

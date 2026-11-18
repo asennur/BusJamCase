@@ -23,11 +23,17 @@ namespace BusJam.Gameplay
 
         private Tween runTween;
         private Tween angryTween;
+        private Vector3 angryRestPosition;
 
         public PassengerColor Color { get; private set; }
         public Vector2Int Cell { get; private set; }
         public bool IsHidden { get; private set; }
         public PassengerState State { get; private set; }
+
+        private void Awake()
+        {
+            angryRestPosition = angryIcon.localPosition;
+        }
 
         public void Setup(PassengerColor color, Vector2Int cell, bool hidden, Material material)
         {
@@ -40,6 +46,7 @@ namespace BusJam.Gameplay
             angryIcon.gameObject.SetActive(false);
             runTween?.Kill();
             angryTween?.Kill();
+            transform.localRotation = Quaternion.identity;
         }
 
         /// <summary>Erişilebilir yolcu outline'lı görünür.</summary>
@@ -77,9 +84,9 @@ namespace BusJam.Gameplay
         {
             angryTween?.Kill();
             angryIcon.gameObject.SetActive(true);
-            angryIcon.localPosition = Vector3.zero;
+            angryIcon.localPosition = angryRestPosition;
 
-            angryTween = angryIcon.DOLocalMoveY(0.6f, angryDuration * 0.4f)
+            angryTween = angryIcon.DOLocalMoveY(angryRestPosition.y + 0.3f, angryDuration * 0.4f)
                 .SetLoops(2, LoopType.Yoyo)
                 .OnComplete(() => angryIcon.gameObject.SetActive(false));
         }
