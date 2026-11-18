@@ -27,15 +27,19 @@ durur ve sorar. Kararlar Asen'in (18 Kasım 2026).
 
 ## 2. Görseller: placeholder
 
-Model yok. Unity primitive + düz renkli materyal.
-- Hücre: ince düz küp/quad zemin karosu. `Void` hücre hiç çizilmez.
-- Yolcu: capsule. Renk başına **tek paylaşılan materyal** (örnek başına materyal kopyası yok).
-- Outline: yolcunun altında koyu halka ya da biraz büyük arka gövde; aç/kapa.
+Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videosu (level 29-30), aşağıdaki yerleşim oradan.
+
+**Ekran düzeni (yukarıdan aşağı):** sol üstte "Level N" rozeti → yatay yol ve otobüsler → bekleme slotu şeridi → grid → (alt boşluk; orijinaldeki booster çubuğu kapsam dışı).
+- Kamera: neredeyse tepeden (~65-70°), hafif perspektif; grid ekranın alt yarısında ortalı.
+- **Yol:** ekran genişliğinde yatay şerit. Otobüsler soldan gelir, ortada (slot şeridinin hizasında) durur, dolunca sağa çıkar. **Sıradaki otobüs aktifin hemen solunda, kuyrukta görünür.**
+- **Otobüs:** üstü açık, renkli gövde (uzun küp), üstünde 3 koltuk; binen yolcu koltukta görünür. Placeholder: renkli küp + 3 koltuk küpü, binen yolcu koltuğa yerleşir.
+- **Slot şeridi:** yolun hemen altında açık renk şerit, ortada 5 beyaz kare slot. Slottaki yolcu slotun üstünde ayakta.
+- **Grid:** açık renk zemin paneli, beyaz kare hücreler, kalın açık kenarlık; arka plan koyu. Şekil düzensiz (merdiven/piramit), **çıkış üst kenardaki dar ağızdan** (y = 0 satırında genelde 1-2 yürünebilir hücre, ağzın yanları `Void`). Hücre boyutu ≈ yolcu boyutu, yolcular hücreleri sık doldurur.
+- **Yolcu:** capsule (+ küçük küre kafa isteğe bağlı). Renk başına **tek paylaşılan materyal**. Koyu outline: erişilebilir olan belirgin.
 - Kızgın yüz: yolcunun üstünde kısa süre görünen kırmızı ikon/quad (DOTween ile zıplar, kaybolur).
-- Otobüs: renkli küp + üstünde 3 koltuk göstergesi (dolunca dolu görünür).
-- Bekleme alanı: 5 düz slot karosu.
 - Gizli yolcu: gri materyal + "?" (renk açılınca gerçek materyal).
 - Tünel: hücreyi kaplayan koyu blok, ağzı baktığı yöne açık; üstünde içeride kalan yolcu sayısı.
+- **Complete:** grid üstünde konfeti patlaması → "Level Completed" paneli (Continue). **Fail:** "Level Failed" paneli (Try Again). Orijinaldeki coin, can, reklam teklifi kapsam dışı.
 
 ## 3. Oyun kuralları
 
@@ -60,7 +64,7 @@ Model yok. Unity primitive + düz renkli materyal.
 
 ## 4. Veri (`BusJam.Level`)
 
-- `PassengerColor : byte` enum.
+- `PassengerColor : byte` enum: `Red, Pink, Purple, Blue, Green, Yellow, White` (videodaki 7 renk).
 - `CellType : byte` → `Empty`, `Passenger`, `Void` (grid dışı, yürünmez, çizilmez), `Tunnel`.
 - `TunnelData` (serializable class) → `Vector2Int cell`, `Direction facing` (`Up, Down, Left, Right`), `List<PassengerColor> queue`. `LevelData.tunnels` listesinde; hücre tipi `Tunnel` olur.
 - `CellData` struct → `type`, `color`, `hidden`.
