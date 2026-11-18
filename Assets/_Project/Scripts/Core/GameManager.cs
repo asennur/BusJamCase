@@ -16,11 +16,11 @@ namespace BusJam.Core
         [SerializeField] private BoardView boardView;
         [SerializeField] private InputHandler inputHandler;
 
-        private Board board;
-        private GameState state;
-        private bool stateInitialized;
         private int currentLevelIndex;
         private LevelData currentLevel;
+
+        public GameState State { get; private set; }
+        public Board Board { get; private set; }
 
         public event Action<GameState> StateChanged;
         public event Action<int, LevelData> LevelLoaded;
@@ -34,8 +34,13 @@ namespace BusJam.Core
             }
 
             Application.targetFrameRate = 60;
+            Board = new Board();
+        }
 
-            board = new Board();
+        // İlk level yükleme burada: Awake/OnEnable sırası nesneler arasında garanti değil,
+        // UI ve GameplayController Start'a kadar event'lere abone olmuş olur.
+        private void Start()
+        {
             currentLevelIndex = SaveSystem.GetLevelIndex();
             LoadLevel(currentLevelIndex);
             SetState(GameState.Start);
@@ -62,27 +67,24 @@ namespace BusJam.Core
         private void LoadLevel(int index)
         {
             currentLevel = levelDatabase.Get(index);
-            board.Setup(currentLevel);
-            boardView.Build(currentLevel, board);
-            LevelLoaded?.Invoke(currentLevelIndex, currentLevel);
-            Debug.Log($"[GameManager] Level {currentLevelIndex} yüklendi: {currentLevel.name}");
+            Board.Setup(currentLevel);
+            boardView.Build(currentLevel, Board);
+            int levelNumber = currentLevelIndex + 1;
+            LevelLoaded?.Invoke(levelNumber, currentLevel);
+            Debug.Log($"[GameManager] Level {levelNumber} yüklendi: {currentLevel.name}");
         }
 
-        // state'in varsayılanı zaten GameState.Start olduğundan, ilk çağrıyı atlamamak için ayrı bayrak gerekir.
+        // Durum değişimleri zaten bilinçli çağrılır; Retry'de Start'ın yeniden atılması UI'ın sıfırlanması için istenir.
         private void SetState(GameState newState)
         {
-            if (stateInitialized && state == newState)
-                return;
-
-            stateInitialized = true;
-            state = newState;
-            Debug.Log($"[GameManager] Durum: {state}");
-            StateChanged?.Invoke(state);
+            State = newState;
+            Debug.Log($"[GameManager] Durum: {State}");
+            StateChanged?.Invoke(State);
         }
 
         private void OnScreenTapped()
         {
-            if (state == GameState.Start)
+            if (State == GameState.Start)
                 StartPlaying();
         }
 
@@ -94,7 +96,7 @@ namespace BusJam.Core
 
         public void StartPlaying()
         {
-            if (state != GameState.Start)
+            if (State != GameState.Start)
                 return;
 
             SetState(GameState.Playing);
@@ -113,8 +115,5 @@ namespace BusJam.Core
             LoadLevel(currentLevelIndex);
             SetState(GameState.Start);
         }
-
-        public GameState GetState() => state;
-        public Board GetBoard() => board;
     }
 }

@@ -7,15 +7,10 @@ namespace BusJam.Gameplay
     public class InputHandler : MonoBehaviour
     {
         [SerializeField] private Camera cam;
+        [SerializeField] private LayerMask passengerMask;
 
         public event Action<Passenger> PassengerTapped;
         public event Action ScreenTapped;
-
-        private void Start()
-        {
-            if (cam == null)
-                cam = Camera.main;
-        }
 
         private void Update()
         {
@@ -25,15 +20,14 @@ namespace BusJam.Gameplay
 
         private void HandleTap()
         {
-            var ray = cam.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, 1000f, LayerMask.GetMask("Passenger")))
-            {
-                var passenger = hit.collider.GetComponent<Passenger>();
-                if (passenger != null)
-                    PassengerTapped?.Invoke(passenger);
-            }
-
             ScreenTapped?.Invoke();
+
+            var ray = cam.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, 1000f, passengerMask) &&
+                hit.collider.TryGetComponent(out Passenger passenger))
+            {
+                PassengerTapped?.Invoke(passenger);
+            }
         }
     }
 }
