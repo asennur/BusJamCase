@@ -193,6 +193,7 @@ GameObject:
   - component: {fileID: 134005832}
   - component: {fileID: 134005834}
   - component: {fileID: 134005833}
+  - component: {fileID: 134005835}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -246,6 +247,22 @@ MonoBehaviour:
   levelDatabase: {fileID: 11400000, guid: 7b89e9e580edfc04db4d87da01c268ff, type: 2}
   boardView: {fileID: 90774742}
   inputHandler: {fileID: 134005833}
+--- !u!114 &134005835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134005831}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9bb7324e0864d24e893ce9c047449cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameManager: {fileID: 134005834}
+  inputHandler: {fileID: 134005833}
+  boardView: {fileID: 90774742}
+  runSpeed: 4
 --- !u!1 &180518806
 GameObject:
   m_ObjectHideFlags: 0

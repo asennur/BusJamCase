@@ -49,19 +49,13 @@ namespace BusJam.Core
         private void OnEnable()
         {
             if (inputHandler != null)
-            {
                 inputHandler.ScreenTapped += OnScreenTapped;
-                inputHandler.PassengerTapped += OnPassengerTapped;
-            }
         }
 
         private void OnDisable()
         {
             if (inputHandler != null)
-            {
                 inputHandler.ScreenTapped -= OnScreenTapped;
-                inputHandler.PassengerTapped -= OnPassengerTapped;
-            }
         }
 
         private void LoadLevel(int index)
@@ -86,12 +80,6 @@ namespace BusJam.Core
         {
             if (State == GameState.Start)
                 StartPlaying();
-        }
-
-        // Geçici: dokunma kararını Z4'te GameplayController verecek.
-        private void OnPassengerTapped(Passenger passenger)
-        {
-            Debug.Log($"[GameManager] Yolcuya dokunuldu: {passenger.Color} @ {passenger.Cell}");
         }
 
         public void StartPlaying()

@@ -1,25 +1,45 @@
+using System.Collections.Generic;
 using BusJam.Level;
+using DG.Tweening;
 using UnityEngine;
 
 namespace BusJam.Gameplay
 {
+    public enum PassengerState
+    {
+        Idle,
+        Running,
+        InSlot,
+        Seated
+    }
+
     /// <summary>Gridde bir yolcunun görünümü ve verisi. Karar vermez; ne yapacağını GameplayController söyler.</summary>
     public class Passenger : MonoBehaviour
     {
         [SerializeField] private Renderer body;
         [SerializeField] private GameObject outline;
+        [SerializeField] private Transform angryIcon;
+        [SerializeField] private float angryDuration = 0.6f;
+
+        private Tween runTween;
+        private Tween angryTween;
 
         public PassengerColor Color { get; private set; }
         public Vector2Int Cell { get; private set; }
         public bool IsHidden { get; private set; }
+        public PassengerState State { get; private set; }
 
         public void Setup(PassengerColor color, Vector2Int cell, bool hidden, Material material)
         {
             Color = color;
             Cell = cell;
             IsHidden = hidden;
+            State = PassengerState.Idle;
             body.sharedMaterial = material;
             outline.SetActive(false);
+            angryIcon.gameObject.SetActive(false);
+            runTween?.Kill();
+            angryTween?.Kill();
         }
 
         /// <summary>Erişilebilir yolcu outline'lı görünür.</summary>
@@ -27,6 +47,41 @@ namespace BusJam.Gameplay
         {
             if (outline.activeSelf != reachable)
                 outline.SetActive(reachable);
+        }
+
+        /// <summary>Yol boyunca sabit hızla koşar (süre = uzunluk / hız), yöne dönerek. Varınca onArrived çağrılır.</summary>
+        public void RunTo(List<Vector3> path, float speed, TweenCallback onArrived)
+        {
+            State = PassengerState.Running;
+            SetReachable(false);
+
+            float length = 0f;
+            Vector3 prev = transform.position;
+            for (int i = 0; i < path.Count; i++)
+            {
+                length += Vector3.Distance(prev, path[i]);
+                prev = path[i];
+            }
+
+            float duration = Mathf.Max(length / speed, 0.01f);
+
+            runTween?.Kill();
+            runTween = transform.DOPath(path.ToArray(), duration, PathType.Linear)
+                .SetEase(Ease.Linear)
+                .SetLookAt(0.01f)
+                .OnComplete(onArrived);
+        }
+
+        /// <summary>Üstte kısa süre kırmızı ikon: zıplar, kaybolur. Art arda tıklamada tween yeniden başlar.</summary>
+        public void ShowAngry()
+        {
+            angryTween?.Kill();
+            angryIcon.gameObject.SetActive(true);
+            angryIcon.localPosition = Vector3.zero;
+
+            angryTween = angryIcon.DOLocalMoveY(0.6f, angryDuration * 0.4f)
+                .SetLoops(2, LoopType.Yoyo)
+                .OnComplete(() => angryIcon.gameObject.SetActive(false));
         }
     }
 }
