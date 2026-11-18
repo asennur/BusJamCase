@@ -41,7 +41,7 @@ namespace BusJam.Level
         }
 
         /// <summary>
-        /// Leveli kaydetmeden önce kurallara uyuyor mu bakar: renk başına yolcu = otobüs × kapasite,
+        /// Leveli kaydetmeden önce kurallara uyuyor mu bakar: en az bir otobüs, renk başına yolcu = otobüs × kapasite,
         /// çıkış satırında yürünebilir hücre var ve tüm yürünebilir hücreler boş gridde çıkışa bağlı.
         /// </summary>
         public bool Validate(out string error)
@@ -49,6 +49,12 @@ namespace BusJam.Level
             if (cells == null || cells.Length != CellCount)
             {
                 error = $"Hücre sayısı {cells?.Length ?? 0}, beklenen {CellCount}";
+                return false;
+            }
+
+            if (busOrder == null || busOrder.Count == 0)
+            {
+                error = "Otobüs sırası boş";
                 return false;
             }
 
