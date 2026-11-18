@@ -132,6 +132,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 90774741}
+  - component: {fileID: 90774742}
   m_Layer: 0
   m_Name: Board
   m_TagString: Untagged
@@ -154,6 +155,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &90774742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 90774740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a933b84b9b1fe04cbfbb351affbf88f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  passengerPrefab: {fileID: 2193731836056189059, guid: 3e2ab979d65836442b9cb5a7766e53d8, type: 3}
+  tilePrefab: {fileID: 1312243618980957560, guid: 8e9b40f9869eb974d90c91bdeb625e6d, type: 3}
+  colorMaterials:
+  - {fileID: 2100000, guid: 8704c296d4af58c4396adb0a4e87ce9c, type: 2}
+  - {fileID: 2100000, guid: 78ca3a4aed7b08c4f93012ada5fcc88c, type: 2}
+  - {fileID: 2100000, guid: 8a6356f6252d1e84b8e90163ed037e3e, type: 2}
+  - {fileID: 2100000, guid: d6eb81ed9f539b14ebcc50e7acfa024d, type: 2}
+  - {fileID: 2100000, guid: affd5ada359936549a8a712185dfce9c, type: 2}
+  - {fileID: 2100000, guid: a6f899608bbd6894c91c04e136da1c79, type: 2}
+  - {fileID: 2100000, guid: 8b0665dba53bd5247adffc0e89b986ce, type: 2}
+  hiddenMaterial: {fileID: 2100000, guid: f1807f7c66fdbc94384ba29352548984, type: 2}
+  cam: {fileID: 737060411}
+  cellSize: 1
+  topSpace: 5
+  frameMargin: 0.6
 --- !u!1 &134005831
 GameObject:
   m_ObjectHideFlags: 0
@@ -163,6 +191,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 134005832}
+  - component: {fileID: 134005833}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -185,6 +214,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &134005833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134005831}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d007951675cf8e4680d2eba9c9f37b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  level: {fileID: 11400000, guid: 64b80d18e882c994db7752af2331cbe7, type: 2}
+  boardView: {fileID: 90774742}
 --- !u!1 &180518806
 GameObject:
   m_ObjectHideFlags: 0
@@ -432,7 +475,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.55, g: 0.75, b: 0.9, a: 1}
+  m_BackGroundColor: {r: 0.16, g: 0.2, b: 0.28, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -481,7 +524,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 737060408}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.46174863, y: 0, z: 0, w: 0.8870109}
+  m_LocalRotation: {x: 0.53729963, y: 0, z: 0, w: 0.8433914}
   m_LocalPosition: {x: 0, y: 16, z: -11}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
