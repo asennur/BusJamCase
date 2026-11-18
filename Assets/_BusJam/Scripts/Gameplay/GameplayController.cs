@@ -36,7 +36,7 @@ namespace BusJam.Gameplay
         }
 
         public event Action LevelCompleted;
-        public event Action<string> LevelFailed;
+        public event Action<FailReason> LevelFailed;
 
         private void OnEnable()
         {
@@ -75,14 +75,28 @@ namespace BusJam.Gameplay
             for (int i = 0; i < level.tunnels.Count; i++)
             {
                 TunnelData data = level.tunnels[i];
-                tunnelGroups.Add(new TunnelGroup
+                var group = new TunnelGroup
                 {
                     tunnelCell = data.cell,
                     mouthCell = data.MouthCell,
                     queue = new Queue<PassengerColor>(data.queue),
                     view = boardView.GetTunnelView(data.cell)
-                });
+                };
+                tunnelGroups.Add(group);
+                EmergeFromTunnel(group);
             }
+        }
+
+        // Ağız hücresi boşsa ve kuyrukta yolcu varsa sıradakini çıkarır (level kurulurken de, oyun sırasında da).
+        private void EmergeFromTunnel(TunnelGroup group)
+        {
+            if (group.queue.Count == 0 || board.GetOccupant(group.mouthCell) != null)
+                return;
+
+            PassengerColor color = group.queue.Dequeue();
+            Passenger passenger = boardView.SpawnFromTunnel(group.tunnelCell, group.mouthCell, color);
+            board.SetOccupant(group.mouthCell, passenger);
+            group.view?.SetRemaining(group.queue.Count);
         }
 
         // Dokunulan yolcu hücresini bıraktığı an çağrılır: ağız o hücreyse kuyruktaki sıradaki yolcu çıkar.
@@ -90,15 +104,11 @@ namespace BusJam.Gameplay
         {
             for (int i = 0; i < tunnelGroups.Count; i++)
             {
-                TunnelGroup group = tunnelGroups[i];
-                if (group.mouthCell != vacatedCell || group.queue.Count == 0)
-                    continue;
-
-                PassengerColor color = group.queue.Dequeue();
-                Passenger passenger = boardView.SpawnFromTunnel(group.tunnelCell, vacatedCell, color);
-                board.SetOccupant(vacatedCell, passenger);
-                group.view?.SetRemaining(group.queue.Count);
-                return;
+                if (tunnelGroups[i].mouthCell == vacatedCell)
+                {
+                    EmergeFromTunnel(tunnelGroups[i]);
+                    return;
+                }
             }
         }
 
@@ -213,10 +223,9 @@ namespace BusJam.Gameplay
             if (waitingArea.HasColor(bus.Color) || HasReachableColor(bus.Color))
                 return;
 
-            string reason = $"Slotlar dolu, {bus.Color} otobüsüne uyan yolcu yok";
-            Debug.Log($"[GameplayController] Fail: {reason}");
-            LevelFailed?.Invoke(reason);
-            gameManager.Fail();
+            Debug.Log($"[GameplayController] Fail: slotlar dolu, {bus.Color} otobüsüne uyan yolcu yok");
+            LevelFailed?.Invoke(FailReason.NoSpace);
+            gameManager.Fail(FailReason.NoSpace);
         }
 
         private bool HasReachableColor(PassengerColor color)

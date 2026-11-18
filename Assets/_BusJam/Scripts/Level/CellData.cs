@@ -2,13 +2,18 @@ using System;
 
 namespace BusJam.Level
 {
-    /// <summary>Empty varsayılan kalır ki yeni grid boş başlasın. Void: grid dışı, yürünmez, çizilmez. Tunnel: engel, kendi kuyruğundan yolcu çıkarır.</summary>
+    /// <summary>
+    /// Empty varsayılan kalır ki yeni grid boş başlasın. Void: karo yok, delik (grid dışı ya da ortada boşluk).
+    /// Tunnel: engel, kendi kuyruğundan yolcu çıkarır. Obstacle: karo var, üstünde yürünmez fiziksel engel.
+    /// Yeni değer sona eklendi ki var olan level asset'lerindeki sayılar kaymasın.
+    /// </summary>
     public enum CellType : byte
     {
         Empty,
         Passenger,
         Void,
-        Tunnel
+        Tunnel,
+        Obstacle
     }
 
     /// <summary>Gridde tek hücrenin kayıtlı hali.</summary>
@@ -19,6 +24,6 @@ namespace BusJam.Level
         public PassengerColor color;
         public bool hidden;
 
-        public bool IsWalkable => type != CellType.Void && type != CellType.Tunnel;
+        public bool IsWalkable => type != CellType.Void && type != CellType.Tunnel && type != CellType.Obstacle;
     }
 }

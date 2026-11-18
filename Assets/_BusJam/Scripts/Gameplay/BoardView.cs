@@ -14,6 +14,7 @@ namespace BusJam.Gameplay
         [SerializeField] private Passenger passengerPrefab;
         [SerializeField] private Transform tilePrefab;
         [SerializeField] private TunnelView tunnelPrefab;
+        [SerializeField] private Transform obstaclePrefab;
         [Tooltip("PassengerColor sırasıyla")]
         [SerializeField] private Material[] colorMaterials;
         [SerializeField] private Material hiddenMaterial;
@@ -22,9 +23,11 @@ namespace BusJam.Gameplay
         private ObjectPool<Passenger> passengerPool;
         private ObjectPool<Transform> tilePool;
         private ObjectPool<TunnelView> tunnelPool;
+        private ObjectPool<Transform> obstaclePool;
         private readonly List<Passenger> activePassengers = new List<Passenger>();
         private readonly List<Transform> activeTiles = new List<Transform>();
         private readonly List<TunnelView> activeTunnelViews = new List<TunnelView>();
+        private readonly List<Transform> activeObstacles = new List<Transform>();
         private int width;
 
         // GameManager.Awake, Board sahne sırasında daha önce gelse bile Build'den önce çalışabilir;
@@ -46,6 +49,11 @@ namespace BusJam.Gameplay
 
             tunnelPool = new ObjectPool<TunnelView>(
                 () => Instantiate(tunnelPrefab, transform),
+                t => t.gameObject.SetActive(true),
+                t => t.gameObject.SetActive(false));
+
+            obstaclePool = new ObjectPool<Transform>(
+                () => Instantiate(obstaclePrefab, transform),
                 t => t.gameObject.SetActive(true),
                 t => t.gameObject.SetActive(false));
         }
@@ -81,6 +89,14 @@ namespace BusJam.Gameplay
                     Transform tile = tilePool.Get();
                     tile.localPosition = local;
                     activeTiles.Add(tile);
+
+                    if (data.type == CellType.Obstacle)
+                    {
+                        Transform obstacle = obstaclePool.Get();
+                        obstacle.localPosition = local;
+                        activeObstacles.Add(obstacle);
+                        continue;
+                    }
 
                     if (data.type != CellType.Passenger)
                         continue;
@@ -147,9 +163,12 @@ namespace BusJam.Gameplay
                 tilePool.Release(activeTiles[i]);
             for (int i = 0; i < activeTunnelViews.Count; i++)
                 tunnelPool.Release(activeTunnelViews[i]);
+            for (int i = 0; i < activeObstacles.Count; i++)
+                obstaclePool.Release(activeObstacles[i]);
             activePassengers.Clear();
             activeTiles.Clear();
             activeTunnelViews.Clear();
+            activeObstacles.Clear();
         }
     }
 }

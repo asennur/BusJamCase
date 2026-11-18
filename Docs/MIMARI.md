@@ -38,6 +38,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - Kızgın yüz: yolcunun üstünde kısa süre görünen kırmızı ikon/quad (DOTween ile zıplar, kaybolur).
 - Gizli yolcu: gri materyal + "?" (renk açılınca gerçek materyal).
 - Tünel: hücreyi kaplayan koyu blok, ağzı baktığı yöne açık; üstünde içeride kalan yolcu sayısı.
+- Engel: `Void` karo yok, delik (grid dışı ya da ortada boşluk, hiçbir şey çizilmez); `Obstacle` karo var, üstünde yürünmez fiziksel engel (kasa/bariyer placeholder'ı).
 - **Complete:** grid üstünde konfeti patlaması → "Level Completed" paneli (Continue). **Fail:** "Level Failed" paneli (Try Again). Orijinaldeki coin, can, reklam teklifi kapsam dışı.
 
 ## 3. Oyun kuralları
@@ -64,7 +65,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 ## 4. Veri (`BusJam.Level`)
 
 - `PassengerColor : byte` enum: `Red, Pink, Purple, Blue, Green, Yellow, White` (videodaki 7 renk).
-- `CellType : byte` → `Empty`, `Passenger`, `Void` (grid dışı, yürünmez, çizilmez), `Tunnel`.
+- `CellType : byte` → `Empty`, `Passenger`, `Void` (karo yok, delik, çizilmez), `Tunnel`, `Obstacle` (karo var, üstünde yürünmez fiziksel engel). Yeni değerler sona eklenir ki var olan level asset'lerindeki sayılar kaymasın.
 - `TunnelData` (serializable class) → `Vector2Int cell`, `Direction facing` (`Up, Down, Left, Right`), `List<PassengerColor> queue`. `LevelData.tunnels` listesinde; hücre tipi `Tunnel` olur.
 - `CellData` struct → `type`, `color`, `hidden`.
 - `LevelData : ScriptableObject` → `width`, `height`, `CellData[] cells` (`index = y * width + x`), `timeLimit`, `waitingSlotCount` (varsayılan 5), `List<PassengerColor> busOrder`. `Resize` örtüşen hücreleri korur.

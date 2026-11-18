@@ -15,21 +15,25 @@ namespace BusJam.Core
         [SerializeField] private LevelDatabase levelDatabase;
         [SerializeField] private BoardView boardView;
         [SerializeField] private InputHandler inputHandler;
+        [SerializeField] private LevelTimer levelTimer;
 
         private int currentLevelIndex;
         private LevelData currentLevel;
 
         public GameState State { get; private set; }
         public Board Board { get; private set; }
+        public FailReason FailReason { get; private set; }
+        public LevelData CurrentLevel => currentLevel;
+        public int CurrentLevelNumber { get; private set; }
 
         public event Action<GameState> StateChanged;
         public event Action<int, LevelData> LevelLoaded;
 
         private void Awake()
         {
-            if (levelDatabase == null || boardView == null || inputHandler == null)
+            if (levelDatabase == null || boardView == null || inputHandler == null || levelTimer == null)
             {
-                Debug.LogError("[GameManager] LevelDatabase, BoardView, InputHandler referansları eksik");
+                Debug.LogError("[GameManager] LevelDatabase, BoardView, InputHandler, LevelTimer referansları eksik");
                 enabled = false;
                 return;
             }
@@ -51,12 +55,16 @@ namespace BusJam.Core
         {
             if (inputHandler != null)
                 inputHandler.ScreenTapped += OnScreenTapped;
+            if (levelTimer != null)
+                levelTimer.Expired += OnTimerExpired;
         }
 
         private void OnDisable()
         {
             if (inputHandler != null)
                 inputHandler.ScreenTapped -= OnScreenTapped;
+            if (levelTimer != null)
+                levelTimer.Expired -= OnTimerExpired;
         }
 
         private void LoadLevel(int index)
@@ -64,16 +72,21 @@ namespace BusJam.Core
             currentLevel = levelDatabase.Get(index);
             Board.Setup(currentLevel);
             boardView.Build(currentLevel, Board);
-            int levelNumber = currentLevelIndex + 1;
-            LevelLoaded?.Invoke(levelNumber, currentLevel);
-            Debug.Log($"[GameManager] Level {levelNumber} yüklendi: {currentLevel.name}");
+            CurrentLevelNumber = currentLevelIndex + 1;
+            LevelLoaded?.Invoke(CurrentLevelNumber, currentLevel);
         }
 
         // Durum değişimleri zaten bilinçli çağrılır; Retry'de Start'ın yeniden atılması UI'ın sıfırlanması için istenir.
+        // Timer yalnız Playing'de çalışır; diğer durumlara geçişte durur.
         private void SetState(GameState newState)
         {
             State = newState;
-            Debug.Log($"[GameManager] Durum: {State}");
+
+            if (newState == GameState.Playing)
+                levelTimer.StartTimer(currentLevel.timeLimit);
+            else
+                levelTimer.StopTimer();
+
             StateChanged?.Invoke(State);
         }
 
@@ -81,6 +94,12 @@ namespace BusJam.Core
         {
             if (State == GameState.Start)
                 StartPlaying();
+        }
+
+        private void OnTimerExpired()
+        {
+            if (State == GameState.Playing)
+                Fail(FailReason.OutOfTime);
         }
 
         public void StartPlaying()
@@ -99,8 +118,9 @@ namespace BusJam.Core
             SetState(GameState.Complete);
         }
 
-        public void Fail()
+        public void Fail(FailReason reason)
         {
+            FailReason = reason;
             SetState(GameState.Fail);
         }
 
