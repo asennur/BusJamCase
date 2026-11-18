@@ -84,6 +84,13 @@ namespace BusJam.Gameplay
 
         public Vector3 CellToWorld(Vector2Int cell) => transform.TransformPoint(CellToLocal(cell));
 
+        /// <summary>Otobüsle giden ya da başka bir sebeple ayrılan tek yolcuyu havuza geri verir (parent BoardView'a döner).</summary>
+        public void ReleasePassenger(Passenger passenger)
+        {
+            activePassengers.Remove(passenger);
+            passengerPool.Release(passenger);
+        }
+
         private Vector3 CellToLocal(Vector2Int cell) =>
             new Vector3((cell.x - (width - 1) * 0.5f) * cellSize, 0f, -cell.y * cellSize);
 

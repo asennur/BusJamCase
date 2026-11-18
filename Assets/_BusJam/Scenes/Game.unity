@@ -262,6 +262,8 @@ MonoBehaviour:
   gameManager: {fileID: 134005834}
   inputHandler: {fileID: 134005833}
   boardView: {fileID: 90774742}
+  busStation: {fileID: 1155942856}
+  waitingArea: {fileID: 752435683}
   runSpeed: 4
 --- !u!1 &180518806
 GameObject:
@@ -380,6 +382,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &577869124
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 577869125}
+  m_Layer: 0
+  m_Name: DoorPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &577869125
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 577869124}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 4.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1155942855}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &660659635
 GameObject:
@@ -575,6 +608,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 752435682}
+  - component: {fileID: 752435683}
   m_Layer: 0
   m_Name: WaitingArea
   m_TagString: Untagged
@@ -591,12 +625,27 @@ Transform:
   m_GameObject: {fileID: 752435681}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 1.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &752435683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752435681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30412f17cf1a1f743b2e51f7b8cb587b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slotTilePrefab: {fileID: 6931502344925710496, guid: 59b0df8e7a5f2824da4536decf15a221, type: 3}
+  slotSpacing: 0.85
+  runSpeed: 4
 --- !u!1 &1014376630
 GameObject:
   m_ObjectHideFlags: 0
@@ -708,6 +757,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1155942855}
+  - component: {fileID: 1155942856}
   m_Layer: 0
   m_Name: BusStation
   m_TagString: Untagged
@@ -727,9 +777,36 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 577869125}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1155942856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1155942854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f7ded404182a8146ab49a60b5264d10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  busPrefab: {fileID: 5860804732000749083, guid: e89cf9e0441e5424a9e03672836fc99f, type: 3}
+  colorMaterials:
+  - {fileID: 2100000, guid: 8704c296d4af58c4396adb0a4e87ce9c, type: 2}
+  - {fileID: 2100000, guid: 78ca3a4aed7b08c4f93012ada5fcc88c, type: 2}
+  - {fileID: 2100000, guid: 8a6356f6252d1e84b8e90163ed037e3e, type: 2}
+  - {fileID: 2100000, guid: d6eb81ed9f539b14ebcc50e7acfa024d, type: 2}
+  - {fileID: 2100000, guid: affd5ada359936549a8a712185dfce9c, type: 2}
+  - {fileID: 2100000, guid: a6f899608bbd6894c91c04e136da1c79, type: 2}
+  - {fileID: 2100000, guid: 8b0665dba53bd5247adffc0e89b986ce, type: 2}
+  doorPoint: {fileID: 577869125}
+  queueSpacing: 2.2
+  exitOffsetX: 6
+  moveDuration: 0.6
+  visibleQueueCount: 3
 --- !u!1 &1613518689
 GameObject:
   m_ObjectHideFlags: 0

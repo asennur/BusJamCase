@@ -30,6 +30,7 @@ namespace BusJam.Core
             if (levelDatabase == null || boardView == null || inputHandler == null)
             {
                 Debug.LogError("[GameManager] LevelDatabase, BoardView, InputHandler referansları eksik");
+                enabled = false;
                 return;
             }
 
@@ -90,10 +91,21 @@ namespace BusJam.Core
             SetState(GameState.Playing);
         }
 
-        public void LoadNext()
+        // İndeks ve kayıt kazanınca hemen ilerler; LoadNext yalnız o (zaten ilerlemiş) leveli sahneye kurar.
+        public void Complete()
         {
             currentLevelIndex++;
             SaveSystem.SetLevelIndex(currentLevelIndex);
+            SetState(GameState.Complete);
+        }
+
+        public void Fail()
+        {
+            SetState(GameState.Fail);
+        }
+
+        public void LoadNext()
+        {
             LoadLevel(currentLevelIndex);
             SetState(GameState.Start);
         }

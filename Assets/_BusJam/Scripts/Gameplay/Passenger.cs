@@ -56,6 +56,18 @@ namespace BusJam.Gameplay
                 outline.SetActive(reachable);
         }
 
+        /// <summary>Bekleme slotuna vardı; otobüs gelince WaitingArea bunu otobüse koşturur.</summary>
+        public void SetInSlot() => State = PassengerState.InSlot;
+
+        /// <summary>Otobüste koltuğa ışınlandı; koltuğa parent'lanır, otobüsle birlikte hareket eder.</summary>
+        public void SetSeated(Transform seatPoint)
+        {
+            State = PassengerState.Seated;
+            transform.SetParent(seatPoint, false);
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+        }
+
         /// <summary>Yol boyunca sabit hızla koşar (süre = uzunluk / hız), yöne dönerek. Varınca onArrived çağrılır.</summary>
         public void RunTo(List<Vector3> path, float speed, TweenCallback onArrived)
         {

@@ -1,7 +1,6 @@
 # Bus Jam Case — Mimari ve tasarım kuralları
 
-Bu dosya kodun tek tasarım kaynağıdır. Kodu yazan ajan (Zed) buna uyar; burada olmayan bir karar gerekiyorsa
-durur ve sorar. Kararlar Asen'in (18 Kasım 2026).
+Bu dosya kodun tek tasarım kaynağıdır; kod (AI destekli) buna uyar. Kararlar Asen'in (18 Kasım 2026).
 
 ## 0. Genel ilkeler
 
@@ -107,6 +106,6 @@ Akış: `GameManager` açılışta kayıtlı leveli yükler → `Start` → ekra
 
 ## 7. Doğrulama (her iş paketinde)
 
-- Unity MCP ile: script derlendi, Console'da hata ve uyarı yok.
+- Script derlendi, Console'da hata ve uyarı yok.
 - Play modunda ilgili davranış denendi, Game view (1080×1920) ekran görüntüsü alındı.
-- Küçük, anlamlı commit; Türkçe mesaj. Push yok.
+- Küçük, anlamlı commit; Türkçe mesaj.

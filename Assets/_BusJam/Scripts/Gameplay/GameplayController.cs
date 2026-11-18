@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BusJam.Core;
 using BusJam.Level;
@@ -6,40 +7,54 @@ using UnityEngine;
 namespace BusJam.Gameplay
 {
     /// <summary>
-    /// Dokunma kararının tek yeri: erişilebilirlik kontrolü, hücreyi boşaltma, koşu başlatma.
-    /// Bu pakette hedef geçici olarak grid dışındaki sabit çıkış noktası; otobüs/slot hedefi Z5'te gelir.
+    /// Kuralların tek yeri: dokunma kararı, hedef rezervasyonu, erişilebilirlik, kazan/kaybet.
+    /// Hedef sırası: otobüs (kapıda + aynı renk + boş koltuk) → bekleme slotu → yoksa kızgın yüz.
     /// </summary>
     public class GameplayController : MonoBehaviour
     {
         [SerializeField] private GameManager gameManager;
         [SerializeField] private InputHandler inputHandler;
         [SerializeField] private BoardView boardView;
+        [SerializeField] private BusStation busStation;
+        [SerializeField] private WaitingArea waitingArea;
         [SerializeField] private float runSpeed = 4f;
 
         private Board board;
         private bool[] reachable;
+        private int runningCount;
         private readonly List<Vector2Int> pathBuffer = new List<Vector2Int>();
         private readonly List<Vector3> worldPathBuffer = new List<Vector3>();
+
+        public event Action LevelCompleted;
+        public event Action<string> LevelFailed;
 
         private void OnEnable()
         {
             gameManager.LevelLoaded += OnLevelLoaded;
             inputHandler.PassengerTapped += OnPassengerTapped;
+            busStation.BusArrived += OnBusArrived;
+            busStation.BusDeparted += OnBusDeparted;
+            busStation.AllBusesDone += OnAllBusesDone;
         }
 
         private void OnDisable()
         {
             gameManager.LevelLoaded -= OnLevelLoaded;
             inputHandler.PassengerTapped -= OnPassengerTapped;
+            busStation.BusArrived -= OnBusArrived;
+            busStation.BusDeparted -= OnBusDeparted;
+            busStation.AllBusesDone -= OnAllBusesDone;
         }
 
-        // Z3'te bootstrap silinince ilk outline uygulaması boşta kaldı; her level yüklenince burada yapılır.
         private void OnLevelLoaded(int levelNumber, LevelData level)
         {
             board = gameManager.Board;
             if (reachable == null || reachable.Length < board.CellCount)
                 reachable = new bool[board.CellCount];
 
+            runningCount = 0;
+            waitingArea.Setup(level.waitingSlotCount);
+            busStation.Setup(level.busOrder);
             RefreshReachable();
         }
 
@@ -49,6 +64,15 @@ namespace BusJam.Gameplay
                 return;
 
             if (!reachable[board.ToIndex(passenger.Cell)])
+            {
+                passenger.ShowAngry();
+                return;
+            }
+
+            Bus bus = busStation.ActiveBus;
+            bool toBus = bus != null && bus.IsAtDoor && bus.Color == passenger.Color && !bus.IsReservedFull;
+
+            if (!toBus && !waitingArea.HasFreeSlot)
             {
                 passenger.ShowAngry();
                 return;
@@ -66,7 +90,102 @@ namespace BusJam.Gameplay
                 worldPathBuffer.Add(boardView.CellToWorld(pathBuffer[i]));
             worldPathBuffer.Add(boardView.CellToWorld(new Vector2Int(lastCell.x, -1)));
 
-            passenger.RunTo(worldPathBuffer, runSpeed, null);
+            runningCount++;
+
+            if (toBus)
+            {
+                Transform seatPoint = bus.ReserveSeat(out int seatIndex);
+                worldPathBuffer.Add(seatPoint.position);
+                passenger.RunTo(worldPathBuffer, runSpeed, () =>
+                {
+                    passenger.SetSeated(seatPoint);
+                    busStation.NotifySeatArrived(bus, seatIndex, passenger);
+                    OnRunFinished();
+                });
+            }
+            else
+            {
+                waitingArea.TryReserveSlot(passenger, out Vector3 slotPos);
+                worldPathBuffer.Add(slotPos);
+                passenger.RunTo(worldPathBuffer, runSpeed, () =>
+                {
+                    passenger.SetInSlot();
+                    OnRunFinished();
+                });
+            }
+        }
+
+        // Otobüs gelince (ilk kurulum dahil) slottaki aynı renk yolcular kendiliğinden biner.
+        private void OnBusArrived(Bus bus)
+        {
+            waitingArea.SendMatchingPassengers(bus, (b, seatIndex, passenger) =>
+            {
+                busStation.NotifySeatArrived(b, seatIndex, passenger);
+                OnRunFinished();
+            });
+
+            // Eşleşme yoksa kimse koşmadı, runningCount değişmedi; fail yine de burada kontrol edilmeli.
+            CheckFail();
+        }
+
+        // Otobüs ayrılış tween'i bitti: içindeki yolcular BoardView havuzuna, otobüsün kendisi BusStation havuzuna döner.
+        private void OnBusDeparted(Bus bus)
+        {
+            Passenger[] seated = bus.SeatedPassengers;
+            for (int i = 0; i < seated.Length; i++)
+            {
+                if (seated[i] != null)
+                    boardView.ReleasePassenger(seated[i]);
+            }
+
+            busStation.ReleaseBus(bus);
+        }
+
+        private void OnAllBusesDone()
+        {
+            LevelCompleted?.Invoke();
+            gameManager.Complete();
+        }
+
+        private void OnRunFinished()
+        {
+            runningCount--;
+            CheckFail();
+        }
+
+        // Kaybet (yer): koşan yolcu yok, slotlar dolu, slottakilerin hiçbiri kapıdaki otobüsün rengine
+        // uymuyor ve gridde o renkten erişilebilir yolcu da yok (varsa oyuncu hâlâ kurtarabilir).
+        private void CheckFail()
+        {
+            if (runningCount > 0 || waitingArea.HasFreeSlot)
+                return;
+
+            Bus bus = busStation.ActiveBus;
+            if (bus == null)
+                return;
+
+            if (waitingArea.HasColor(bus.Color) || HasReachableColor(bus.Color))
+                return;
+
+            string reason = $"Slotlar dolu, {bus.Color} otobüsüne uyan yolcu yok";
+            Debug.Log($"[GameplayController] Fail: {reason}");
+            LevelFailed?.Invoke(reason);
+            gameManager.Fail();
+        }
+
+        private bool HasReachableColor(PassengerColor color)
+        {
+            for (int i = 0; i < board.CellCount; i++)
+            {
+                if (!reachable[i])
+                    continue;
+
+                Passenger p = board.GetOccupant(i);
+                if (p != null && !p.IsHidden && p.Color == color)
+                    return true;
+            }
+
+            return false;
         }
 
         private void RefreshReachable()
