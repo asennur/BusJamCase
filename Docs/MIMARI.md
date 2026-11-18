@@ -12,7 +12,7 @@ durur ve sorar. Kararlar Asen'in (18 Kasım 2026).
 - Yorumlar kısa: sınıf ve gerekli metot başına bir iki cümle, Türkçe. Satır satır yorum yok.
 - Namespace: `BusJam.Core`, `BusJam.Level`, `BusJam.Gameplay`, `BusJam.UI`, `BusJam.Save`, `BusJam.LevelEditor`.
 - İsimlendirme: `PascalCase` tip/metot/property, `camelCase` alan, `[SerializeField] private` tercih edilir.
-- Kod `Assets/_Project/Scripts/{Core,Level,Gameplay,UI,Save,Editor}` altında. Editor-only kod `Editor` klasöründe ya da `#if UNITY_EDITOR` içinde.
+- Kod `Assets/_BusJam/Scripts/{Core,Level,Gameplay,UI,Save,Editor}` altında. Editor-only kod `Editor` klasöründe ya da `#if UNITY_EDITOR` içinde.
 
 ## 1. Platform: dikey mobil
 
@@ -75,7 +75,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
   - çıkış satırında en az bir yürünebilir hücre,
   - tüm yürünebilir hücreler çıkışa bağlı (boş gridde BFS).
 - `LevelDatabase : ScriptableObject` → sıralı liste; `Get(index)` liste bitince baştan döner, ekrandaki level numarası artmaya devam eder.
-- Assetler: `Assets/_Project/Data/Levels/Level_01.asset` …, `Assets/_Project/Data/LevelDatabase.asset`.
+- Assetler: `Assets/_BusJam/Data/Levels/Level_01.asset` …, `Assets/_BusJam/Data/LevelDatabase.asset`.
 
 ## 5. Sistemler
 
