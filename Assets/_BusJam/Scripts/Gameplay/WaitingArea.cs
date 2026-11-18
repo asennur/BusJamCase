@@ -87,7 +87,7 @@ namespace BusJam.Gameplay
             for (int i = 0; i < slots.Length && !bus.IsReservedFull; i++)
             {
                 Passenger passenger = slots[i];
-                if (passenger == null || passenger.Color != bus.Color)
+                if (passenger == null || passenger.State != PassengerState.InSlot || passenger.Color != bus.Color)
                     continue;
 
                 slots[i] = null;

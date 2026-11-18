@@ -42,7 +42,7 @@ namespace BusJam.Gameplay
         {
             gameManager.LevelLoaded += OnLevelLoaded;
             inputHandler.PassengerTapped += OnPassengerTapped;
-            busStation.BusArrived += OnBusArrived;
+            busStation.BusArrived += BoardWaitingPassengers;
             busStation.BusDeparted += OnBusDeparted;
             busStation.AllBusesDone += OnAllBusesDone;
         }
@@ -51,7 +51,7 @@ namespace BusJam.Gameplay
         {
             gameManager.LevelLoaded -= OnLevelLoaded;
             inputHandler.PassengerTapped -= OnPassengerTapped;
-            busStation.BusArrived -= OnBusArrived;
+            busStation.BusArrived -= BoardWaitingPassengers;
             busStation.BusDeparted -= OnBusDeparted;
             busStation.AllBusesDone -= OnAllBusesDone;
         }
@@ -155,8 +155,7 @@ namespace BusJam.Gameplay
                 passenger.RunTo(worldPathBuffer, runSpeed, () =>
                 {
                     passenger.SetSeated(seatPoint);
-                    busStation.NotifySeatArrived(bus, seatIndex, passenger);
-                    OnRunFinished();
+                    OnSeatArrived(bus, seatIndex, passenger);
                 });
             }
             else
@@ -166,23 +165,31 @@ namespace BusJam.Gameplay
                 passenger.RunTo(worldPathBuffer, runSpeed, () =>
                 {
                     passenger.SetInSlot();
+                    Bus atDoor = busStation.ActiveBus;
+                    if (atDoor != null && atDoor.IsAtDoor && atDoor.Color == passenger.Color)
+                        BoardWaitingPassengers(atDoor);
                     OnRunFinished();
                 });
             }
         }
 
         // Otobüs gelince (ilk kurulum dahil) slottaki aynı renk yolcular kendiliğinden biner.
-        private void OnBusArrived(Bus bus)
+        private void BoardWaitingPassengers(Bus bus)
         {
-            int started = waitingArea.SendMatchingPassengers(bus, (b, seatIndex, passenger) =>
-            {
-                busStation.NotifySeatArrived(b, seatIndex, passenger);
-                OnRunFinished();
-            });
-            runningCount += started;
+            if (gameManager.State != GameState.Playing)
+                return;
+
+            runningCount += waitingArea.SendMatchingPassengers(bus, OnSeatArrived);
 
             // Eşleşme yoksa kimse koşmadı, runningCount değişmedi; fail yine de burada kontrol edilmeli.
             CheckFail();
+        }
+
+        private void OnSeatArrived(Bus bus, int seatIndex, Passenger passenger)
+        {
+            if (gameManager.State == GameState.Playing)
+                busStation.NotifySeatArrived(bus, seatIndex, passenger);
+            OnRunFinished();
         }
 
         // Otobüs ayrılış tween'i bitti: içindeki yolcular BoardView havuzuna, otobüsün kendisi BusStation havuzuna döner.
@@ -200,6 +207,9 @@ namespace BusJam.Gameplay
 
         private void OnAllBusesDone()
         {
+            if (gameManager.State != GameState.Playing)
+                return;
+
             LevelCompleted?.Invoke();
             gameManager.Complete();
         }
@@ -214,11 +224,11 @@ namespace BusJam.Gameplay
         // uymuyor ve gridde o renkten erişilebilir yolcu da yok (varsa oyuncu hâlâ kurtarabilir).
         private void CheckFail()
         {
-            if (runningCount > 0 || waitingArea.HasFreeSlot)
+            if (gameManager.State != GameState.Playing || runningCount > 0 || waitingArea.HasFreeSlot)
                 return;
 
             Bus bus = busStation.ActiveBus;
-            if (bus == null)
+            if (bus == null || !bus.IsAtDoor)
                 return;
 
             if (waitingArea.HasColor(bus.Color) || HasReachableColor(bus.Color))
