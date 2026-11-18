@@ -22,6 +22,17 @@ namespace BusJam.Gameplay
         [SerializeField] private GameObject hiddenMark;
         [SerializeField] private float angryDuration = 0.6f;
 
+        [SerializeField, Min(0f)] private float strideHeight = 0.085f;
+        [SerializeField, Min(0.01f)] private float halfStride = 0.105f;
+        [SerializeField, Range(0f, 0.5f)] private float tapSquash = 0.16f;
+        [SerializeField, Min(0.01f)] private float tapDuration = 0.18f;
+        [SerializeField] private Transform waveArm;
+        [SerializeField, Range(0f, 70f)] private float waveAngle = 32f;
+        [SerializeField, Min(0.01f)] private float halfWave = 0.14f;
+
+        private Vector3 bodyRestPosition;
+        private Tween strideTween;
+        private Tween armTween;
         private Tween runTween;
         private Tween angryTween;
         private Tween revealTween;
@@ -34,7 +45,39 @@ namespace BusJam.Gameplay
 
         private void Awake()
         {
+            bodyRestPosition = body.transform.localPosition;
             angryRestPosition = angryIcon.localPosition;
+        }
+
+        private void OnDisable()
+        {
+            runTween?.Kill();
+            angryTween?.Kill();
+            revealTween?.Kill();
+            strideTween?.Kill();
+            armTween?.Kill();
+            body.transform.localPosition = bodyRestPosition;
+            if (waveArm != null)
+                waveArm.gameObject.SetActive(false);
+        }
+
+        public void ShowTap()
+        {
+            revealTween?.Kill();
+            transform.localScale = new Vector3(1f + tapSquash, 1f - tapSquash, 1f + tapSquash);
+            revealTween = transform.DOScale(Vector3.one, tapDuration).SetEase(Ease.OutQuad);
+        }
+
+        public void Wave()
+        {
+            if (waveArm == null)
+                return;
+
+            armTween?.Kill();
+            waveArm.gameObject.SetActive(true);
+            waveArm.localRotation = Quaternion.Euler(0f, 0f, -waveAngle);
+            armTween = waveArm.DOLocalRotate(Vector3.forward * waveAngle, halfWave)
+                .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
         }
 
         public void Setup(PassengerColor color, Vector2Int cell, bool hidden, Material material)
@@ -104,10 +147,18 @@ namespace BusJam.Gameplay
             float duration = Mathf.Max(length / speed, 0.01f);
 
             runTween?.Kill();
+            strideTween?.Kill();
+            strideTween = body.transform.DOLocalMoveY(bodyRestPosition.y + strideHeight, halfStride)
+                .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
             runTween = transform.DOPath(path.ToArray(), duration, PathType.Linear)
                 .SetEase(Ease.Linear)
                 .SetLookAt(0.01f)
-                .OnComplete(onArrived);
+                .OnComplete(() =>
+                {
+                    strideTween.Kill();
+                    body.transform.localPosition = bodyRestPosition;
+                    onArrived();
+                });
         }
 
         /// <summary>Tünelden ağız hücresine çıkış: kısa tween ile hedef local konuma kayar.</summary>

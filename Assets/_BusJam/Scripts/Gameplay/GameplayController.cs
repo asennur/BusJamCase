@@ -132,6 +132,7 @@ namespace BusJam.Gameplay
                 return;
             }
 
+            passenger.ShowTap();
             Vector2Int startCell = passenger.Cell;
             board.SetOccupant(startCell, null);
             TryEmergeFromTunnel(startCell);

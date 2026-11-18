@@ -24,6 +24,10 @@ namespace BusJam.Gameplay
         [SerializeField] private int visibleQueueCount = 3;
 
         private readonly List<Bus> queue = new List<Bus>();
+        [SerializeField] private Ease arrivalEase = Ease.OutCubic;
+        [SerializeField] private Ease departureEase = Ease.InQuad;
+        [SerializeField, Min(0f)] private float finalWaveHold = 0.85f;
+        private readonly List<Bus> departing = new List<Bus>();
         private List<PassengerColor> order;
         private int nextSpawnIndex;
         private ObjectPool<Bus> busPool;
@@ -49,7 +53,10 @@ namespace BusJam.Gameplay
         {
             EnsurePool();
             for (int i = 0; i < queue.Count; i++)
-                busPool.Release(queue[i]);
+                ReturnToPool(queue[i]);
+            foreach (Bus bus in departing)
+                ReturnToPool(bus);
+            departing.Clear();
             queue.Clear();
 
             order = busOrder;
@@ -59,8 +66,11 @@ namespace BusJam.Gameplay
 
             if (queue.Count > 0)
             {
-                queue[0].SetAtDoor(true);
-                BusArrived?.Invoke(queue[0]);
+                for (int i = 0; i < queue.Count; i++)
+                {
+                    queue[i].transform.position = QueuePosition(i + 1);
+                    MoveToQueuePosition(i);
+                }
             }
             else
             {
@@ -76,7 +86,17 @@ namespace BusJam.Gameplay
         }
 
         /// <summary>Yolcuları boşaltılmış otobüsü havuza geri verir (BusDeparted sonrası GameplayController çağırır).</summary>
-        public void ReleaseBus(Bus bus) => busPool.Release(bus);
+        public void ReleaseBus(Bus bus)
+        {
+            departing.Remove(bus);
+            busPool.Release(bus);
+        }
+
+        private void ReturnToPool(Bus bus)
+        {
+            bus.transform.DOKill();
+            busPool.Release(bus);
+        }
 
         private void SpawnAtQueueEnd()
         {
@@ -97,31 +117,43 @@ namespace BusJam.Gameplay
             leaving.SetAtDoor(false);
             queue.RemoveAt(0);
 
+            bool finalBus = queue.Count == 0 && nextSpawnIndex == order.Count;
+            if (finalBus)
+                foreach (Passenger passenger in leaving.SeatedPassengers)
+                    passenger.Wave();
+
+            departing.Add(leaving);
             leaving.transform.DOMove(leaving.transform.position + doorPoint.right * exitOffsetX, moveDuration)
-                .SetEase(Ease.InSine)
+                .SetDelay(finalBus ? finalWaveHold : 0f)
+                .SetEase(departureEase)
                 .OnComplete(() => BusDeparted?.Invoke(leaving));
 
             for (int i = 0; i < queue.Count; i++)
-            {
-                Vector3 target = QueuePosition(i);
-                Tween move = queue[i].transform.DOMove(target, moveDuration).SetEase(Ease.OutSine);
-
-                if (i == 0)
-                {
-                    Bus arriving = queue[0];
-                    move.OnComplete(() =>
-                    {
-                        arriving.SetAtDoor(true);
-                        BusArrived?.Invoke(arriving);
-                    });
-                }
-            }
+                MoveToQueuePosition(i);
 
             if (nextSpawnIndex < order.Count)
+            {
                 SpawnAtQueueEnd();
+                int tail = queue.Count - 1;
+                queue[tail].transform.position = QueuePosition(tail + 1);
+                MoveToQueuePosition(tail);
+            }
 
-            if (queue.Count == 0)
+            if (finalBus)
                 AllBusesDone?.Invoke();
+        }
+
+        private void MoveToQueuePosition(int index)
+        {
+            Bus bus = queue[index];
+            bus.transform.DOKill();
+            Tween motion = bus.transform.DOMove(QueuePosition(index), moveDuration).SetEase(arrivalEase);
+            if (index == 0)
+                motion.OnComplete(() =>
+                {
+                    bus.SetAtDoor(true);
+                    BusArrived?.Invoke(bus);
+                });
         }
     }
 }
