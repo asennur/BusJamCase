@@ -39,6 +39,7 @@ namespace BusJam.Level
             width = newWidth;
             height = newHeight;
             cells = resized;
+            tunnels.RemoveAll(tunnel => tunnel.cell.x >= width || tunnel.cell.y >= height);
         }
 
         /// <summary>
@@ -110,8 +111,8 @@ namespace BusJam.Level
                     return false;
                 }
 
-                CellType mouthType = GetCell(mouth.x, mouth.y).type;
-                if (mouthType == CellType.Void || mouthType == CellType.Tunnel)
+                CellData mouthCell = GetCell(mouth.x, mouth.y);
+                if (!mouthCell.IsWalkable)
                 {
                     error = $"Tünel ({tunnel.cell.x}, {tunnel.cell.y}) ağzı geçersiz hücrede ({mouth.x}, {mouth.y})";
                     return false;
@@ -180,11 +181,5 @@ namespace BusJam.Level
             }
         }
 
-        // Inspector'dan boyut değişirse dizi boyunu uydurur. Düzeni koruyan değişim Level Editor'de Resize ile yapılır.
-        private void OnValidate()
-        {
-            if (cells == null || cells.Length != CellCount)
-                System.Array.Resize(ref cells, CellCount);
-        }
     }
 }

@@ -110,6 +110,20 @@ namespace BusJam.Gameplay
             }
         }
 
+        // Karo olmayan Void hücreleri de tahta düzleminde seçilebilir.
+        public bool TryPickCell(Ray ray, out Vector2Int cell)
+        {
+            cell = default;
+            var plane = new Plane(transform.up, transform.position);
+            if (!plane.Raycast(ray, out float distance))
+                return false;
+
+            Vector3 local = transform.InverseTransformPoint(ray.GetPoint(distance));
+            cell = new Vector2Int(Mathf.RoundToInt(local.x / cellSize + (width - 1) * 0.5f),
+                Mathf.RoundToInt(-local.z / cellSize));
+            return true;
+        }
+
         public Vector3 CellToWorld(Vector2Int cell) => transform.TransformPoint(CellToLocal(cell));
 
         /// <summary>Gizli yolcu rengi açılırken kullanılacak gerçek renk materyali.</summary>
