@@ -19,10 +19,12 @@ namespace BusJam.Gameplay
         [SerializeField] private Renderer body;
         [SerializeField] private GameObject outline;
         [SerializeField] private Transform angryIcon;
+        [SerializeField] private GameObject hiddenMark;
         [SerializeField] private float angryDuration = 0.6f;
 
         private Tween runTween;
         private Tween angryTween;
+        private Tween revealTween;
         private Vector3 angryRestPosition;
 
         public PassengerColor Color { get; private set; }
@@ -44,9 +46,26 @@ namespace BusJam.Gameplay
             body.sharedMaterial = material;
             outline.SetActive(false);
             angryIcon.gameObject.SetActive(false);
+            hiddenMark.SetActive(hidden);
             runTween?.Kill();
             angryTween?.Kill();
+            revealTween?.Kill();
             transform.localRotation = Quaternion.identity;
+            transform.localScale = Vector3.one;
+        }
+
+        /// <summary>Erişilebilir olan gizli yolcunun rengi açılır: gerçek materyal, "?" kalkar, kısa punch. Bir kez açılan geri gizlenmez.</summary>
+        public void Reveal(Material material)
+        {
+            if (!IsHidden)
+                return;
+
+            IsHidden = false;
+            body.sharedMaterial = material;
+            hiddenMark.SetActive(false);
+
+            revealTween?.Kill();
+            revealTween = transform.DOPunchScale(Vector3.one * 0.25f, 0.3f, 1, 0.5f);
         }
 
         /// <summary>Erişilebilir yolcu outline'lı görünür.</summary>

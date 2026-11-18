@@ -195,8 +195,12 @@ namespace BusJam.Gameplay
             for (int i = 0; i < board.CellCount; i++)
             {
                 Passenger p = board.GetOccupant(i);
-                if (p != null)
-                    p.SetReachable(reachable[i]);
+                if (p == null)
+                    continue;
+
+                p.SetReachable(reachable[i]);
+                if (reachable[i] && p.IsHidden)
+                    p.Reveal(boardView.GetColorMaterial(p.Color));
             }
         }
     }

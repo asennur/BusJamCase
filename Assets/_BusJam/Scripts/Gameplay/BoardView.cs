@@ -78,6 +78,9 @@ namespace BusJam.Gameplay
 
         public Vector3 CellToWorld(Vector2Int cell) => transform.TransformPoint(CellToLocal(cell));
 
+        /// <summary>Gizli yolcu rengi açılırken kullanılacak gerçek renk materyali.</summary>
+        public Material GetColorMaterial(PassengerColor color) => colorMaterials[(int)color];
+
         /// <summary>Otobüsle giden ya da başka bir sebeple ayrılan tek yolcuyu havuza geri verir (parent BoardView'a döner).</summary>
         public void ReleasePassenger(Passenger passenger)
         {
