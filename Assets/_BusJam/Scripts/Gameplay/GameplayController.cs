@@ -118,11 +118,12 @@ namespace BusJam.Gameplay
         // Otobüs gelince (ilk kurulum dahil) slottaki aynı renk yolcular kendiliğinden biner.
         private void OnBusArrived(Bus bus)
         {
-            waitingArea.SendMatchingPassengers(bus, (b, seatIndex, passenger) =>
+            int started = waitingArea.SendMatchingPassengers(bus, (b, seatIndex, passenger) =>
             {
                 busStation.NotifySeatArrived(b, seatIndex, passenger);
                 OnRunFinished();
             });
+            runningCount += started;
 
             // Eşleşme yoksa kimse koşmadı, runningCount değişmedi; fail yine de burada kontrol edilmeli.
             CheckFail();

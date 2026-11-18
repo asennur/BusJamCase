@@ -15,6 +15,7 @@ namespace BusJam.Gameplay
         [SerializeField] private float runSpeed = 4f;
 
         private Passenger[] slots;
+        private readonly List<Transform> tiles = new List<Transform>();
         private readonly List<Vector3> singlePointPath = new List<Vector3>(1) { Vector3.zero };
 
         public bool HasFreeSlot
@@ -28,14 +29,26 @@ namespace BusJam.Gameplay
             }
         }
 
+        // Karolar levelden levele yeniden kullanılır (yalnız sayı değişince eklenir/kapatılır), Destroy/Instantiate yok.
         public void Setup(int slotCount)
         {
-            foreach (Transform child in transform)
-                Destroy(child.gameObject);
-
             slots = new Passenger[slotCount];
+
             for (int i = 0; i < slotCount; i++)
-                Instantiate(slotTilePrefab, SlotPosition(i), Quaternion.identity, transform);
+            {
+                if (i < tiles.Count)
+                {
+                    tiles[i].position = SlotPosition(i);
+                    tiles[i].gameObject.SetActive(true);
+                }
+                else
+                {
+                    tiles.Add(Instantiate(slotTilePrefab, SlotPosition(i), Quaternion.identity, transform));
+                }
+            }
+
+            for (int i = slotCount; i < tiles.Count; i++)
+                tiles[i].gameObject.SetActive(false);
         }
 
         public Vector3 SlotPosition(int index) =>
@@ -66,9 +79,11 @@ namespace BusJam.Gameplay
             return false;
         }
 
-        /// <summary>Kapıdaki (IsAtDoor) otobüsün rengiyle eşleşen slottaki yolcuları, boş koltuk kalmayana kadar otobüse koşturur.</summary>
-        public void SendMatchingPassengers(Bus bus, Action<Bus, int, Passenger> onSeatArrived)
+        /// <summary>Kapıdaki (IsAtDoor) otobüsün rengiyle eşleşen slottaki yolcuları, boş koltuk kalmayana kadar otobüse koşturur. Döndürdüğü sayı, koşmaya başlayan yolcu sayısıdır (çağıran runningCount'u buna göre artırmalı).</summary>
+        public int SendMatchingPassengers(Bus bus, Action<Bus, int, Passenger> onSeatArrived)
         {
+            int startedCount = 0;
+
             for (int i = 0; i < slots.Length && !bus.IsReservedFull; i++)
             {
                 Passenger passenger = slots[i];
@@ -77,6 +92,7 @@ namespace BusJam.Gameplay
 
                 slots[i] = null;
                 Transform seatPoint = bus.ReserveSeat(out int seatIndex);
+                startedCount++;
 
                 singlePointPath[0] = seatPoint.position;
                 passenger.RunTo(singlePointPath, runSpeed, () =>
@@ -85,6 +101,8 @@ namespace BusJam.Gameplay
                     onSeatArrived(bus, seatIndex, passenger);
                 });
             }
+
+            return startedCount;
         }
     }
 }

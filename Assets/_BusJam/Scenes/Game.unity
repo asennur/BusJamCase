@@ -178,10 +178,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: a6f899608bbd6894c91c04e136da1c79, type: 2}
   - {fileID: 2100000, guid: 8b0665dba53bd5247adffc0e89b986ce, type: 2}
   hiddenMaterial: {fileID: 2100000, guid: f1807f7c66fdbc94384ba29352548984, type: 2}
-  cam: {fileID: 737060411}
   cellSize: 1
-  topSpace: 5
-  frameMargin: 0.6
 --- !u!1 &134005831
 GameObject:
   m_ObjectHideFlags: 0
@@ -593,7 +590,7 @@ Transform:
   m_GameObject: {fileID: 737060408}
   serializedVersion: 2
   m_LocalRotation: {x: 0.53729963, y: 0, z: 0, w: 0.8433914}
-  m_LocalPosition: {x: 0, y: 16, z: -11}
+  m_LocalPosition: {x: 0, y: 21.060741, z: -11.320784}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

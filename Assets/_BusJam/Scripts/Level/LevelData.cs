@@ -58,6 +58,12 @@ namespace BusJam.Level
                 return false;
             }
 
+            if (width > GameRules.MaxWidth || height > GameRules.MaxHeight)
+            {
+                error = $"Grid {width}x{height}, izin verilen en fazla {GameRules.MaxWidth}x{GameRules.MaxHeight} (kamera sabit)";
+                return false;
+            }
+
             return ValidateColorCounts(out error) && ValidateConnectivity(out error);
         }
 

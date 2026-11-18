@@ -22,7 +22,7 @@ Bu dosya kodun tek tasarım kaynağıdır; kod (AI destekli) buna uyar. Kararlar
 - UI: Canvas Scaler **Scale With Screen Size**, referans 1080×1920, match 0.5. HUD bir `SafeArea` paneli içinde.
 - Input: eski Input Manager, `Input.GetMouseButtonDown(0)` (dokunmayı da karşılar).
 - Text: TextMeshPro.
-- Kamera: perspektif, yukarıdan eğik (~65°, §2 ile aynı). Açı sabit; her level yüklenince grid ve üstündeki yol/slot alanı sığacak kadar geri çekilir. Otobüs ekranın üstünde, bekleme alanı ortada, grid altta.
+- Kamera: perspektif, yukarıdan eğik (~65°, §2 ile aynı), **sabit** (Asen kararı, Z5.1). Grid boyutu `GameRules.MaxWidth`/`MaxHeight` (7×9) ile sınırlı, bu sınırın içindeki her level sabit kadraja sığar. Otobüs ekranın üstünde, bekleme alanı ortada, grid altta.
 
 ## 2. Görseller: placeholder
 
@@ -83,7 +83,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 | `GameManager` (Core) | MonoBehaviour | Akış ve durum (`GameState { Start, Playing, Complete, Fail }`). Level yükle, kaydet, sonraki/tekrar. Event: `StateChanged`, `LevelLoaded(int levelNumber, LevelData)`. |
 | `GameRules` (Core) | static | Sabitler (`BusCapacity = 3`). |
 | `Board` (Gameplay) | düz C# sınıfı | Hücre doluluğu (hücredeki `Passenger` referansı), yürünebilirlik, `TryFindPath` (BFS), `ComputeReachable` (çıkıştan tek flood-fill). MonoBehaviour değil, sahneye bağlı değil. BFS kuyruk/parent dizileri bir kez ayrılır, tekrar kullanılır. |
-| `BoardView` (Gameplay) | MonoBehaviour | Levelden karoları ve yolcuları kurar (havuz), `CellToWorld`, kamera çerçeveleme. |
+| `BoardView` (Gameplay) | MonoBehaviour | Levelden karoları ve yolcuları kurar (havuz), `CellToWorld`. Kamera sahnede sabit. |
 | `Passenger` (Gameplay) | MonoBehaviour | Renk, hücre, durum (`Idle, Running, InSlot, Seated`). `SetReachable`, `ShowAngry`, `RunTo(path, onArrived)`, `Reveal`. Mantık kararı vermez. |
 | `BusStation` (Gameplay) | MonoBehaviour | Otobüs sırası, aktif otobüs, koltuk rezervasyonu, dolunca gönder / sıradakini getir. Event: `BusArrived`, `AllBusesDone`. |
 | `WaitingArea` (Gameplay) | MonoBehaviour | N slot, rezervasyon, slot pozisyonları, renge göre yolcu verme. |
