@@ -17,6 +17,7 @@ namespace BusJam.Level
         [Min(1)] public int waitingSlotCount = 5;
         public CellData[] cells = new CellData[9];
         public List<PassengerColor> busOrder = new List<PassengerColor>();
+        public List<TunnelData> tunnels = new List<TunnelData>();
 
         public int CellCount => width * height;
 
@@ -64,7 +65,7 @@ namespace BusJam.Level
                 return false;
             }
 
-            return ValidateColorCounts(out error) && ValidateConnectivity(out error);
+            return ValidateColorCounts(out error) && ValidateConnectivity(out error) && ValidateTunnels(out error);
         }
 
         private bool ValidateColorCounts(out string error)
@@ -77,6 +78,10 @@ namespace BusJam.Level
                 if (cell.type == CellType.Passenger)
                     passengers[(int)cell.color]++;
 
+            foreach (var tunnel in tunnels)
+                foreach (var color in tunnel.queue)
+                    passengers[(int)color]++;
+
             foreach (var color in busOrder)
                 seats[(int)color] += GameRules.BusCapacity;
 
@@ -85,6 +90,30 @@ namespace BusJam.Level
                 if (passengers[i] != seats[i])
                 {
                     error = $"{(PassengerColor)i}: {passengers[i]} yolcu, {seats[i]} koltuk";
+                    return false;
+                }
+            }
+
+            error = null;
+            return true;
+        }
+
+        // Her tünelin ağzı grid içinde ve yürünebilir bir hücre (Void/Tunnel olamaz) olmalı.
+        private bool ValidateTunnels(out string error)
+        {
+            foreach (var tunnel in tunnels)
+            {
+                Vector2Int mouth = tunnel.MouthCell;
+                if (mouth.x < 0 || mouth.x >= width || mouth.y < 0 || mouth.y >= height)
+                {
+                    error = $"Tünel ({tunnel.cell.x}, {tunnel.cell.y}) ağzı grid dışında";
+                    return false;
+                }
+
+                CellType mouthType = GetCell(mouth.x, mouth.y).type;
+                if (mouthType == CellType.Void || mouthType == CellType.Tunnel)
+                {
+                    error = $"Tünel ({tunnel.cell.x}, {tunnel.cell.y}) ağzı geçersiz hücrede ({mouth.x}, {mouth.y})";
                     return false;
                 }
             }

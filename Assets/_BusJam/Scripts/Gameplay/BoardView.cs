@@ -13,6 +13,7 @@ namespace BusJam.Gameplay
     {
         [SerializeField] private Passenger passengerPrefab;
         [SerializeField] private Transform tilePrefab;
+        [SerializeField] private TunnelView tunnelPrefab;
         [Tooltip("PassengerColor sırasıyla")]
         [SerializeField] private Material[] colorMaterials;
         [SerializeField] private Material hiddenMaterial;
@@ -20,8 +21,10 @@ namespace BusJam.Gameplay
 
         private ObjectPool<Passenger> passengerPool;
         private ObjectPool<Transform> tilePool;
+        private ObjectPool<TunnelView> tunnelPool;
         private readonly List<Passenger> activePassengers = new List<Passenger>();
         private readonly List<Transform> activeTiles = new List<Transform>();
+        private readonly List<TunnelView> activeTunnelViews = new List<TunnelView>();
         private int width;
 
         // GameManager.Awake, Board sahne sırasında daha önce gelse bile Build'den önce çalışabilir;
@@ -38,6 +41,11 @@ namespace BusJam.Gameplay
 
             tilePool = new ObjectPool<Transform>(
                 () => Instantiate(tilePrefab, transform),
+                t => t.gameObject.SetActive(true),
+                t => t.gameObject.SetActive(false));
+
+            tunnelPool = new ObjectPool<TunnelView>(
+                () => Instantiate(tunnelPrefab, transform),
                 t => t.gameObject.SetActive(true),
                 t => t.gameObject.SetActive(false));
         }
@@ -60,6 +68,16 @@ namespace BusJam.Gameplay
                     var cell = new Vector2Int(x, y);
                     Vector3 local = CellToLocal(cell);
 
+                    if (data.type == CellType.Tunnel)
+                    {
+                        TunnelData tunnelData = FindTunnelData(level, cell);
+                        TunnelView tunnelView = tunnelPool.Get();
+                        tunnelView.transform.localPosition = local;
+                        tunnelView.Setup(cell, tunnelData.facing, tunnelData.queue.Count);
+                        activeTunnelViews.Add(tunnelView);
+                        continue;
+                    }
+
                     Transform tile = tilePool.Get();
                     tile.localPosition = local;
                     activeTiles.Add(tile);
@@ -81,6 +99,36 @@ namespace BusJam.Gameplay
         /// <summary>Gizli yolcu rengi açılırken kullanılacak gerçek renk materyali.</summary>
         public Material GetColorMaterial(PassengerColor color) => colorMaterials[(int)color];
 
+        /// <summary>Kurulu tünel görünümlerinden hücresi eşleşeni döndürür (GameplayController kuyruk sayısını güncellemek için kullanır).</summary>
+        public TunnelView GetTunnelView(Vector2Int tunnelCell)
+        {
+            for (int i = 0; i < activeTunnelViews.Count; i++)
+                if (activeTunnelViews[i].Cell == tunnelCell)
+                    return activeTunnelViews[i];
+
+            return null;
+        }
+
+        /// <summary>Tünel ağzı boşalınca kuyruktan gelen yolcuyu havuzdan alır, tünelin konumundan ağız hücresine kaydırır.</summary>
+        public Passenger SpawnFromTunnel(Vector2Int tunnelCell, Vector2Int mouthCell, PassengerColor color)
+        {
+            Passenger passenger = passengerPool.Get();
+            passenger.transform.localPosition = CellToLocal(tunnelCell);
+            passenger.Setup(color, mouthCell, false, colorMaterials[(int)color]);
+            activePassengers.Add(passenger);
+            passenger.EmergeFromTunnel(CellToLocal(mouthCell));
+            return passenger;
+        }
+
+        private static TunnelData FindTunnelData(LevelData level, Vector2Int cell)
+        {
+            for (int i = 0; i < level.tunnels.Count; i++)
+                if (level.tunnels[i].cell == cell)
+                    return level.tunnels[i];
+
+            return null;
+        }
+
         /// <summary>Otobüsle giden ya da başka bir sebeple ayrılan tek yolcuyu havuza geri verir (parent BoardView'a döner).</summary>
         public void ReleasePassenger(Passenger passenger)
         {
@@ -97,8 +145,11 @@ namespace BusJam.Gameplay
                 passengerPool.Release(activePassengers[i]);
             for (int i = 0; i < activeTiles.Count; i++)
                 tilePool.Release(activeTiles[i]);
+            for (int i = 0; i < activeTunnelViews.Count; i++)
+                tunnelPool.Release(activeTunnelViews[i]);
             activePassengers.Clear();
             activeTiles.Clear();
+            activeTunnelViews.Clear();
         }
     }
 }

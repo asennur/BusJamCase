@@ -110,6 +110,13 @@ namespace BusJam.Gameplay
                 .OnComplete(onArrived);
         }
 
+        /// <summary>Tünelden ağız hücresine çıkış: kısa tween ile hedef local konuma kayar.</summary>
+        public void EmergeFromTunnel(Vector3 localTarget)
+        {
+            runTween?.Kill();
+            runTween = transform.DOLocalMove(localTarget, 0.3f).SetEase(Ease.OutQuad);
+        }
+
         /// <summary>Üstte kısa süre kırmızı ikon: zıplar, kaybolur. Art arda tıklamada tween yeniden başlar.</summary>
         public void ShowAngry()
         {

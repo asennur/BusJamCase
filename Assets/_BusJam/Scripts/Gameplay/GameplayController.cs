@@ -24,6 +24,16 @@ namespace BusJam.Gameplay
         private int runningCount;
         private readonly List<Vector2Int> pathBuffer = new List<Vector2Int>();
         private readonly List<Vector3> worldPathBuffer = new List<Vector3>();
+        private readonly List<TunnelGroup> tunnelGroups = new List<TunnelGroup>();
+
+        // Çalışma zamanı tünel durumu: level verisindeki kuyruk burada tüketilir, asset değişmez.
+        private class TunnelGroup
+        {
+            public Vector2Int tunnelCell;
+            public Vector2Int mouthCell;
+            public Queue<PassengerColor> queue;
+            public TunnelView view;
+        }
 
         public event Action LevelCompleted;
         public event Action<string> LevelFailed;
@@ -53,9 +63,43 @@ namespace BusJam.Gameplay
                 reachable = new bool[board.CellCount];
 
             runningCount = 0;
+            SetupTunnels(level);
             waitingArea.Setup(level.waitingSlotCount);
             busStation.Setup(level.busOrder);
             RefreshReachable();
+        }
+
+        private void SetupTunnels(LevelData level)
+        {
+            tunnelGroups.Clear();
+            for (int i = 0; i < level.tunnels.Count; i++)
+            {
+                TunnelData data = level.tunnels[i];
+                tunnelGroups.Add(new TunnelGroup
+                {
+                    tunnelCell = data.cell,
+                    mouthCell = data.MouthCell,
+                    queue = new Queue<PassengerColor>(data.queue),
+                    view = boardView.GetTunnelView(data.cell)
+                });
+            }
+        }
+
+        // Dokunulan yolcu hücresini bıraktığı an çağrılır: ağız o hücreyse kuyruktaki sıradaki yolcu çıkar.
+        private void TryEmergeFromTunnel(Vector2Int vacatedCell)
+        {
+            for (int i = 0; i < tunnelGroups.Count; i++)
+            {
+                TunnelGroup group = tunnelGroups[i];
+                if (group.mouthCell != vacatedCell || group.queue.Count == 0)
+                    continue;
+
+                PassengerColor color = group.queue.Dequeue();
+                Passenger passenger = boardView.SpawnFromTunnel(group.tunnelCell, vacatedCell, color);
+                board.SetOccupant(vacatedCell, passenger);
+                group.view?.SetRemaining(group.queue.Count);
+                return;
+            }
         }
 
         private void OnPassengerTapped(Passenger passenger)
@@ -80,6 +124,7 @@ namespace BusJam.Gameplay
 
             Vector2Int startCell = passenger.Cell;
             board.SetOccupant(startCell, null);
+            TryEmergeFromTunnel(startCell);
             RefreshReachable();
 
             board.TryFindPath(startCell, pathBuffer);
