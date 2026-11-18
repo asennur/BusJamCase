@@ -1,0 +1,149 @@
+using System.Collections.Generic;
+using BusJam.Core;
+using UnityEngine;
+
+namespace BusJam.Level
+{
+    /// <summary>
+    /// Bir levelin tüm verisi. Oyun sahnesi okur, Level Editor yazar.
+    /// Hücreler satır satır tutulur; y = 0 otobüse en yakın (çıkış) satırıdır.
+    /// </summary>
+    [CreateAssetMenu(menuName = "BusJam/Level Data", fileName = "Level_")]
+    public class LevelData : ScriptableObject
+    {
+        [Min(1)] public int width = 3;
+        [Min(1)] public int height = 3;
+        [Min(1f)] public float timeLimit = 60f;
+        [Min(1)] public int waitingSlotCount = 5;
+        public CellData[] cells = new CellData[9];
+        public List<PassengerColor> busOrder = new List<PassengerColor>();
+
+        public int CellCount => width * height;
+
+        public CellData GetCell(int x, int y) => cells[y * width + x];
+
+        public void SetCell(int x, int y, CellData cell) => cells[y * width + x] = cell;
+
+        /// <summary>Boyut değişince örtüşen hücreleri koruyarak diziyi yeniden kurar.</summary>
+        public void Resize(int newWidth, int newHeight)
+        {
+            var resized = new CellData[newWidth * newHeight];
+            int w = Mathf.Min(width, newWidth);
+            int h = Mathf.Min(height, newHeight);
+
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                    resized[y * newWidth + x] = cells[y * width + x];
+
+            width = newWidth;
+            height = newHeight;
+            cells = resized;
+        }
+
+        /// <summary>
+        /// Leveli kaydetmeden önce kurallara uyuyor mu bakar: renk başına yolcu = otobüs × kapasite,
+        /// çıkış satırında yürünebilir hücre var ve tüm yürünebilir hücreler boş gridde çıkışa bağlı.
+        /// </summary>
+        public bool Validate(out string error)
+        {
+            if (cells == null || cells.Length != CellCount)
+            {
+                error = $"Hücre sayısı {cells?.Length ?? 0}, beklenen {CellCount}";
+                return false;
+            }
+
+            return ValidateColorCounts(out error) && ValidateConnectivity(out error);
+        }
+
+        private bool ValidateColorCounts(out string error)
+        {
+            int colorCount = System.Enum.GetValues(typeof(PassengerColor)).Length;
+            var passengers = new int[colorCount];
+            var seats = new int[colorCount];
+
+            foreach (var cell in cells)
+                if (cell.type == CellType.Passenger)
+                    passengers[(int)cell.color]++;
+
+            foreach (var color in busOrder)
+                seats[(int)color] += GameRules.BusCapacity;
+
+            for (int i = 0; i < colorCount; i++)
+            {
+                if (passengers[i] != seats[i])
+                {
+                    error = $"{(PassengerColor)i}: {passengers[i]} yolcu, {seats[i]} koltuk";
+                    return false;
+                }
+            }
+
+            error = null;
+            return true;
+        }
+
+        // Çıkış satırından (y = 0) tüm yürünebilir hücrelere flood-fill; ulaşılamayan hücre hatadır.
+        private bool ValidateConnectivity(out string error)
+        {
+            var visited = new bool[CellCount];
+            var queue = new Queue<int>();
+
+            for (int x = 0; x < width; x++)
+            {
+                if (cells[x].IsWalkable)
+                {
+                    visited[x] = true;
+                    queue.Enqueue(x);
+                }
+            }
+
+            if (queue.Count == 0)
+            {
+                error = "Çıkış satırında (y = 0) yürünebilir hücre yok";
+                return false;
+            }
+
+            while (queue.Count > 0)
+            {
+                int index = queue.Dequeue();
+                int cx = index % width;
+                int cy = index / width;
+                TryVisit(cx + 1, cy);
+                TryVisit(cx - 1, cy);
+                TryVisit(cx, cy + 1);
+                TryVisit(cx, cy - 1);
+            }
+
+            for (int i = 0; i < CellCount; i++)
+            {
+                if (cells[i].IsWalkable && !visited[i])
+                {
+                    error = $"Hücre ({i % width}, {i / width}) çıkışa bağlı değil";
+                    return false;
+                }
+            }
+
+            error = null;
+            return true;
+
+            void TryVisit(int x, int y)
+            {
+                if (x < 0 || x >= width || y < 0 || y >= height)
+                    return;
+
+                int i = y * width + x;
+                if (visited[i] || !cells[i].IsWalkable)
+                    return;
+
+                visited[i] = true;
+                queue.Enqueue(i);
+            }
+        }
+
+        // Inspector'dan boyut değişirse dizi boyunu uydurur. Düzeni koruyan değişim Level Editor'de Resize ile yapılır.
+        private void OnValidate()
+        {
+            if (cells == null || cells.Length != CellCount)
+                System.Array.Resize(ref cells, CellCount);
+        }
+    }
+}
