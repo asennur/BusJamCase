@@ -126,7 +126,7 @@ namespace BusJam.Gameplay
             Bus bus = busStation.ActiveBus;
             bool toBus = bus != null && bus.IsAtDoor && bus.Color == passenger.Color && !bus.IsReservedFull;
 
-            if (!toBus && !waitingArea.HasFreeSlot)
+            if (!waitingArea.HasFreeSlot)
             {
                 passenger.ShowAngry();
                 return;
@@ -220,8 +220,7 @@ namespace BusJam.Gameplay
             CheckFail();
         }
 
-        // Kaybet (yer): koşan yolcu yok, slotlar dolu, slottakilerin hiçbiri kapıdaki otobüsün rengine
-        // uymuyor ve gridde o renkten erişilebilir yolcu da yok (varsa oyuncu hâlâ kurtarabilir).
+        // Devam eden koşular ve otobüsün kapıya gelişi sonuçlandıktan sonra kalan slotlara bakılır.
         private void CheckFail()
         {
             if (gameManager.State != GameState.Playing || runningCount > 0 || waitingArea.HasFreeSlot)
@@ -231,27 +230,8 @@ namespace BusJam.Gameplay
             if (bus == null || !bus.IsAtDoor)
                 return;
 
-            if (waitingArea.HasColor(bus.Color) || HasReachableColor(bus.Color))
-                return;
-
-            Debug.Log($"[GameplayController] Fail: slotlar dolu, {bus.Color} otobüsüne uyan yolcu yok");
             LevelFailed?.Invoke(FailReason.NoSpace);
             gameManager.Fail(FailReason.NoSpace);
-        }
-
-        private bool HasReachableColor(PassengerColor color)
-        {
-            for (int i = 0; i < board.CellCount; i++)
-            {
-                if (!reachable[i])
-                    continue;
-
-                Passenger p = board.GetOccupant(i);
-                if (p != null && !p.IsHidden && p.Color == color)
-                    return true;
-            }
-
-            return false;
         }
 
         private void RefreshReachable()

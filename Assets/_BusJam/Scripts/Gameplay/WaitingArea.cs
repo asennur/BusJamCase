@@ -71,14 +71,6 @@ namespace BusJam.Gameplay
             return false;
         }
 
-        public bool HasColor(PassengerColor color)
-        {
-            for (int i = 0; i < slots.Length; i++)
-                if (slots[i] != null && slots[i].Color == color)
-                    return true;
-            return false;
-        }
-
         /// <summary>Kapıdaki (IsAtDoor) otobüsün rengiyle eşleşen slottaki yolcuları, boş koltuk kalmayana kadar otobüse koşturur. Döndürdüğü sayı, koşmaya başlayan yolcu sayısıdır (çağıran runningCount'u buna göre artırmalı).</summary>
         public int SendMatchingPassengers(Bus bus, Action<Bus, int, Passenger> onSeatArrived)
         {

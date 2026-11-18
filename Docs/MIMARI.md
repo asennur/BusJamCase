@@ -49,7 +49,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - **Erişilebilir yolcu:** çıkış satırında ya da çıkışa boş hücrelerle bağlı. Erişilebilir olan outline'lı.
 - **Dokunma:**
   1. Oyun `Playing` değilse yok say.
-  2. Erişilemezse → kızgın yüz.
+  2. Erişilemezse veya tüm slotlar rezerve/doluysa → kızgın yüz.
   3. Hedef seç: otobüs kapıdaysa, rengi aynıysa ve boş (rezerve edilmemiş) koltuk varsa → koltuk. Yoksa boş slot. O da yoksa → kızgın yüz.
   4. Hedefi **hemen rezerve et**, yolcunun hücresini **hemen boşalt**, erişilebilirliği yeniden hesapla (outline güncellenir).
   5. Yolcu yol boyunca akıcı koşar (DOTween path). Otobüse varınca koltuğa ışınlanır.
@@ -59,7 +59,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - **Gizli yolcu:** erişilemezken gri ve "?" görünür, rengi bilinmez. Erişilebilir olduğu an rengi açılır ve bir daha gizlenmez.
 - **Tünel:** bir hücre kaplar, yürünmez (engel gibi). Bir yöne bakar; baktığı komşu hücre ağzıdır. İçinde levelde tanımlı sıralı yolcu kuyruğu vardır. Ağız hücresi boşaldığı an (oradaki yolcu dokunulup kalktığında) kuyruktaki sıradaki yolcu ağız hücresine çıkar, erişilebilirlik yeniden hesaplanır. Kuyruk bitince tünel engel olarak kalır.
 - **Kazan:** son otobüs dolup gitti.
-- **Kaybet (yer):** koşan yolcu yok, slotlar dolu ve slottakilerin hiçbiri kapıdaki otobüsün rengine uymuyor. (Varsayım, videoyla doğrulanacak: slotlar doluyken gridde aynı renk erişilebilir yolcu varsa dokununca otobüse gidebilir; o durumda fail değil.)
+- **Kaybet (yer):** Son slot rezerve edilince yeni yolcu alınmaz. Devam eden koşular ve otobüsün kapıya gelişi tamamlandığında otomatik biniş bir slot açmamışsa oyun kaybedilir. Gridde kalan yolcuların rengi sonucu değiştirmez.
 - **Kaybet (süre):** timer 0.
 
 ## 4. Veri (`BusJam.Level`)
