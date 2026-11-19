@@ -29,6 +29,9 @@ namespace BusJam.Gameplay
         [SerializeField] private Material[] colorMaterials;
         [SerializeField] private Material hiddenMaterial;
         [SerializeField] private float cellSize = 1f;
+        [SerializeField] private Material baseMaterial;
+
+        private Mesh baseMesh;
 
         private ObjectPool<Passenger> passengerPool;
         private ObjectPool<Transform> tilePool;
@@ -131,6 +134,60 @@ namespace BusJam.Gameplay
             }
 
             BuildRim(level);
+            BuildBase(level);
+        }
+
+        // Tek mesh yalnız zemin hücrelerini örter; Void ve çukurlar açık kalır.
+        private void BuildBase(LevelData level)
+        {
+            if (baseMesh == null)
+            {
+                var plate = new GameObject("BoardBase", typeof(MeshFilter), typeof(MeshRenderer));
+                plate.transform.SetParent(transform, false);
+                baseMesh = new Mesh { name = "BoardBase" };
+                plate.GetComponent<MeshFilter>().sharedMesh = baseMesh;
+                var renderer = plate.GetComponent<MeshRenderer>();
+                renderer.sharedMaterial = baseMaterial;
+                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+
+            var vertices = new List<Vector3>();
+            var triangles = new List<int>();
+            float half = cellSize * 0.5f;
+            for (int y = 0; y < level.height; y++)
+            {
+                for (int x = 0; x < level.width; x++)
+                {
+                    if (!IsGround(level, x, y))
+                        continue;
+
+                    Vector3 center = CellToLocal(new Vector2Int(x, y));
+                    center.y = -0.09f;
+                    int start = vertices.Count;
+                    vertices.Add(center + new Vector3(-half, 0f, half));
+                    vertices.Add(center + new Vector3(half, 0f, half));
+                    vertices.Add(center + new Vector3(half, 0f, -half));
+                    vertices.Add(center + new Vector3(-half, 0f, -half));
+                    triangles.Add(start);
+                    triangles.Add(start + 1);
+                    triangles.Add(start + 2);
+                    triangles.Add(start);
+                    triangles.Add(start + 2);
+                    triangles.Add(start + 3);
+                }
+            }
+
+            baseMesh.Clear();
+            baseMesh.SetVertices(vertices);
+            baseMesh.SetTriangles(triangles, 0);
+            baseMesh.RecalculateNormals();
+            baseMesh.RecalculateBounds();
+        }
+
+        private void OnDestroy()
+        {
+            if (baseMesh != null)
+                Destroy(baseMesh);
         }
 
         // Her köşe noktası 4 hücreye komşu: NE (x, y-1), SE (x, y), SW (x-1, y), NW (x-1, y-1).

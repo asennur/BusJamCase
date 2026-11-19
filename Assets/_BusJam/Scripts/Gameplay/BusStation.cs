@@ -134,33 +134,37 @@ namespace BusJam.Gameplay
                 .OnStart(leaving.PlayDrive)
                 .OnComplete(() => BusDeparted?.Invoke(leaving));
 
+            // Çıkış tamamlanınca kapıdan 6 birim uzaklaşmış olur (gövde 4.12 + boşluk).
+            float queueDelay = delay + moveDuration;
             for (int i = 0; i < queue.Count; i++)
-                MoveToQueuePosition(i);
+                MoveToQueuePosition(i, queueDelay);
 
             if (nextSpawnIndex < order.Count)
             {
                 SpawnAtQueueEnd();
                 int tail = queue.Count - 1;
                 queue[tail].transform.position = QueuePosition(tail + 1);
-                MoveToQueuePosition(tail);
+                MoveToQueuePosition(tail, queueDelay);
             }
 
             if (finalBus)
                 AllBusesDone?.Invoke();
         }
 
-        private void MoveToQueuePosition(int index)
+        private void MoveToQueuePosition(int index, float delay = 0f)
         {
             Bus bus = queue[index];
             bus.transform.DOKill();
-            bus.PlayDrive();
-            Tween motion = bus.transform.DOMove(QueuePosition(index), moveDuration).SetEase(arrivalEase);
+            Tween motion = bus.transform.DOMove(QueuePosition(index), moveDuration)
+                .SetDelay(delay).SetEase(arrivalEase).OnStart(bus.PlayDrive);
             if (index == 0)
                 motion.OnComplete(() =>
                 {
-                    bus.PlayStop(true);
-                    bus.SetAtDoor(true);
-                    BusArrived?.Invoke(bus);
+                    bus.PlayStop(true, () =>
+                    {
+                        bus.SetAtDoor(true);
+                        BusArrived?.Invoke(bus);
+                    });
                 });
             else
                 motion.OnComplete(() => bus.PlayStop(false));

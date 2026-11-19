@@ -107,6 +107,7 @@ namespace BusJam.Gameplay
             State = PassengerState.Idle;
             Play(IdleHash);
             body.sharedMaterial = material;
+            body.enabled = true;
             outline.SetActive(false);
             angryIcon.gameObject.SetActive(false);
             hiddenMark.SetActive(hidden);
@@ -140,16 +141,19 @@ namespace BusJam.Gameplay
         }
 
         /// <summary>Bekleme slotuna vardı; otobüs gelince WaitingArea bunu otobüse koşturur.</summary>
-        public void SetInSlot()
+        public void SetInSlot(Quaternion facing, float scale)
         {
             State = PassengerState.InSlot;
+            transform.rotation = facing;
+            transform.localScale = Vector3.one * scale;
             Play(IdleHash);
         }
 
         /// <summary>Slotlar doluyken taşıp WaitingArea'nın taşma kuyruğunda bekliyor; bir slot ayrılınca GameplayController onu oradan alır.</summary>
-        public void SetIdle()
+        public void SetIdle(Quaternion facing)
         {
             State = PassengerState.Idle;
+            transform.rotation = facing;
             Play(IdleHash);
         }
 
@@ -163,10 +167,31 @@ namespace BusJam.Gameplay
             Play(SitHash);
         }
 
+        /// <summary>Kapıda küçülüp kaybolur, koltukta büyür; dolum yalnız belirme bitince bildirilir.</summary>
+        public void EnterBus(Transform entry, Transform seatPoint, TweenCallback onSeated)
+        {
+            runTween?.Kill();
+            Vector3 inside = entry.position + entry.forward * 0.18f;
+            runTween = DOTween.Sequence()
+                .Append(transform.DOMove(inside, 0.15f).SetEase(Ease.InQuad))
+                .Join(transform.DOScale(0.05f, 0.15f).SetEase(Ease.InQuad))
+                .AppendCallback(() =>
+                {
+                    body.enabled = false;
+                    SetSeated(seatPoint);
+                })
+                .AppendInterval(0.02f)
+                .AppendCallback(() => body.enabled = true)
+                .Append(transform.DOScale(1f, 0.2f).SetEase(Ease.OutBack))
+                .OnComplete(onSeated);
+        }
+
         /// <summary>Yol boyunca sabit hızla koşar (süre = uzunluk / hız), yöne dönerek. Varınca onArrived çağrılır.</summary>
         public void RunTo(List<Vector3> path, float speed, TweenCallback onArrived)
         {
             State = PassengerState.Running;
+            revealTween?.Kill();
+            transform.localScale = Vector3.one;
             SetReachable(false);
             Play(RunHash);
 

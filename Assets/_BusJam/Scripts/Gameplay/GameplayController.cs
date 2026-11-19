@@ -19,7 +19,7 @@ namespace BusJam.Gameplay
         [SerializeField] private BoardView boardView;
         [SerializeField] private BusStation busStation;
         [SerializeField] private WaitingArea waitingArea;
-        [SerializeField] private float runSpeed = 4f;
+        [SerializeField] private float runSpeed = 4.8f;
 
         private Board board;
         private bool[] reachable;
@@ -162,11 +162,10 @@ namespace BusJam.Gameplay
             if (toBus)
             {
                 Transform seatPoint = bus.ReserveSeat(out int seatIndex);
-                worldPathBuffer.Add(seatPoint.position);
+                worldPathBuffer.Add(bus.DoorEntry.position);
                 passenger.RunTo(worldPathBuffer, runSpeed, () =>
                 {
-                    passenger.SetSeated(seatPoint);
-                    OnSeatArrived(bus, seatIndex, passenger);
+                    passenger.EnterBus(bus.DoorEntry, seatPoint, () => OnSeatArrived(bus, seatIndex, passenger));
                 });
             }
             else if (hasFreeSlot)
@@ -175,7 +174,7 @@ namespace BusJam.Gameplay
                 worldPathBuffer.Add(slotPos);
                 passenger.RunTo(worldPathBuffer, runSpeed, () =>
                 {
-                    passenger.SetInSlot();
+                    passenger.SetInSlot(waitingArea.WaitingRotation, waitingArea.PassengerSlotScale);
                     Bus atDoor = busStation.ActiveBus;
                     if (atDoor != null && atDoor.IsAtDoor && atDoor.Color == passenger.Color)
                         BoardWaitingPassengers(atDoor);
@@ -198,7 +197,7 @@ namespace BusJam.Gameplay
                     }
                     else
                     {
-                        passenger.SetIdle();
+                        passenger.SetIdle(waitingArea.WaitingRotation);
                         OnRunFinished();
                     }
                 });
@@ -261,7 +260,7 @@ namespace BusJam.Gameplay
             worldPathBuffer.Add(waitingArea.SlotPosition(slotIndex));
             passenger.RunTo(worldPathBuffer, runSpeed, () =>
             {
-                passenger.SetInSlot();
+                passenger.SetInSlot(waitingArea.WaitingRotation, waitingArea.PassengerSlotScale);
                 Bus atDoor = busStation.ActiveBus;
                 if (atDoor != null && atDoor.IsAtDoor && atDoor.Color == passenger.Color)
                     BoardWaitingPassengers(atDoor);

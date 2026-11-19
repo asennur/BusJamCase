@@ -17,10 +17,10 @@ namespace BusJam.Gameplay
         [SerializeField] private SlotTile slotTilePrefab;
         [Tooltip("Eski placeholder kilit ikonu; kit modelinde kilit SlotTile içinde, boş bırakılabilir")]
         [SerializeField] private GameObject lockIconPrefab;
-        [SerializeField] private float slotSpacing = 0.85f;
+        [SerializeField] private float slotSpacing = 1.003f;
         [SerializeField] private float overflowBaseDistance = 0.9f;
         [SerializeField] private float overflowSpacing = 0.5f;
-        [SerializeField] private float runSpeed = 4f;
+        [SerializeField] private float runSpeed = 4.8f;
 
         private readonly Passenger[] slots = new Passenger[GameRules.VisibleSlotCount];
         private readonly bool[] unlocked = new bool[GameRules.VisibleSlotCount];
@@ -30,6 +30,8 @@ namespace BusJam.Gameplay
 
         /// <summary>Bir slot otobüse biniş yüzünden boşalınca slotIndex ile atılır (GameplayController taşma kuyruğunu bu slota atar).</summary>
         public event Action<int> SlotOpened;
+        public Quaternion WaitingRotation => transform.rotation;
+        public float PassengerSlotScale => slotTilePrefab.transform.localScale.x;
 
         public bool HasFreeSlot
         {
@@ -118,11 +120,10 @@ namespace BusJam.Gameplay
                 Transform seatPoint = bus.ReserveSeat(out int seatIndex);
                 startedCount++;
 
-                singlePointPath[0] = seatPoint.position;
+                singlePointPath[0] = bus.DoorEntry.position;
                 passenger.RunTo(singlePointPath, runSpeed, () =>
                 {
-                    passenger.SetSeated(seatPoint);
-                    onSeatArrived(bus, seatIndex, passenger);
+                    passenger.EnterBus(bus.DoorEntry, seatPoint, () => onSeatArrived(bus, seatIndex, passenger));
                 });
             }
 

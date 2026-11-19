@@ -21,6 +21,7 @@ namespace BusJam.Gameplay
         [Tooltip("0. materyal yuvası otobüs rengidir")]
         [SerializeField] private Renderer body;
         [SerializeField] private Transform[] seatPoints;
+        [SerializeField] private Transform doorEntry;
         [SerializeField] private GameObject[] seatIndicators;
         [SerializeField] private Animator animator;
         [SerializeField, Min(0f)] private float crossFade = 0.1f;
@@ -35,6 +36,7 @@ namespace BusJam.Gameplay
 
         public PassengerColor Color { get; private set; }
         public bool IsReservedFull => reservedCount >= seatPoints.Length;
+        public Transform DoorEntry => doorEntry;
 
         /// <summary>Kuyruktan kapıya gelme tween'i bitince true olur; yolcular yalnız o zaman bu otobüse koşabilir.</summary>
         public bool IsAtDoor { get; private set; }
@@ -74,18 +76,23 @@ namespace BusJam.Gameplay
             Play(DriveHash);
         }
 
-        /// <summary>Kuyrukta yerine vardı: kapıdaysa fren sonra Idle, değilse doğrudan Idle.</summary>
-        public void PlayStop(bool atDoor)
+        /// <summary>Kapıda fren bitince kapıyı açar; tek seferlik klibin son pozu kapanışa kadar kalır.</summary>
+        public void PlayStop(bool atDoor, System.Action onReady = null)
         {
             DOTween.Kill(this);
             if (!atDoor || animator == null)
             {
                 Play(IdleHash);
+                onReady?.Invoke();
                 return;
             }
 
             Play(BrakeHash);
-            DOVirtual.DelayedCall(brakeDuration, () => Play(IdleHash)).SetTarget(this);
+            DOVirtual.DelayedCall(brakeDuration, () =>
+            {
+                Play(DoorOpenHash);
+                onReady?.Invoke();
+            }).SetTarget(this);
         }
 
         /// <summary>Dolunca kapıyı kapatır; kalkış için beklenecek süreyi döner.</summary>
@@ -99,15 +106,9 @@ namespace BusJam.Gameplay
             return doorCloseDuration;
         }
 
-        /// <summary>Bir koltuğu hemen rezerve eder; koltuğun noktasını ve indeksini döner. İlk rezervasyonda kapı açılır.</summary>
+        /// <summary>Bir koltuğu hemen rezerve eder; kapı animasyonunu değiştirmez.</summary>
         public Transform ReserveSeat(out int seatIndex)
         {
-            if (reservedCount == 0)
-            {
-                DOTween.Kill(this);
-                Play(DoorOpenHash);
-            }
-
             seatIndex = reservedCount;
             reservedCount++;
             return seatPoints[seatIndex];
