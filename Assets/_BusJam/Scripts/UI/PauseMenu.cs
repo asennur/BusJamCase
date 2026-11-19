@@ -39,9 +39,19 @@ namespace BusJam.UI
             noButton.onClick.AddListener(() => confirmPanel.SetActive(false));
         }
 
-        // The HUD (and this gear) is only visible while playing; closing the HUD must not leave the game paused.
+        // The HUD is also shown in Ready (before Tap to start); the gear only makes sense while playing.
+        private void OnEnable()
+        {
+            gameManager.StateChanged += OnStateChanged;
+            OnStateChanged(gameManager.State);
+        }
+
+        private void OnStateChanged(GameState state) => openButton.gameObject.SetActive(state == GameState.Playing);
+
+        // Closing the HUD must not leave the game paused.
         private void OnDisable()
         {
+            if (gameManager != null) gameManager.StateChanged -= OnStateChanged;
             panel.SetActive(false);
             confirmPanel.SetActive(false);
             if (gameManager != null && gameManager.IsPaused) gameManager.SetPaused(false);
