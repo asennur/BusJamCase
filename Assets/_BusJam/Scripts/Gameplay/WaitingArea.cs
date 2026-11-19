@@ -14,8 +14,8 @@ namespace BusJam.Gameplay
     /// </summary>
     public class WaitingArea : MonoBehaviour
     {
-        [SerializeField] private Transform slotTilePrefab;
-        [SerializeField] private Material lockedMaterial;
+        [SerializeField] private SlotTile slotTilePrefab;
+        [Tooltip("Eski placeholder kilit ikonu; kit modelinde kilit SlotTile içinde, boş bırakılabilir")]
         [SerializeField] private GameObject lockIconPrefab;
         [SerializeField] private float slotSpacing = 0.85f;
         [SerializeField] private float overflowBaseDistance = 0.9f;
@@ -24,11 +24,9 @@ namespace BusJam.Gameplay
 
         private readonly Passenger[] slots = new Passenger[GameRules.VisibleSlotCount];
         private readonly bool[] unlocked = new bool[GameRules.VisibleSlotCount];
-        private readonly List<Transform> tiles = new List<Transform>();
-        private readonly List<Renderer> tileRenderers = new List<Renderer>();
+        private readonly List<SlotTile> tiles = new List<SlotTile>();
         private readonly List<GameObject> lockIcons = new List<GameObject>();
         private readonly List<Vector3> singlePointPath = new List<Vector3>(1) { Vector3.zero };
-        private Material unlockedMaterial;
 
         /// <summary>Bir slot otobüse biniş yüzünden boşalınca slotIndex ile atılır (GameplayController taşma kuyruğunu bu slota atar).</summary>
         public event Action<int> SlotOpened;
@@ -55,18 +53,16 @@ namespace BusJam.Gameplay
 
                 if (i >= tiles.Count)
                 {
-                    Transform tile = Instantiate(slotTilePrefab, SlotPosition(i), Quaternion.identity, transform);
-                    Renderer renderer = tile.GetComponentInChildren<Renderer>();
-                    if (unlockedMaterial == null)
-                        unlockedMaterial = renderer.sharedMaterial;
+                    SlotTile tile = Instantiate(slotTilePrefab, SlotPosition(i), Quaternion.identity, transform);
                     tiles.Add(tile);
-                    tileRenderers.Add(renderer);
-                    lockIcons.Add(Instantiate(lockIconPrefab, tile, false));
+                    lockIcons.Add(lockIconPrefab != null ? Instantiate(lockIconPrefab, tile.transform, false) : null);
                 }
 
-                tiles[i].position = SlotPosition(i);
-                tileRenderers[i].sharedMaterial = unlocked[i] ? unlockedMaterial : lockedMaterial;
-                lockIcons[i].SetActive(!unlocked[i]);
+                int unlockLevel = i == 0 ? GameRules.FirstSlotUnlockLevel : GameRules.LastSlotUnlockLevel;
+                tiles[i].transform.position = SlotPosition(i);
+                tiles[i].SetLocked(!unlocked[i], unlockLevel);
+                if (lockIcons[i] != null)
+                    lockIcons[i].SetActive(!unlocked[i]);
             }
         }
 
