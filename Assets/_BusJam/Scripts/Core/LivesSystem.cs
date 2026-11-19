@@ -134,6 +134,18 @@ namespace BusJam.Core
             return true;
         }
 
+        /// <summary>Refills lives and resets the regeneration clock after a confirmed progress reset.</summary>
+        public void ResetFull()
+        {
+            initialized = true;
+            Lives = maxLives;
+            lastRegenUtc = lastObservedUtc = DateTime.UtcNow.Ticks;
+            rollbackUntilUtc = 0;
+            NextLifeSeconds = 0;
+            Save();
+            Publish();
+        }
+
         private void Publish()
         {
             if (publishedLives == Lives && publishedSeconds == NextLifeSeconds) return;

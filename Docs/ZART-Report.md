@@ -1,0 +1,10 @@
+# ZART — In-game icons
+
+- Imported all three icons into `Assets/_BusJam/Art/UI` and assigned `UIArt.asset`: real alpha, trimmed content with 8 px padding, Sprite/UI, no mipmaps, maximum 512, Android/iOS ASTC 6x6. The angry source received a transparent-background cutout; white eyes and steam remain opaque.
+- Passenger `angryIcon` uses a camera-facing SpriteRenderer above the 1.4× visual root. Existing 0.48 s visibility/bob is retained, with a 0 → 1.1 → 1 scale pop.
+- Saved tutorials run only on Levels 1, 6 and 8, point to a tappable passenger, use unscaled DOTween, and dismiss on the first accepted tap. Rope/cloak hints use the exact requested English text.
+- Start settings button sits inside SafeArea at top-right, clear of the counters. The modal includes Settings, Close, Reset Progress and a same-popup Yes/No confirmation. Reset loads index 0, refills lives/rebases regeneration, clears tutorial flags and coins, and refreshes visible coin counters.
+- Unity **2022.3.19f1**, Edit mode only. **54 isolated checks passed**, including rejected/accepted taps, saved dismissal, pop timing, confirmation/cancel and full reset. Compilation clean; final Console 0. Runtime Play/device rendering was not tested.
+- Exactly two 1080×1920 captures: [Start](ZART-Captures/Start.png), [Settings](ZART-Captures/Settings.png). All existing UI transform snapshots match; no existing scene object was deleted. Preserved Asen's in-memory counter layout when saving.
+- No vault access. `M_Purple`, `M_Yellow` and `ArtSource` untouched and excluded from the commit. MCP calls recovered on retry; no unresolved disconnect.
+- Production restored before work (20-minute regeneration). After the commit, the authorized ZM3 one-life seed is re-applied and `Game.unity` saved **uncommitted**, Play off. No push.

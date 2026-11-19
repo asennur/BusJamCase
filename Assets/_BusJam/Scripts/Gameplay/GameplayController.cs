@@ -42,6 +42,7 @@ namespace BusJam.Gameplay
         }
 
         public event Action LevelCompleted;
+        public event Action<Passenger> TapAccepted;
         public event Action<FailReason> LevelFailed;
 
         private void OnEnable()
@@ -221,6 +222,20 @@ namespace BusJam.Gameplay
             }
 
             ToggleGridCloaks();
+            TapAccepted?.Invoke(passenger);
+        }
+
+        /// <summary>Returns the first passenger that satisfies the current tap rules.</summary>
+        public Passenger FirstTappablePassenger()
+        {
+            if (board == null || (!waitingArea.HasFreeSlot && !SlotWillOpen())) return null;
+            for (int i = 0; i < board.CellCount; i++)
+            {
+                Passenger p = board.GetOccupant(i);
+                if (p != null && p.State == PassengerState.Idle && reachable[i] && p.RopesLeft == 0
+                    && (!p.IsCloaked || p.CloakOpen)) return p;
+            }
+            return null;
         }
 
         private void ToggleGridCloaks()

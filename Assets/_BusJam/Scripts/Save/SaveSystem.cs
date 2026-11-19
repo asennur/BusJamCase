@@ -5,6 +5,7 @@ namespace BusJam.Save
     /// <summary>Oyuncu ilerlemesi (kaldÄ±ÄŸÄ± level indeksi) PlayerPrefs'e kaydedilir.</summary>
     public static class SaveSystem
     {
+        public static event System.Action ProgressReset;
         public static int Coins => Mathf.Max(0, PlayerPrefs.GetInt("Coins", 0));
 
         public static void AddCoins(int amount)
@@ -14,6 +15,27 @@ namespace BusJam.Save
         }
 
         private const string LevelIndexKey = "LevelIndex";
+
+        public static bool TutorialSeen(int level) => PlayerPrefs.GetInt(TutorialKey(level), 0) != 0;
+
+        public static void CompleteTutorial(int level)
+        {
+            PlayerPrefs.SetInt(TutorialKey(level), 1);
+            PlayerPrefs.Save();
+        }
+
+        private static string TutorialKey(int level) => "TutorialSeen_" + level;
+
+        public static void ResetProgress()
+        {
+            PlayerPrefs.SetInt(LevelIndexKey, 0);
+            PlayerPrefs.SetInt("Coins", 0);
+            PlayerPrefs.DeleteKey(TutorialKey(1));
+            PlayerPrefs.DeleteKey(TutorialKey(6));
+            PlayerPrefs.DeleteKey(TutorialKey(8));
+            PlayerPrefs.Save();
+            ProgressReset?.Invoke();
+        }
 
         public static int GetLevelIndex()
         {

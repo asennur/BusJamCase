@@ -53,6 +53,7 @@ namespace BusJam.Gameplay
         private Tween angryTween;
         private Tween revealTween;
         private Vector3 angryRestPosition;
+        private Vector3 angryRestScale;
         private Material colorMaterial;
         private Tween cloakTween;
         private bool isReachable;
@@ -72,6 +73,7 @@ namespace BusJam.Gameplay
         {
             bodyRestPosition = body.transform.localPosition;
             angryRestPosition = angryIcon.localPosition;
+            angryRestScale = angryIcon.localScale;
         }
 
         private void OnDisable()
@@ -336,9 +338,13 @@ namespace BusJam.Gameplay
             angryTween?.Kill();
             angryIcon.gameObject.SetActive(true);
             angryIcon.localPosition = angryRestPosition;
+            angryIcon.localScale = Vector3.zero;
 
-            angryTween = angryIcon.DOLocalMoveY(angryRestPosition.y + 0.3f, angryDuration * 0.4f)
-                .SetLoops(2, LoopType.Yoyo)
+            angryTween = DOTween.Sequence()
+                .Append(angryIcon.DOLocalMoveY(angryRestPosition.y + 0.3f, angryDuration * 0.4f)
+                    .SetLoops(2, LoopType.Yoyo))
+                .Insert(0f, angryIcon.DOScale(angryRestScale * 1.1f, angryDuration * 0.16f).SetEase(Ease.OutQuad))
+                .Insert(angryDuration * 0.16f, angryIcon.DOScale(angryRestScale, angryDuration * 0.16f))
                 .OnComplete(() => angryIcon.gameObject.SetActive(false));
         }
     }

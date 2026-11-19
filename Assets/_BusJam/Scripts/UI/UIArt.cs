@@ -32,5 +32,8 @@ namespace BusJam.UI
         public Sprite ribbon_purple;
         public Sprite title_complete;
         public Sprite title_failed;
+        public Sprite icon_angry;
+        public Sprite fx_tap_hand;
+        public Sprite btn_settings;
     }
 }

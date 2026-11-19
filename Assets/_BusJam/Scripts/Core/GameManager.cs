@@ -134,5 +134,15 @@ namespace BusJam.Core
             LoadLevel(currentLevelIndex);
             SetState(GameState.Start);
         }
+
+        public void ResetProgress()
+        {
+            if (State != GameState.Start) return;
+            SaveSystem.ResetProgress();
+            livesSystem.ResetFull();
+            currentLevelIndex = 0;
+            LoadLevel(0);
+            SetState(GameState.Start);
+        }
     }
 }
