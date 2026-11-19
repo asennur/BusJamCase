@@ -40,6 +40,8 @@ namespace BusJam.Gameplay
 
         public event Action<Bus> BusArrived;
         public event Action<Bus> BusDeparted;
+        /// <summary>A full bus starts driving away (after its door closed); used for the departure sound.</summary>
+        public event Action<Bus> BusDeparting;
         public event Action AllBusesDone;
 
         private void EnsurePool()
@@ -132,7 +134,7 @@ namespace BusJam.Gameplay
             leaving.transform.DOMove(leaving.transform.position + doorPoint.right * exitOffsetX, moveDuration)
                 .SetDelay(delay)
                 .SetEase(departureEase)
-                .OnStart(leaving.PlayDrive)
+                .OnStart(() => { leaving.PlayDrive(); BusDeparting?.Invoke(leaving); })
                 .OnComplete(() => BusDeparted?.Invoke(leaving));
 
             // Çıkış tamamlanınca kapıdan 6 birim uzaklaşmış olur (gövde 4.12 + boşluk).

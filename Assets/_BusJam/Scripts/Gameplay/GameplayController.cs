@@ -161,6 +161,7 @@ namespace BusJam.Gameplay
                 return;
 
             passenger.ShowTap();
+            AudioManager.Play(Sfx.PassengerTap);
             Vector2Int startCell = passenger.Cell;
             board.SetOccupant(startCell, null);
             RemoveNeighborRopes(startCell);
