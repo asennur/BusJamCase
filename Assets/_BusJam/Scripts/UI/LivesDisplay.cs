@@ -12,6 +12,7 @@ namespace BusJam.UI
         [SerializeField] private TMP_Text countdownText;
         [SerializeField] private GameObject countdownGroup;
         [SerializeField] private bool showNextLifeLabel;
+        [SerializeField] private bool showFull;
 
         private readonly char[] countBuffer = new char[10];
         private readonly char[] timeBuffer = new char[32];
@@ -39,7 +40,9 @@ namespace BusJam.UI
                 }
             }
             bool waiting = lives < livesSystem.MaxLives;
-            if (countdownGroup != null && countdownGroup.activeSelf != waiting) countdownGroup.SetActive(waiting);
+            bool visible = waiting || showFull;
+            if (countdownGroup != null && countdownGroup.activeSelf != visible) countdownGroup.SetActive(visible);
+            if (!waiting && showFull && countdownText != null) countdownText.SetText("FULL");
             if (lastSeconds == seconds) return;
             lastSeconds = seconds;
             if (!waiting || countdownText == null) return;

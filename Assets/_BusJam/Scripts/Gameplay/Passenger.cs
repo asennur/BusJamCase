@@ -23,6 +23,8 @@ namespace BusJam.Gameplay
         private static readonly int WaveHash = Animator.StringToHash("Wave");
 
         [SerializeField] private Renderer body;
+        [SerializeField] private Transform visualRoot;
+        [SerializeField, Min(1f)] private float standingVisualScale = 1.4f;
         [SerializeField] private Animator animator;
         [SerializeField, Min(0f)] private float crossFade = 0.1f;
         [SerializeField] private GameObject outline;
@@ -120,6 +122,7 @@ namespace BusJam.Gameplay
             CloakOpen = cloak != Cloak.StartsClosed;
             isReachable = false;
             State = PassengerState.Idle;
+            if (visualRoot != null) visualRoot.localScale = Vector3.one * standingVisualScale;
             Play(IdleHash);
             body.sharedMaterial = CloakOpen ? material : cloakMaterial;
             body.enabled = true;
@@ -245,6 +248,8 @@ namespace BusJam.Gameplay
         public void SetSeated(Transform seatPoint)
         {
             State = PassengerState.Seated;
+            // Cancel the standing enlargement when parenting to an unchanged bus seat.
+            if (visualRoot != null) visualRoot.localScale = Vector3.one;
             transform.SetParent(seatPoint, false);
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.Euler(seatRotation);

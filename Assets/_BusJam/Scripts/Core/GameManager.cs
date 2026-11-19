@@ -53,16 +53,12 @@ namespace BusJam.Core
 
         private void OnEnable()
         {
-            if (inputHandler != null)
-                inputHandler.ScreenTapped += OnScreenTapped;
             if (levelTimer != null)
                 levelTimer.Expired += OnTimerExpired;
         }
 
         private void OnDisable()
         {
-            if (inputHandler != null)
-                inputHandler.ScreenTapped -= OnScreenTapped;
             if (levelTimer != null)
                 levelTimer.Expired -= OnTimerExpired;
         }
@@ -87,12 +83,6 @@ namespace BusJam.Core
                 levelTimer.StopTimer();
 
             StateChanged?.Invoke(State);
-        }
-
-        private void OnScreenTapped()
-        {
-            if (State == GameState.Start)
-                StartPlaying();
         }
 
         private void OnTimerExpired()
