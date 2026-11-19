@@ -57,6 +57,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - **Otobüs:** sıra level verisinden. Kapasite 3. Dolunca gider, sıradaki gelir. Gelince slottaki aynı renk yolcular (en fazla boş koltuk kadar) kendiliğinden biner.
 - Gridde yolcu kendiliğinden hareket etmez; yalnız oyuncu dokununca koşar. Kendiliğinden hareket eden tek şey slottakilerin otobüse binişidir.
 - **Gizli yolcu:** erişilemezken gri ve "?" görünür, rengi bilinmez. Erişilebilir olduğu an rengi açılır ve bir daha gizlenmez.
+- **İpli yolcu (Asen kuralı, 19 Kasım):** 0–4 kat ip taşır. İp varken erişilemez, outline göstermez, dokununca kızar ve hücresi dolu kalır. Dört yöndeki her komşu hücre dokunulan yolcu ayrılınca bir kat çözer; aynı tünel ağzının her yeniden boşalması sayılır, ağza yolcu gelişi sayılmaz. Son ip çözülünce erişilebilirlik yeniden hesaplanır. Gizli yolcuyla birlikte kullanılabilir; renk erişilebilir olunca açılır.
 - **Tünel:** bir hücre kaplar, yürünmez (engel gibi). Bir yöne bakar; baktığı komşu hücre ağzıdır. İçinde levelde tanımlı sıralı yolcu kuyruğu vardır. Ağız hücresi boşaldığı an (oradaki yolcu dokunulup kalktığında) kuyruktaki sıradaki yolcu ağız hücresine çıkar, erişilebilirlik yeniden hesaplanır. Kuyruk bitince tünel engel olarak kalır.
 - **Kazan:** son otobüs dolup gitti.
 - **Kaybet (yer):** Devam eden koşular ve otobüsün kapıya gelişi sonuçlandıktan sonra hâlâ boş slot yoksa (taşma kuyruğunda bekleyen varsa dahil) kaybedilir; griddeki renkler sonucu değiştirmez (Asen kararı, 19 Kasım; ZD2).
@@ -67,9 +68,10 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - `PassengerColor : byte` enum: `Red, Pink, Purple, Blue, Green, Yellow, White` (videodaki 7 renk).
 - `CellType : byte` → `Empty`, `Passenger`, `Void` (karo yok, delik, çizilmez), `Tunnel`, `Obstacle` (karo var, üstünde yürünmez fiziksel engel). Yeni değerler sona eklenir ki var olan level asset'lerindeki sayılar kaymasın.
 - `TunnelData` (serializable class) → `Vector2Int cell`, `Direction facing` (`Up, Down, Left, Right`), `List<PassengerColor> queue`. `LevelData.tunnels` listesinde; hücre tipi `Tunnel` olur.
-- `CellData` struct → `type`, `color`, `hidden`.
+- `CellData` struct → `type`, `color`, `hidden`, `byte ropes` (sona eklenir, eski assetlerde 0 = ipsiz; Asen kuralı, 19 Kasım).
 - `LevelData : ScriptableObject` → `width`, `height`, `CellData[] cells` (`index = y * width + x`), `timeLimit`, `List<PassengerColor> busOrder`. `Resize` örtüşen hücreleri korur. Bekleme slotu sayısı level verisinde **tutulmaz**: ekranda her zaman 7 sabit slot vardır, uçtaki ikisi level numarasına göre açılır (`GameRules.VisibleSlotCount/FirstSlotUnlockLevel/LastSlotUnlockLevel`, Asen kuralı 19 Kasım).
 - `Validate(out string error)`:
+  - ip yalnız Passenger hücresinde; ip sayısı başlangıçta dolu, sonradan boşalabilecek dört yön komşularının (Passenger ya da kuyruğu dolu tünel ağzı) sayısını aşamaz (Asen kuralı, 19 Kasım),
   - her renkte yolcu sayısı (gridde + tünel kuyruklarında) = o renkteki otobüs × 3,
   - her tünelin ağız hücresi grid içinde ve `Void`/`Tunnel` değil,
   - çıkış satırında en az bir yürünebilir hücre,
@@ -102,6 +104,7 @@ Akış: `GameManager` açılışta kayıtlı leveli yükler → `Start` → ekra
 - Play modunda çalışan ayrı sahne, uGUI paneli + grid görünümü (oyunun `BoardView`'ını yeniden kullanır).
 - Var olan leveli seç/yükle ya da yeni oluştur.
 - Genişlik/yükseklik, hücreye tıklayarak boya: araç = `Void`, `Empty`, renkli yolcu, gizli aç/kapa.
+- Yolcu fırçasında ip sayısı 0–4 seçilir; diğer hücre tipleri ipsiz yazılır (Asen kuralı, 19 Kasım).
 - Otobüs sırası: renk ekle/sil/sırala. Süre alanı (slot sayısı sabit, editörden ayarlanmaz).
 - Kaydet: `Validate` geçmezse hatayı göster, kaydetme. Geçerse `#if UNITY_EDITOR` ile `EditorUtility.SetDirty` + `AssetDatabase.SaveAssets`; yeni level `AssetDatabase.CreateAsset` + `LevelDatabase.Add`.
 

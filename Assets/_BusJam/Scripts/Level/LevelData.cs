@@ -65,7 +65,56 @@ namespace BusJam.Level
                 return false;
             }
 
-            return ValidateColorCounts(out error) && ValidateConnectivity(out error) && ValidateTunnels(out error);
+            return ValidateTunnels(out error) && ValidateRopes(out error)
+                && ValidateColorCounts(out error) && ValidateConnectivity(out error);
+        }
+
+        // Her komşu en fazla bir kez sayılır; dolu tünel ağzı başlangıçta kuyruktan da dolabilir.
+        private bool ValidateRopes(out string error)
+        {
+            for (int i = 0; i < cells.Length; i++)
+            {
+                CellData cell = cells[i];
+                if (cell.ropes == 0)
+                    continue;
+
+                int x = i % width;
+                int y = i / width;
+                if (cell.type != CellType.Passenger)
+                {
+                    error = $"({x},{y}) ip yalnız Passenger hücresinde olabilir";
+                    return false;
+                }
+
+                int neighbors = (CanVacate(x - 1, y) ? 1 : 0) + (CanVacate(x + 1, y) ? 1 : 0)
+                    + (CanVacate(x, y - 1) ? 1 : 0) + (CanVacate(x, y + 1) ? 1 : 0);
+                if (cell.ropes > neighbors)
+                {
+                    error = $"({x},{y}) ipli yolcu hiç çözülemez: {cell.ropes} ip, {neighbors} dolu komşu";
+                    return false;
+                }
+            }
+
+            error = null;
+            return true;
+        }
+
+        private bool CanVacate(int x, int y)
+        {
+            if (x < 0 || x >= width || y < 0 || y >= height)
+                return false;
+
+            CellData cell = GetCell(x, y);
+            if (cell.type == CellType.Passenger)
+                return true;
+            if (!cell.IsWalkable)
+                return false;
+
+            var position = new Vector2Int(x, y);
+            for (int i = 0; i < tunnels.Count; i++)
+                if (tunnels[i].MouthCell == position && tunnels[i].queue.Count > 0)
+                    return true;
+            return false;
         }
 
         private bool ValidateColorCounts(out string error)

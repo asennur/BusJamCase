@@ -16,7 +16,7 @@ namespace BusJam.LevelEditor
         [SerializeField] private LevelDatabase database;
         [SerializeField] private BoardView boardView;
         [SerializeField] private Camera boardCamera;
-        [SerializeField] private TMP_Dropdown levelList, brush, color, facing;
+        [SerializeField] private TMP_Dropdown levelList, brush, color, facing, ropes;
         [SerializeField] private UnityEngine.UI.Toggle hidden;
         [SerializeField] private TMP_InputField width, height, seconds, buses, tunnelQueue;
         [SerializeField] private TMP_Text status;
@@ -30,6 +30,7 @@ namespace BusJam.LevelEditor
             SetOptions(brush, Enum.GetNames(typeof(CellType)));
             SetOptions(color, Enum.GetNames(typeof(PassengerColor)));
             SetOptions(facing, Enum.GetNames(typeof(Direction)));
+            SetOptions(ropes, new[] { "0", "1", "2", "3", "4" });
             RefreshLevelList();
             if (database.Count > 0)
                 LoadSelected();
@@ -126,7 +127,8 @@ namespace BusJam.LevelEditor
                 draft.tunnels.Add(tunnel);
             draft.SetCell(cell.x, cell.y, new CellData
             {
-                type = type, color = (PassengerColor)color.value, hidden = type == CellType.Passenger && hidden.isOn
+                type = type, color = (PassengerColor)color.value, hidden = type == CellType.Passenger && hidden.isOn,
+                ropes = type == CellType.Passenger ? (byte)ropes.value : (byte)0
             });
             Preview();
             status.text = $"({cell.x}, {cell.y}) {type}";

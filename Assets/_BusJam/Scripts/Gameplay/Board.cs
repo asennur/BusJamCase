@@ -64,6 +64,8 @@ namespace BusJam.Gameplay
         public bool TryFindPath(Vector2Int start, List<Vector2Int> result)
         {
             result.Clear();
+            if (GetOccupant(start) != null && GetOccupant(start).RopesLeft > 0)
+                return false;
             if (start.y == 0)
                 return true;
 
@@ -125,7 +127,7 @@ namespace BusJam.Gameplay
 
                 if (occupants[x] != null)
                 {
-                    result[x] = true;
+                    result[x] = occupants[x].RopesLeft == 0;
                     continue;
                 }
 
@@ -149,7 +151,7 @@ namespace BusJam.Gameplay
 
                     if (occupants[nextIndex] != null)
                     {
-                        result[nextIndex] = true;
+                        result[nextIndex] = occupants[nextIndex].RopesLeft == 0;
                         continue;
                     }
 

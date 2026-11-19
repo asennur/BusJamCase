@@ -128,6 +128,7 @@ namespace BusJam.Gameplay
                     Passenger passenger = passengerPool.Get();
                     passenger.transform.localPosition = local;
                     passenger.Setup(data.color, cell, data.hidden, data.hidden ? hiddenMaterial : colorMaterials[(int)data.color]);
+                    passenger.SetRopes(data.ropes);
                     activePassengers.Add(passenger);
                     board.SetOccupant(cell, passenger);
                 }

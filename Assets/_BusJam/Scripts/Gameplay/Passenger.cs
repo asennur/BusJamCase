@@ -28,6 +28,7 @@ namespace BusJam.Gameplay
         [SerializeField] private GameObject outline;
         [SerializeField] private Transform angryIcon;
         [SerializeField] private GameObject hiddenMark;
+        [SerializeField] private GameObject[] ropeLayers;
         [SerializeField] private float angryDuration = 0.6f;
 
         [SerializeField, Min(0f)] private float strideHeight = 0.085f;
@@ -51,6 +52,7 @@ namespace BusJam.Gameplay
         public PassengerColor Color { get; private set; }
         public Vector2Int Cell { get; private set; }
         public bool IsHidden { get; private set; }
+        public int RopesLeft { get; private set; }
         public PassengerState State { get; private set; }
 
         /// <summary>Taşma kuyruğunda beklerken bir slot kendisine ayrıldıysa slot index'i; yoksa -1 (GameplayController kullanır).</summary>
@@ -117,6 +119,31 @@ namespace BusJam.Gameplay
             transform.localRotation = Quaternion.identity;
             transform.localScale = Vector3.one;
             PendingSlotIndex = -1;
+            SetRopes(0);
+        }
+
+        /// <summary>Havuzdan gelen yolcunun iplerini ve görünür katlarını sıfırlar.</summary>
+        public void SetRopes(int count)
+        {
+            RopesLeft = Mathf.Clamp(count, 0, 4);
+            if (ropeLayers != null)
+                for (int i = 0; i < ropeLayers.Length; i++)
+                    if (ropeLayers[i] != null)
+                        ropeLayers[i].SetActive(i < RopesLeft);
+            if (RopesLeft > 0)
+                SetReachable(false);
+        }
+
+        /// <summary>Bir kat ip çözülür; art arda çözülmelerde punch üst üste binmez.</summary>
+        public void RemoveRope()
+        {
+            if (RopesLeft == 0)
+                return;
+
+            SetRopes(RopesLeft - 1);
+            revealTween?.Kill();
+            transform.localScale = Vector3.one;
+            revealTween = transform.DOPunchScale(Vector3.one * 0.12f, 0.2f, 1, 0.5f);
         }
 
         /// <summary>Erişilebilir olan gizli yolcunun rengi açılır: gerçek materyal, "?" kalkar, kısa punch. Bir kez açılan geri gizlenmez.</summary>

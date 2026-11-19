@@ -23,6 +23,7 @@ namespace BusJam.Level
         public CellType type;
         public PassengerColor color;
         public bool hidden;
+        public byte ropes;
 
         public bool IsWalkable => type != CellType.Void && type != CellType.Tunnel && type != CellType.Obstacle;
     }

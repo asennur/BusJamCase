@@ -128,7 +128,11 @@ namespace BusJam.Gameplay
             if (gameManager.State != GameState.Playing || passenger.State != PassengerState.Idle)
                 return;
 
-            if (!reachable[board.ToIndex(passenger.Cell)])
+            // Taşma kuyruğunda bekleyen yolcu eski hücresini yeniden boşaltamaz.
+            if (!board.InBounds(passenger.Cell) || board.GetOccupant(passenger.Cell) != passenger)
+                return;
+
+            if (passenger.RopesLeft > 0 || !reachable[board.ToIndex(passenger.Cell)])
             {
                 passenger.ShowAngry();
                 return;
@@ -146,6 +150,7 @@ namespace BusJam.Gameplay
             passenger.ShowTap();
             Vector2Int startCell = passenger.Cell;
             board.SetOccupant(startCell, null);
+            RemoveNeighborRopes(startCell);
             TryEmergeFromTunnel(startCell);
             RefreshReachable();
 
@@ -201,6 +206,24 @@ namespace BusJam.Gameplay
                         OnRunFinished();
                     }
                 });
+            }
+        }
+
+        // Yalnız dokunmayla boşalan hücre tetikler; tünelden ağza geliş ip çözmez.
+        private void RemoveNeighborRopes(Vector2Int vacatedCell)
+        {
+            RemoveAt(vacatedCell + Vector2Int.left);
+            RemoveAt(vacatedCell + Vector2Int.right);
+            RemoveAt(vacatedCell + Vector2Int.up);
+            RemoveAt(vacatedCell + Vector2Int.down);
+
+            void RemoveAt(Vector2Int cell)
+            {
+                if (!board.InBounds(cell))
+                    return;
+                Passenger neighbor = board.GetOccupant(cell);
+                if (neighbor != null && neighbor.RopesLeft > 0)
+                    neighbor.RemoveRope();
             }
         }
 
