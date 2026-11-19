@@ -56,6 +56,10 @@ namespace BusJam.LevelEditor
 
         private void Start()
         {
+            // Picking a level in the list opens it right away (no separate Load button).
+            levelList.onValueChanged.AddListener(_ => LoadSelected());
+            HideLoadButtons();
+            StyleLevelList();
             RefreshLevelList();
             if (database.Count > 0) LoadSelected();
             else NewLevel();
@@ -67,6 +71,39 @@ namespace BusJam.LevelEditor
         }
 
         // ---------- level list / open ----------
+
+        // The old Load button is redundant now that selection loads; hide any button still wired to LoadSelected.
+        private void HideLoadButtons()
+        {
+            foreach (var button in FindObjectsOfType<UnityEngine.UI.Button>(true))
+                for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
+                    if (button.onClick.GetPersistentMethodName(i) == nameof(LoadSelected)
+                        && button.onClick.GetPersistentTarget(i) == this)
+                        button.gameObject.SetActive(false);
+        }
+
+        // The dropdown list was white on white: give the list a dark panel and readable rows.
+        private void StyleLevelList()
+        {
+            if (levelList.template == null) return;
+            var panel = levelList.template.GetComponent<UnityEngine.UI.Image>();
+            if (panel != null) panel.color = new Color(0.04f, 0.13f, 0.33f, 0.97f);
+            foreach (var toggle in levelList.template.GetComponentsInChildren<UnityEngine.UI.Toggle>(true))
+            {
+                if (toggle.targetGraphic != null) toggle.targetGraphic.color = new Color(0.16f, 0.32f, 0.72f, 0.85f);
+                var colors = toggle.colors;
+                colors.normalColor = Color.white;
+                colors.highlightedColor = new Color(0.75f, 0.9f, 1f);
+                colors.selectedColor = new Color(0.75f, 0.9f, 1f);
+                toggle.colors = colors;
+                if (toggle.graphic != null) toggle.graphic.color = new Color(1f, 0.85f, 0.25f);
+            }
+            if (levelList.itemText != null)
+            {
+                levelList.itemText.color = Color.white;
+                levelList.itemText.fontSize = Mathf.Max(levelList.itemText.fontSize, 30f);
+            }
+        }
 
         private void RefreshLevelList()
         {
@@ -185,7 +222,7 @@ namespace BusJam.LevelEditor
         public void AddToTunnel(Vector2Int cell, PassengerColor color)
         {
             var tunnel = TunnelAt(cell);
-            if (tunnel == null) return;
+            if (tunnel == null || !CanAdd(color)) return;
             tunnel.queue.Add(color);
             Rebuild(false);
         }
@@ -207,6 +244,8 @@ namespace BusJam.LevelEditor
                 SetStatus($"Passengers go on tiles, not on a {Describe(data.type)}.");
                 return false;
             }
+            bool sameColor = data.type == CellType.Passenger && data.color == color;
+            if (!sameColor && !CanAdd(color)) return false;
             draft.SetCell(cell.x, cell.y, new CellData { type = CellType.Passenger, color = color });
             Rebuild(false);
             return true;
@@ -282,6 +321,18 @@ namespace BusJam.LevelEditor
             foreach (var cell in draft.cells) if (cell.type == CellType.Passenger && cell.color == color) count++;
             foreach (var tunnel in draft.tunnels) foreach (var c in tunnel.queue) if (c == color) count++;
             return count;
+        }
+
+        /// <summary>Passengers of this colour still to place: 3 per bus, counting the grid and every tunnel queue.</summary>
+        public int Remaining(PassengerColor color) => Required(color) - Placed(color);
+
+        private bool CanAdd(PassengerColor color)
+        {
+            if (Remaining(color) > 0) return true;
+            SetStatus(Required(color) == 0
+                ? $"There is no {color} bus. Add a {color} bus first."
+                : $"All {Required(color)} {color} passengers are placed. Add another {color} bus for more.");
+            return false;
         }
 
         public Color DisplayColor(PassengerColor color)

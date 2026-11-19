@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace BusJam.LevelEditor
 {
-    /// <summary>One colour in the passenger palette: shows placed / needed (3 per bus) and is dragged onto a tile.</summary>
+    /// <summary>One colour in the passenger palette: shows how many are still to place and is dragged onto a tile.</summary>
     public class PaletteItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         [SerializeField] private Image icon;
@@ -15,7 +15,7 @@ namespace BusJam.LevelEditor
         private LevelEditorPanel editor;
         private EditorDragGhost ghost;
         private PassengerColor color;
-        private bool dragging;
+        private bool dragging, usable;
 
         public void Setup(LevelEditorPanel owner, EditorDragGhost dragGhost, PassengerColor passengerColor)
         {
@@ -29,15 +29,20 @@ namespace BusJam.LevelEditor
         public void Refresh()
         {
             if (editor == null || editor.Draft == null) return;
-            int placed = editor.Placed(color), needed = editor.Required(color);
-            count.text = $"{placed}/{needed}";
-            count.color = placed == needed ? new Color(0.55f, 1f, 0.45f) : placed > needed ? new Color(1f, 0.45f, 0.4f) : Color.white;
+            int remaining = editor.Remaining(color);
+            usable = remaining > 0;
+            // Count = passengers of this colour still to place (3 per bus, tunnels included); only usable colours can be dragged.
+            count.text = remaining >= 0 ? $"x{remaining}" : $"+{-remaining}";
+            count.color = remaining < 0 ? new Color(1f, 0.45f, 0.4f) : usable ? Color.white : new Color(1f, 1f, 1f, 0.45f);
+            var tint = editor.DisplayColor(color);
+            tint.a = usable ? 1f : 0.3f;
+            icon.color = tint;
         }
 
         public void OnBeginDrag(PointerEventData pointer)
         {
-            dragging = pointer.button == PointerEventData.InputButton.Left;
-            if (dragging) ghost.Begin(icon.color, pointer.position);
+            dragging = usable && pointer.button == PointerEventData.InputButton.Left;
+            if (dragging) ghost.Begin(editor.DisplayColor(color), pointer.position);
         }
 
         public void OnDrag(PointerEventData pointer)

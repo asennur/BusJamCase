@@ -19,6 +19,7 @@ namespace BusJam.LevelEditor
         [SerializeField] private Button addTemplate;
 
         private readonly List<Button> chips = new List<Button>();
+        private readonly List<Button> adds = new List<Button>();
         private Action<int> onRemove;
         private bool built;
 
@@ -36,10 +37,22 @@ namespace BusJam.LevelEditor
                 button.image.color = editor.DisplayColor(color);
                 var picked = color;
                 button.onClick.AddListener(() => onAdd(picked));
+                adds.Add(button);
             }
         }
 
         public void SetRemoveHandler(Action<int> handler) => onRemove = handler;
+
+        /// <summary>Enables only the add buttons whose colour can still be used (e.g. tunnel queue limited by the buses).</summary>
+        public void SetAddInteractable(Func<PassengerColor, bool> canAdd)
+        {
+            for (int i = 0; i < adds.Count; i++)
+            {
+                bool on = canAdd(LevelEditorPanel.Colors[i]);
+                adds[i].interactable = on;
+                var c = adds[i].image.color; c.a = on ? 1f : 0.3f; adds[i].image.color = c;
+            }
+        }
 
         public void Show(LevelEditorPanel editor, IReadOnlyList<PassengerColor> colors)
         {

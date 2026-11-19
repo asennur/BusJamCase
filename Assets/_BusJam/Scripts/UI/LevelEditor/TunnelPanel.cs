@@ -53,6 +53,7 @@ namespace BusJam.LevelEditor
             if (tunnel == null) { Hide(); return; }
             title.text = $"Tunnel ({Cell.x}, {Cell.y}) · faces {tunnel.facing} · {tunnel.queue.Count} inside";
             queue.Show(editor, tunnel.queue);
+            queue.SetAddInteractable(color => editor.Remaining(color) > 0);
         }
     }
 }
