@@ -3547,6 +3547,12 @@ MonoBehaviour:
   tilePrefab: {fileID: 1312243618980957560, guid: 8e9b40f9869eb974d90c91bdeb625e6d, type: 3}
   tunnelPrefab: {fileID: 4711668801961494322, guid: d5bbb84b6b01e3944a8b0df4a1af3bea, type: 3}
   obstaclePrefab: {fileID: 3110265379363359241, guid: 412c5557e83b3db4cb378a2612de869f, type: 3}
+  rimStraightPrefab: {fileID: 2547961605745519088, guid: 427cad135e9983b49b063b4c82ff5d72, type: 3}
+  rimOuterPrefab: {fileID: 5523746574106995505, guid: 81e319f8c2b171541be89f13c87bfff6, type: 3}
+  rimInnerPrefab: {fileID: 1468180946331627997, guid: f598a91e042127448971bebe7e46fc28, type: 3}
+  rimStraightYaw: 180
+  rimOuterYaw: 180
+  rimInnerYaw: 180
   colorMaterials:
   - {fileID: 2100000, guid: 8704c296d4af58c4396adb0a4e87ce9c, type: 2}
   - {fileID: 2100000, guid: 78ca3a4aed7b08c4f93012ada5fcc88c, type: 2}
@@ -4747,7 +4753,6 @@ MonoBehaviour:
   width: {fileID: 1881926325}
   height: {fileID: 1460189554}
   seconds: {fileID: 433774340}
-  slots: {fileID: 1663430393}
   buses: {fileID: 1700758571}
   tunnelQueue: {fileID: 74459498}
   status: {fileID: 1249639457}
