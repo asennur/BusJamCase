@@ -149,6 +149,10 @@ namespace BusJam.Editor
 
         private static void FailChecks()
         {
+            string[] lifeKeys = { "Lives", "LastRegenUtc", "LivesUtcHighWater" };
+            bool[] existed = Array.ConvertAll(lifeKeys, PlayerPrefs.HasKey);
+            string[] saved = Array.ConvertAll(lifeKeys, key => key == "Lives"
+                ? PlayerPrefs.GetInt(key).ToString() : PlayerPrefs.GetString(key));
             var scene = EditorSceneManager.NewPreviewScene();
             var level = Line(3, 1);
             var spawned = new List<GameObject>();
@@ -158,6 +162,7 @@ namespace BusJam.Editor
                 SceneManager.MoveGameObjectToScene(systems, scene);
                 var controller = systems.AddComponent<GameplayController>();
                 var manager = systems.AddComponent<GameManager>();
+                Set(manager, "livesSystem", systems.AddComponent<LivesSystem>());
                 var station = systems.AddComponent<BusStation>();
                 var waiting = systems.AddComponent<WaitingArea>();
                 Set(controller, "gameManager", manager);
@@ -225,6 +230,13 @@ namespace BusJam.Editor
                 foreach (var item in spawned) Object.DestroyImmediate(item);
                 Object.DestroyImmediate(level);
                 EditorSceneManager.ClosePreviewScene(scene);
+                for (int i = 0; i < lifeKeys.Length; i++)
+                {
+                    if (!existed[i]) PlayerPrefs.DeleteKey(lifeKeys[i]);
+                    else if (i == 0) PlayerPrefs.SetInt(lifeKeys[i], int.Parse(saved[i]));
+                    else PlayerPrefs.SetString(lifeKeys[i], saved[i]);
+                }
+                PlayerPrefs.Save();
             }
         }
 

@@ -7,8 +7,7 @@ using UnityEngine;
 namespace BusJam.Core
 {
     /// <summary>
-    /// Oyun akışını yönetir: durum makinesi, level yükleme, kaydetme.
-    /// SaveSystem'den son leveli alır, level indeksini artırıp kaydeder.
+    /// Controls game state, level loading and saved progress.
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -16,6 +15,7 @@ namespace BusJam.Core
         [SerializeField] private BoardView boardView;
         [SerializeField] private InputHandler inputHandler;
         [SerializeField] private LevelTimer levelTimer;
+        [SerializeField] private LivesSystem livesSystem;
 
         private int currentLevelIndex;
         private LevelData currentLevel;
@@ -32,9 +32,9 @@ namespace BusJam.Core
 
         private void Awake()
         {
-            if (levelDatabase == null || boardView == null || inputHandler == null || levelTimer == null)
+            if (levelDatabase == null || boardView == null || inputHandler == null || levelTimer == null || livesSystem == null)
             {
-                Debug.LogError("[GameManager] LevelDatabase, BoardView, InputHandler, LevelTimer referansları eksik");
+                Debug.LogError("[GameManager] Assign LevelDatabase, BoardView, InputHandler, LevelTimer and LivesSystem.");
                 enabled = false;
                 return;
             }
@@ -43,8 +43,7 @@ namespace BusJam.Core
             Board = new Board();
         }
 
-        // İlk level yükleme burada: Awake/OnEnable sırası nesneler arasında garanti değil,
-        // UI ve GameplayController Start'a kadar event'lere abone olmuş olur.
+        // UI and gameplay subscribe before the first level is loaded in Start.
         private void Start()
         {
             currentLevelIndex = SaveSystem.GetLevelIndex();
@@ -77,8 +76,7 @@ namespace BusJam.Core
             LevelLoaded?.Invoke(CurrentLevelNumber, currentLevel);
         }
 
-        // Durum değişimleri zaten bilinçli çağrılır; Retry'de Start'ın yeniden atılması UI'ın sıfırlanması için istenir.
-        // Timer yalnız Playing'de çalışır; diğer durumlara geçişte durur.
+        // Retrying publishes Start again so the UI resets; the timer runs only while Playing.
         private void SetState(GameState newState)
         {
             State = newState;
@@ -105,14 +103,15 @@ namespace BusJam.Core
 
         public void StartPlaying()
         {
-            if (State != GameState.Start)
+            livesSystem.Refresh();
+            if (State != GameState.Start || livesSystem.Lives == 0)
                 return;
 
             SetState(GameState.Playing);
             PlayingStarted?.Invoke();
         }
 
-        // İndeks ve kayıt kazanınca hemen ilerler; LoadNext yalnız o (zaten ilerlemiş) leveli sahneye kurar.
+        // Winning saves the next index immediately; LoadNext builds that saved level.
         public void Complete()
         {
             currentLevelIndex++;
@@ -122,8 +121,16 @@ namespace BusJam.Core
 
         public void Fail(FailReason reason)
         {
+            if (State != GameState.Playing) return;
+            livesSystem.TrySpendLife();
             FailReason = reason;
             SetState(GameState.Fail);
+        }
+
+        public void Restart()
+        {
+            if (State != GameState.Playing || !livesSystem.TrySpendLife()) return;
+            Retry();
         }
 
         public void LoadNext()

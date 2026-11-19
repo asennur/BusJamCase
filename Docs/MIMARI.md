@@ -39,7 +39,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - Gizli yolcu: gri materyal + "?" (renk açılınca gerçek materyal).
 - Tünel: hücreyi kaplayan koyu blok, ağzı baktığı yöne açık; üstünde içeride kalan yolcu sayısı.
 - Engel: `Void` karo yok, delik (grid dışı ya da ortada boşluk, hiçbir şey çizilmez); `Obstacle` karo var, üstünde yürünmez fiziksel engel (kasa/bariyer placeholder'ı).
-- **Complete:** grid üstünde konfeti patlaması → "Level Completed" paneli (Continue). **Fail:** "Level Failed" paneli (Try Again). Orijinaldeki coin, can, reklam teklifi kapsam dışı.
+- **Complete:** grid üstünde konfeti patlaması → "Level Completed" paneli (Continue). **Fail:** "Level Failed" paneli (Try Again). Coin and ad offers remain outside scope; lives follow the rule in §3.
 
 ## 3. Oyun kuralları
 
@@ -66,6 +66,14 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - **Kaybet (hamle, Asen kuralı, 19 Kasım; ZM2b):** koşu, otobüs geçişi, bekleyen biniş ve taşma yokken gridde yolcu kalır ama erişilebilir, ipsiz ve açık pelerinli/pelerinsiz hiçbir dokunuş yoksa `NoMoves`; metin "No moves left!".
 - Karar: Hiçbir level çözülemez olamaz; ip veya pelerin içeren level en az iki farklı kazanan dokunuş dizisi taşır. İlk ip Level_06, ilk pelerin Level_08 (Asen, 19 Kasım 2026).
 
+### Lives (Asen rule, 19 November)
+
+- Five lives maximum, one life every 20 minutes (serialized settings). UTC regeneration persists in PlayerPrefs (`Lives`, `LastRegenUtc` ticks as a string); startup and resume recover offline time. A one-second InvokeRepeating publishes changed counts/seconds without Update polling.
+- Fail spends one life once. The HUD Restart button spends one life and retries; Fail Retry does not spend again. Starting with zero lives is blocked.
+- At Start with zero lives, NoLivesPanel replaces StartPanel; regeneration returns to StartPanel. HUD and Start show a heart/count and a countdown below the cap. Countdown text uses reusable character buffers and changes only with the displayed second.
+- Clock rollback rebases LastRegenUtc and persists a UTC high-water guard (`LivesUtcHighWater`); returning the clock forward grants no rebound lives. The timer waits for the guard before starting a fresh interval. Production uses server time.
+- Decision: Implement the authorized five-life / 20-minute rule and event-driven start gating (Asen rule, 19 November 2026).
+
 ## 4. Veri (`BusJam.Level`)
 
 - `PassengerColor : byte` enum: `Red, Pink, Purple, Blue, Green, Yellow, White` (videodaki 7 renk).
@@ -88,6 +96,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 | Sınıf | Tür | Sorumluluk |
 | --- | --- | --- |
 | `GameManager` (Core) | MonoBehaviour | Akış ve durum (`GameState { Start, Playing, Complete, Fail }`). Level yükle, kaydet, sonraki/tekrar. Event: `StateChanged`, `LevelLoaded(int levelNumber, LevelData)`. |
+| `LivesSystem` (Core) | MonoBehaviour | Persistent life count, offline UTC regeneration, rollback guard and changed-count/countdown events (Asen rule, 19 November). |
 | `GameRules` (Core) | static | Sabitler (`BusCapacity = 3`). |
 | `Board` (Gameplay) | düz C# sınıfı | Hücre doluluğu (hücredeki `Passenger` referansı), yürünebilirlik, `TryFindPath` (BFS), `ComputeReachable` (çıkıştan tek flood-fill). MonoBehaviour değil, sahneye bağlı değil. BFS kuyruk/parent dizileri bir kez ayrılır, tekrar kullanılır. |
 | `BoardView` (Gameplay) | MonoBehaviour | Levelden karoları ve yolcuları kurar (havuz), `CellToWorld`. Kamera sahnede sabit. |
