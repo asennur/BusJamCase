@@ -2,16 +2,21 @@ using UnityEngine;
 
 namespace BusJam.Save
 {
-    /// <summary>Oyuncu ilerlemesi (kaldÄ±ÄŸÄ± level indeksi) PlayerPrefs'e kaydedilir.</summary>
+    /// <summary>Persists level progress, tutorials and coins in PlayerPrefs.</summary>
     public static class SaveSystem
     {
         public static event System.Action ProgressReset;
+        public static event System.Action<int> CoinsChanged;
         public static int Coins => Mathf.Max(0, PlayerPrefs.GetInt("Coins", 0));
 
         public static void AddCoins(int amount)
         {
-            PlayerPrefs.SetInt("Coins", (int)System.Math.Min(int.MaxValue, (long)Coins + Mathf.Max(0, amount)));
+            int before = Coins;
+            int after = (int)System.Math.Min(int.MaxValue, (long)before + Mathf.Max(0, amount));
+            if (before == after) return;
+            PlayerPrefs.SetInt("Coins", after);
             PlayerPrefs.Save();
+            CoinsChanged?.Invoke(after);
         }
 
         private const string LevelIndexKey = "LevelIndex";
@@ -34,6 +39,7 @@ namespace BusJam.Save
             PlayerPrefs.DeleteKey(TutorialKey(6));
             PlayerPrefs.DeleteKey(TutorialKey(8));
             PlayerPrefs.Save();
+            CoinsChanged?.Invoke(0);
             ProgressReset?.Invoke();
         }
 

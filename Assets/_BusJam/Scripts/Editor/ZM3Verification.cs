@@ -103,6 +103,14 @@ namespace BusJam.Editor
                 Check(GC.GetAllocatedBytesForCurrentThread() == allocated, "A thousand unchanged-second polls allocate zero bytes.");
 
                 seed(1, now, 1);
+                PlayerPrefs.SetString("LivesUtcHighWater", (now + 60 * minute).ToString());
+                Set(lives, "initialized", false);
+                Call(lives, "Initialize", now);
+                Call(lives, "RefreshAt", now + TimeSpan.TicksPerSecond);
+                Check(lives.NextLifeSeconds == 59, "A future saved guard cannot freeze the countdown.");
+                Call(lives, "RefreshAt", now + minute);
+                Check(lives.Lives == 2, "A future saved guard still permits one life per interval.");
+                seed(1, now, 1);
                 Call(lives, "RefreshAt", now - 60 * minute);
                 Check(lives.Lives == 1 && lives.NextLifeSeconds == 60, "Rollback grants no lives and leaves a bounded countdown.");
                 Check(PlayerPrefs.GetString("LastRegenUtc") == (now - 60 * minute).ToString(), "Rollback rebases LastRegenUtc to now.");
@@ -113,8 +121,8 @@ namespace BusJam.Editor
                 seed(1, now, 1);
                 Call(lives, "RefreshAt", now - 60 * minute);
                 Set(lives, "initialized", false); Set(lives, "rollbackUntilUtc", 0L);
-                Call(lives, "Initialize", now - 30 * minute);
-                Check(lives.Lives == 1, "Rollback guard survives an application restart.");
+                Call(lives, "Initialize", now - 60 * minute);
+                Check(lives.Lives == 1, "Rollback guard survives an immediate application restart without granting lives.");
                 Call(lives, "RefreshAt", now + minute * 2);
                 Check(lives.Lives == 1, "Forward rebound after restart awards nothing.");
                 Call(lives, "RefreshAt", now + minute * 3);
@@ -150,14 +158,14 @@ namespace BusJam.Editor
                     manager.Fail(FailReason.NoSpace);
                     Check(lives.Lives == i, "Duplicate Fail cannot charge twice.");
                     manager.Retry();
-                    Check(lives.Lives == i && manager.State == GameState.Start, "Fail Retry must not charge another life.");
+                    Check(lives.Lives == i && manager.State == (i > 0 ? GameState.Ready : GameState.Start), "Fail Retry must not charge another life.");
                 }
                 manager.StartPlaying();
                 Check(manager.State == GameState.Start, "Zero lives must block level start.");
 
                 var ui = go.AddComponent<UIManager>();
                 Set(ui, "gameManager", manager); Set(ui, "livesSystem", lives);
-                foreach (string field in new[] { "startPanel", "hudPanel", "completePanel", "failPanel", "noLivesPanel" })
+                foreach (string field in new[] { "startPanel", "hudPanel", "completePanel", "failPanel", "noLivesPanel", "readyPanel" })
                 {
                     var panel = new GameObject(field); panel.transform.SetParent(go.transform);
                     Set(ui, field, panel);
@@ -168,10 +176,11 @@ namespace BusJam.Editor
                 Call(lives, "RefreshAt", DateTime.UtcNow.Ticks + minute);
                 Check(!Get<GameObject>(ui, "noLivesPanel").activeSelf && Get<GameObject>(ui, "startPanel").activeSelf, "Recovery returns to StartPanel through the event.");
                 seed(2, DateTime.UtcNow.Ticks, 1);
+                manager.PrepareLevel();
                 manager.StartPlaying();
                 Check(manager.State == GameState.Playing && lives.Lives == 2, "Starting does not spend a life.");
                 manager.Restart();
-                Check(lives.Lives == 1 && manager.State == GameState.Start, "Restart spends one life and retries.");
+                Check(lives.Lives == 1 && manager.State == GameState.Ready, "Restart spends one life and retries.");
                 manager.Restart();
                 Check(lives.Lives == 1, "Restart outside Playing is ignored.");
                 manager.StartPlaying(); manager.Restart();
@@ -213,18 +222,21 @@ namespace BusJam.Editor
             Check(Get<UnityEngine.UI.Button>(hud, "restartButton") != null, "HUD Restart button is wired.");
             Check(Get<GameObject>(ui, "noLivesPanel") != null, "NoLivesPanel is wired.");
             var displays = ui.GetComponentsInChildren<LivesDisplay>(true);
-            Check(displays.Length == 3, "HUD, Start and NoLives each have a life display.");
+            Check(displays.Length == 2, "Start and NoLives have life displays; money and HUD have no life timer.");
             foreach (var display in displays)
             {
                 Check(Get<LivesSystem>(display, "livesSystem") == lives && Get<TMP_Text>(display, "countText") != null
-                    && Get<TMP_Text>(display, "countdownText") != null && Get<GameObject>(display, "countdownGroup") != null, "All display fields must be assigned.");
+                    && Get<TMP_Text>(display, "countdownText") != null, "All display text fields must be assigned.");
                 var clone = Object.Instantiate(display);
                 try
                 {
                     Call(clone, "Show", 0, 754);
                     Check(Get<TMP_Text>(clone, "countdownText").text.EndsWith("12:34"), "Countdown renders mm:ss.");
                     Call(clone, "Show", 5, 0);
-                    Check(!Get<GameObject>(clone, "countdownGroup").activeSelf, "Full lives hide the countdown.");
+                    if (Get<bool>(clone, "showFull"))
+                        Check(Get<TMP_Text>(clone, "countdownText").text == "FULL", "Full lives show FULL on the menu plate.");
+                    else
+                        Check(!Get<GameObject>(clone, "countdownGroup").activeSelf, "Full lives hide the countdown group.");
                     var show = (Action<int, int>)Delegate.CreateDelegate(typeof(Action<int, int>), clone,
                         typeof(LivesDisplay).GetMethod("Show", Private));
                     for (int i = 0; i < 60; i++) show(3, 1200 - i);

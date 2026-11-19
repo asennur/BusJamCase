@@ -275,6 +275,7 @@ namespace BusJam.Editor
             RequireEditMode();
             var scene = SceneManager.GetActiveScene();
             var lives = InScene<LivesSystem>(scene);
+            Set(lives, "maxLives", 5);
             Set(lives, "regenMinutes", 1);
             EditorUtility.SetDirty(lives);
             EditorSceneManager.MarkSceneDirty(scene);
@@ -317,6 +318,7 @@ namespace BusJam.Editor
             RequireEditMode();
             var scene = SceneManager.GetActiveScene();
             var lives = InScene<LivesSystem>(scene);
+            Set(lives, "maxLives", 5);
             Set(lives, "regenMinutes", 20);
             EditorUtility.SetDirty(lives);
             EditorSceneManager.MarkSceneDirty(scene);
@@ -327,6 +329,16 @@ namespace BusJam.Editor
             PlayerPrefs.DeleteKey("LivesUtcHighWater");
             PlayerPrefs.Save();
             return "Production restored: regeneration 20 minutes, level index 49, fresh default of 5 lives.";
+        }
+
+        [MenuItem("Bus Jam/Lives/Clear Lives Data (Edit)")]
+        public static void ClearLivesData()
+        {
+            RequireEditMode();
+            PlayerPrefs.DeleteKey("Lives");
+            PlayerPrefs.DeleteKey("LastRegenUtc");
+            PlayerPrefs.DeleteKey("LivesUtcHighWater");
+            PlayerPrefs.Save();
         }
     }
 }

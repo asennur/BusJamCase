@@ -207,9 +207,9 @@ namespace BusJam.Editor
                             level.cells[y * level.width + x + 1].type == BusJam.Level.CellType.Passenger) packedNeighbours++;
                 var visual = instance.transform.Find("VisualRoot");
                 instance.GetComponent<Passenger>().SetSeated(waiting.transform);
-                bool seated = visual.localScale == Vector3.one;
-                if (!seated) throw new InvalidOperationException("Seat enlargement was not cancelled.");
-                return $"PASS: Level_09 has {packedNeighbours} horizontal packed pairs; visual envelope {gridSize.x:F4} x {gridSize.z:F4} within {cell:F3} grid; slot width {slotSize.x:F4} within {spacing:F4} spacing. Seat visual scale restored to 1. Collider stays on unscaled passenger root.";
+                bool seated = visual.localScale == Vector3.one * 1.4f;
+                if (!seated) throw new InvalidOperationException("Seat lost the full standing visual scale.");
+                return $"PASS: Level_09 has {packedNeighbours} horizontal packed pairs; visual envelope {gridSize.x:F4} x {gridSize.z:F4} within {cell:F3} grid; slot width {slotSize.x:F4} within {spacing:F4} spacing. Seat retains 1.4x visual scale. Collider stays on unscaled passenger root.";
             }
             finally { Object.DestroyImmediate(instance); }
         }

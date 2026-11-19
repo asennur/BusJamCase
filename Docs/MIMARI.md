@@ -71,7 +71,8 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - Five lives maximum, one life every 20 minutes (serialized settings). UTC regeneration persists in PlayerPrefs (`Lives`, `LastRegenUtc` ticks as a string); startup and resume recover offline time. A one-second InvokeRepeating publishes changed counts/seconds without Update polling.
 - Fail spends one life once. The HUD Restart button spends one life and retries; Fail Retry does not spend again. Starting with zero lives is blocked.
 - At Start with zero lives, NoLivesPanel replaces StartPanel; regeneration returns to StartPanel. HUD and Start show a heart/count and a countdown below the cap. Countdown text uses reusable character buffers and changes only with the displayed second.
-- Clock rollback rebases LastRegenUtc and persists a UTC high-water guard (`LivesUtcHighWater`); returning the clock forward grants no rebound lives. The timer waits for the guard before starting a fresh interval. Production uses server time.
+- Clock rollback rebases LastRegenUtc once and persists a UTC high-water guard (`LivesUtcHighWater`); returning the clock forward grants no rebound lives. Normal elapsed intervals continue below the guard, and startup preserves valid partial progress even with a future saved guard. Production uses server time.
+- Decision: Preserve the full 1.4x standing passenger world size when seated, including inverse seat-parent scale; loop imported exhaust on a smoke-only Animator layer and shake only the bus model child (ZPAX2, 19 November 2026).
 - Decision: Implement the authorized five-life / 20-minute rule and event-driven start gating (Asen rule, 19 November 2026).
 
 ## 4. Veri (`BusJam.Level`)

@@ -88,6 +88,10 @@ MonoBehaviour:
   crossFade: 0.1
   brakeDuration: 0.6
   doorCloseDuration: 0.33333334
+  model: {fileID: 1842860265637475666}
+  idleShakeHeight: 0.003
+  idleShakeRoll: 0.12
+  idleShakeFrequency: 13.5
 --- !u!1001 &2168939349037388473
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -148,6 +152,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4530775999018097547, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
+      propertyPath: m_Materials.Array.data[10]
+      value: 
+      objectReference: {fileID: 2100000, guid: d0af14e52bb6a9249ac98c1b032a5e19, type: 2}
     - target: {fileID: 919132149155446097, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
       propertyPath: m_Name
       value: Otobus

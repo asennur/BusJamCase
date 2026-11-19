@@ -43,7 +43,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: M_BusSmoke
-    second: {fileID: 2100000, guid: 78ca1038bd034c24eab919f87ca6a02b, type: 2}
+    second: {fileID: 2100000, guid: d0af14e52bb6a9249ac98c1b032a5e19, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

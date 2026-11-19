@@ -61,7 +61,11 @@ namespace BusJam.Core
             maxLives = Mathf.Max(1, maxLives);
             Lives = Mathf.Clamp(PlayerPrefs.GetInt(LivesKey, maxLives), 0, maxLives);
             lastRegenUtc = ReadTicks(RegenKey, now);
-            lastObservedUtc = ReadTicks(GuardKey, lastRegenUtc);
+            long guard = ReadTicks(GuardKey, now);
+            lastObservedUtc = now;
+            rollbackUntilUtc = guard > now ? guard : 0;
+            // A future saved guard must not overwrite valid progress on every startup.
+            if (lastRegenUtc > now) lastRegenUtc = now;
             RefreshAt(now);
             Save();
         }
@@ -84,20 +88,18 @@ namespace BusJam.Core
         private void RefreshAt(long now)
         {
             bool save = false;
-            if (now < lastRegenUtc || now < lastObservedUtc)
+            if (now < lastObservedUtc)
             {
                 rollbackUntilUtc = Math.Max(rollbackUntilUtc, Math.Max(lastObservedUtc, lastRegenUtc));
                 lastRegenUtc = now;
                 save = true;
             }
-            else if (rollbackUntilUtc > 0)
+            else if (rollbackUntilUtc > 0 && now >= rollbackUntilUtc)
             {
+                // Crossing the old clock value must not award the forward rebound.
                 lastRegenUtc = now;
-                if (now >= rollbackUntilUtc)
-                {
-                    rollbackUntilUtc = 0;
-                    save = true;
-                }
+                rollbackUntilUtc = 0;
+                save = true;
             }
             else if (Lives >= maxLives)
             {

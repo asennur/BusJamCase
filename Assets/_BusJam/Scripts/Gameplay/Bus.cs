@@ -5,10 +5,8 @@ using UnityEngine;
 namespace BusJam.Gameplay
 {
     /// <summary>
-    /// Tek otobüsün görünümü ve koltuk durumu. Rezervasyon (dokunma anında) ve varış (yolcu koltuğa
-    /// ışınlanınca) ayrıdır: gösterge yalnız yolcu gerçekten varınca dolu görünür. Varan yolcular koltuğa
-    /// parent'lanır (Passenger.SetSeated), bu yüzden otobüs onları kendileriyle birlikte taşır.
-    /// Animator bağlıysa hareket, fren ve kapı klipleri koddan CrossFade ile oynar.
+    /// Displays one bus and tracks seat reservations separately from passenger arrivals.
+    /// Controls drive, brake and door clips; seated passengers follow their seat bones.
     /// </summary>
     public class Bus : MonoBehaviour
     {
@@ -18,7 +16,7 @@ namespace BusJam.Gameplay
         private static readonly int DoorOpenHash = Animator.StringToHash("DoorOpen");
         private static readonly int DoorCloseHash = Animator.StringToHash("DoorClose");
 
-        [Tooltip("0. materyal yuvası otobüs rengidir")]
+        [Tooltip("Material slot 0 carries the bus color.")]
         [SerializeField] private Renderer body;
         [SerializeField] private Transform[] seatPoints;
         [SerializeField] private Transform doorEntry;
@@ -26,24 +24,56 @@ namespace BusJam.Gameplay
         [SerializeField] private Animator animator;
         [SerializeField, Min(0f)] private float crossFade = 0.1f;
         [SerializeField, Min(0f)] private float brakeDuration = 0.4f;
-        [Tooltip("Kapı kapanma klibinin süresi; kalkış bu kadar bekler")]
+        [Tooltip("Door-close duration to wait before departure.")]
         [SerializeField, Min(0f)] private float doorCloseDuration = 0.3f;
+        [SerializeField] private Transform model;
+        [SerializeField, Min(0f)] private float idleShakeHeight = 0.003f;
+        [SerializeField, Min(0f)] private float idleShakeRoll = 0.12f;
+        [SerializeField, Range(12f, 15f)] private float idleShakeFrequency = 13.5f;
 
         private Material[] bodyMaterials;
         private int reservedCount;
         private int arrivedCount;
         private Passenger[] seatedPassengers;
+        private Vector3 modelRestPosition;
+        private Quaternion modelRestRotation;
+        private bool idleShake = true;
 
         public PassengerColor Color { get; private set; }
         public bool IsReservedFull => reservedCount >= seatPoints.Length;
         public Transform DoorEntry => doorEntry;
 
-        /// <summary>Kuyruktan kapıya gelme tween'i bitince true olur; yolcular yalnız o zaman bu otobüse koşabilir.</summary>
+        /// <summary>Allows boarding only after the bus reaches the door.</summary>
         public bool IsAtDoor { get; private set; }
 
-        private void Awake() => bodyMaterials = body.sharedMaterials;
+        private void Awake()
+        {
+            bodyMaterials = body.sharedMaterials;
+            if (model == null) return;
+            modelRestPosition = model.localPosition;
+            modelRestRotation = model.localRotation;
+        }
 
-        private void OnDisable() => DOTween.Kill(this);
+        private void OnDisable()
+        {
+            DOTween.Kill(this);
+            RestoreModel();
+        }
+
+        private void LateUpdate()
+        {
+            if (!idleShake || model == null) return;
+            float phase = Time.time * idleShakeFrequency * Mathf.PI * 2f;
+            model.localPosition = modelRestPosition + Vector3.up * (Mathf.Sin(phase) * idleShakeHeight);
+            model.localRotation = modelRestRotation * Quaternion.Euler(0f, 0f, Mathf.Sin(phase + 0.8f) * idleShakeRoll);
+        }
+
+        private void RestoreModel()
+        {
+            if (model == null) return;
+            model.localPosition = modelRestPosition;
+            model.localRotation = modelRestRotation;
+        }
 
         public void Setup(PassengerColor color, Material material)
         {
@@ -69,14 +99,14 @@ namespace BusJam.Gameplay
 
         public void SetAtDoor(bool value) => IsAtDoor = value;
 
-        /// <summary>Kuyrukta kayarken ve ayrılırken.</summary>
+        /// <summary>Plays while advancing through the queue or departing.</summary>
         public void PlayDrive()
         {
             DOTween.Kill(this);
             Play(DriveHash);
         }
 
-        /// <summary>Kapıda fren bitince kapıyı açar; tek seferlik klibin son pozu kapanışa kadar kalır.</summary>
+        /// <summary>Opens the door after braking and holds its final pose until closing.</summary>
         public void PlayStop(bool atDoor, System.Action onReady = null)
         {
             DOTween.Kill(this);
@@ -95,7 +125,7 @@ namespace BusJam.Gameplay
             }).SetTarget(this);
         }
 
-        /// <summary>Dolunca kapıyı kapatır; kalkış için beklenecek süreyi döner.</summary>
+        /// <summary>Closes the full bus and returns the delay before departure.</summary>
         public float CloseDoor()
         {
             if (animator == null)
@@ -106,7 +136,7 @@ namespace BusJam.Gameplay
             return doorCloseDuration;
         }
 
-        /// <summary>Bir koltuğu hemen rezerve eder; kapı animasyonunu değiştirmez.</summary>
+        /// <summary>Reserves a seat immediately without changing the door animation.</summary>
         public Transform ReserveSeat(out int seatIndex)
         {
             seatIndex = reservedCount;
@@ -114,7 +144,7 @@ namespace BusJam.Gameplay
             return seatPoints[seatIndex];
         }
 
-        /// <summary>Yolcu koltuğa gerçekten vardı; gösterge dolar. Otobüs tam dolduysa true döner.</summary>
+        /// <summary>Records an arrival and returns whether every seat is occupied.</summary>
         public bool SeatArrived(int seatIndex, Passenger passenger)
         {
             seatedPassengers[seatIndex] = passenger;
@@ -124,11 +154,13 @@ namespace BusJam.Gameplay
             return arrivedCount >= seatPoints.Length;
         }
 
-        /// <summary>Otobüs ayrılırken içindeki yolcuları BoardView'a geri vermek için; null olmayanlar doludur.</summary>
+        /// <summary>Passengers to return to BoardView's pool after departure.</summary>
         public Passenger[] SeatedPassengers => seatedPassengers;
 
         private void Play(int stateHash)
         {
+            idleShake = stateHash != BrakeHash && stateHash != DriveHash;
+            if (!idleShake) RestoreModel();
             if (animator != null)
                 animator.CrossFadeInFixedTime(stateHash, crossFade);
         }

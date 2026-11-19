@@ -23,6 +23,7 @@ namespace BusJam.UI
         {
             livesSystem.Changed += Show;
             lastCount = lastSeconds = -1;
+            livesSystem.Refresh();
             Show(livesSystem.Lives, livesSystem.NextLifeSeconds);
         }
 

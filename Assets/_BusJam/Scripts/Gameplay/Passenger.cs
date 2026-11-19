@@ -13,8 +13,7 @@ namespace BusJam.Gameplay
         Seated
     }
 
-    /// <summary>Gridde bir yolcunun görünümü ve verisi. Karar vermez; ne yapacağını GameplayController söyler.
-    /// Animator bağlıysa durumlar klip ile oynar; yoksa eski stride/kol tween'leri çalışır.</summary>
+    /// <summary>Displays passenger state supplied by GameplayController, using clips or placeholder tweens.</summary>
     public class Passenger : MonoBehaviour
     {
         private static readonly int IdleHash = Animator.StringToHash("Idle");
@@ -43,7 +42,7 @@ namespace BusJam.Gameplay
         [SerializeField] private Transform waveArm;
         [SerializeField, Range(0f, 70f)] private float waveAngle = 32f;
         [SerializeField, Min(0.01f)] private float halfWave = 0.14f;
-        [Tooltip("Koltuk kemiğine parent'lanınca yerel rotasyon düzeltmesi (model ekseni koltuktan farklıysa)")]
+        [Tooltip("Local rotation correction when parented to a seat bone.")]
         [SerializeField] private Vector3 seatRotation;
 
         private Vector3 bodyRestPosition;
@@ -66,7 +65,7 @@ namespace BusJam.Gameplay
         public bool CloakOpen { get; private set; }
         public PassengerState State { get; private set; }
 
-        /// <summary>Taşma kuyruğunda beklerken bir slot kendisine ayrıldıysa slot index'i; yoksa -1 (GameplayController kullanır).</summary>
+        /// <summary>Reserved waiting slot while in overflow, or -1 when none is reserved.</summary>
         public int PendingSlotIndex { get; set; } = -1;
 
         private void Awake()
@@ -141,7 +140,7 @@ namespace BusJam.Gameplay
             ResetCloakVisual();
         }
 
-        // Tween havuzdaki yolcu başına bir kez kurulur; dokunuşta liste veya tween yaratılmaz.
+        // Each pooled passenger reuses one cloak tween.
         private void ResetCloakVisual()
         {
             if (cloakVisual == null)
@@ -153,7 +152,7 @@ namespace BusJam.Gameplay
             cloakVisual.gameObject.SetActive(IsCloaked && !CloakOpen);
         }
 
-        /// <summary>Pelerin rengi gizler; açılıp kapanırken aynı kısa ölçek tween'i iki yönde oynar.</summary>
+        /// <summary>Conceals the color with a reversible cloak tween.</summary>
         public void SetCloak(bool open)
         {
             if (!IsCloaked || CloakOpen == open)
@@ -182,7 +181,7 @@ namespace BusJam.Gameplay
 
         private void OnDestroy() => cloakTween?.Kill();
 
-        /// <summary>Havuzdan gelen yolcunun iplerini ve görünür katlarını sıfırlar.</summary>
+        /// <summary>Resets rope count and visible layers when reusing a passenger.</summary>
         public void SetRopes(int count)
         {
             RopesLeft = Mathf.Clamp(count, 0, 4);
@@ -194,7 +193,7 @@ namespace BusJam.Gameplay
                 SetReachable(false);
         }
 
-        /// <summary>Bir kat ip çözülür; art arda çözülmelerde punch üst üste binmez.</summary>
+        /// <summary>Removes one rope and restarts the scale punch.</summary>
         public void RemoveRope()
         {
             if (RopesLeft == 0)
@@ -206,7 +205,7 @@ namespace BusJam.Gameplay
             revealTween = transform.DOPunchScale(Vector3.one * 0.12f, 0.2f, 1, 0.5f);
         }
 
-        /// <summary>Erişilebilir olan gizli yolcunun rengi açılır: gerçek materyal, "?" kalkar, kısa punch. Bir kez açılan geri gizlenmez.</summary>
+        /// <summary>Permanently reveals a hidden passenger's color and removes the question mark.</summary>
         public void Reveal(Material material)
         {
             if (!IsHidden)
@@ -220,7 +219,7 @@ namespace BusJam.Gameplay
             revealTween = transform.DOPunchScale(Vector3.one * 0.25f, 0.3f, 1, 0.5f);
         }
 
-        /// <summary>Erişilebilir yolcu outline'lı görünür.</summary>
+        /// <summary>Shows the outline only when the passenger is reachable and unlocked.</summary>
         public void SetReachable(bool reachable)
         {
             isReachable = reachable;
@@ -229,7 +228,7 @@ namespace BusJam.Gameplay
                 outline.SetActive(visible);
         }
 
-        /// <summary>Bekleme slotuna vardı; otobüs gelince WaitingArea bunu otobüse koşturur.</summary>
+        /// <summary>Waits in a slot until WaitingArea sends the passenger to a matching bus.</summary>
         public void SetInSlot(Quaternion facing, float scale)
         {
             State = PassengerState.InSlot;
@@ -238,7 +237,7 @@ namespace BusJam.Gameplay
             Play(IdleHash);
         }
 
-        /// <summary>Slotlar doluyken taşıp WaitingArea'nın taşma kuyruğunda bekliyor; bir slot ayrılınca GameplayController onu oradan alır.</summary>
+        /// <summary>Waits in overflow until GameplayController reserves a slot.</summary>
         public void SetIdle(Quaternion facing)
         {
             State = PassengerState.Idle;
@@ -246,19 +245,22 @@ namespace BusJam.Gameplay
             Play(IdleHash);
         }
 
-        /// <summary>Otobüste koltuğa ışınlandı; koltuğa parent'lanır, otobüsle birlikte hareket eder.</summary>
+        /// <summary>Parents to the seat while retaining the grid's full world scale.</summary>
         public void SetSeated(Transform seatPoint)
         {
             State = PassengerState.Seated;
-            // Cancel the standing enlargement when parenting to an unchanged bus seat.
-            if (visualRoot != null) visualRoot.localScale = Vector3.one;
+            if (visualRoot != null) visualRoot.localScale = Vector3.one * standingVisualScale;
             transform.SetParent(seatPoint, false);
+            // Seat bones inherit the bus model scale; preserve the grid's world size.
+            Vector3 seatScale = seatPoint.lossyScale;
+            transform.localScale = new Vector3(1f / Mathf.Abs(seatScale.x),
+                1f / Mathf.Abs(seatScale.y), 1f / Mathf.Abs(seatScale.z));
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.Euler(seatRotation);
             Play(SitHash);
         }
 
-        /// <summary>Kapıda küçülüp kaybolur, koltukta büyür; dolum yalnız belirme bitince bildirilir.</summary>
+        /// <summary>Shrinks through the door, then grows to full seated size before reporting arrival.</summary>
         public void EnterBus(Transform entry, Transform seatPoint, TweenCallback onSeated)
         {
             runTween?.Kill();
@@ -270,14 +272,20 @@ namespace BusJam.Gameplay
                 {
                     body.enabled = false;
                     SetSeated(seatPoint);
+                    transform.localScale *= 0.05f;
                 })
                 .AppendInterval(0.02f)
                 .AppendCallback(() => body.enabled = true)
-                .Append(transform.DOScale(1f, 0.2f).SetEase(Ease.OutBack))
+                .Append(DOVirtual.Float(0.05f, 1f, 0.2f, scale =>
+                {
+                    Vector3 parentScale = seatPoint.lossyScale;
+                    transform.localScale = new Vector3(scale / Mathf.Abs(parentScale.x),
+                        scale / Mathf.Abs(parentScale.y), scale / Mathf.Abs(parentScale.z));
+                }).SetEase(Ease.OutBack))
                 .OnComplete(onSeated);
         }
 
-        /// <summary>Yol boyunca sabit hızla koşar (süre = uzunluk / hız), yöne dönerek. Varınca onArrived çağrılır.</summary>
+        /// <summary>Runs along the path at constant speed and reports arrival.</summary>
         public void RunTo(List<Vector3> path, float speed, TweenCallback onArrived)
         {
             State = PassengerState.Running;
@@ -312,14 +320,14 @@ namespace BusJam.Gameplay
                 });
         }
 
-        /// <summary>Tünelden ağız hücresine çıkış: kısa tween ile hedef local konuma kayar.</summary>
+        /// <summary>Slides from the tunnel into its mouth cell.</summary>
         public void EmergeFromTunnel(Vector3 localTarget)
         {
             runTween?.Kill();
             runTween = transform.DOLocalMove(localTarget, 0.3f).SetEase(Ease.OutQuad);
         }
 
-        /// <summary>Taşma kuyruğunda beklerken öndeki biri ayrılınca bir adım öne kayar (kısa tween).</summary>
+        /// <summary>Advances one place when someone leaves the overflow queue.</summary>
         public void ShiftOverflow(Vector3 worldTarget)
         {
             runTween?.Kill();
@@ -332,7 +340,7 @@ namespace BusJam.Gameplay
                 animator.CrossFadeInFixedTime(stateHash, crossFade);
         }
 
-        /// <summary>Üstte kısa süre kırmızı ikon: zıplar, kaybolur. Art arda tıklamada tween yeniden başlar.</summary>
+        /// <summary>Pops and bobs the angry icon, restarting on repeated taps.</summary>
         public void ShowAngry()
         {
             angryTween?.Kill();

@@ -14,7 +14,7 @@ namespace BusJam.UI
         private void Awake() => punch = transform.DOPunchScale(Vector3.one * .12f, punchDuration, 2).SetUpdate(true).SetAutoKill(false).Pause();
         private void OnEnable()
         {
-            SaveSystem.ProgressReset += Refresh;
+            SaveSystem.CoinsChanged += Show;
             Refresh();
         }
         private void Refresh() => Show(SaveSystem.Coins);
@@ -29,7 +29,7 @@ namespace BusJam.UI
         private void OnDestroy() => punch?.Kill();
         private void OnDisable()
         {
-            SaveSystem.ProgressReset -= Refresh;
+            SaveSystem.CoinsChanged -= Show;
             punch?.Rewind();
             transform.localScale = Vector3.one;
         }
