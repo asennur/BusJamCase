@@ -26,7 +26,6 @@ namespace BusJam.Gameplay
         private readonly List<Bus> queue = new List<Bus>();
         [SerializeField] private Ease arrivalEase = Ease.OutCubic;
         [SerializeField] private Ease departureEase = Ease.InQuad;
-        [SerializeField, Min(0f)] private float finalWaveHold = 0.85f;
         private readonly List<Bus> departing = new List<Bus>();
         private List<PassengerColor> order;
         private int nextSpawnIndex;
@@ -128,13 +127,14 @@ namespace BusJam.Gameplay
                 foreach (Passenger passenger in leaving.SeatedPassengers)
                     passenger.Wave();
 
-            // Kapı kapanmadan kalkış yok; son otobüste el sallama da beklenir.
-            float delay = leaving.CloseDoor() + (finalBus ? finalWaveHold : 0f);
+            // Normal buses wait for the door to close. The last bus leaves at once and silently,
+            // because the Complete screen opens right away (Asen, 19 Nov).
+            float delay = finalBus ? 0f : leaving.CloseDoor();
             departing.Add(leaving);
             leaving.transform.DOMove(leaving.transform.position + doorPoint.right * exitOffsetX, moveDuration)
                 .SetDelay(delay)
                 .SetEase(departureEase)
-                .OnStart(() => { leaving.PlayDrive(); BusDeparting?.Invoke(leaving); })
+                .OnStart(() => { leaving.PlayDrive(); if (!finalBus) BusDeparting?.Invoke(leaving); })
                 .OnComplete(() => BusDeparted?.Invoke(leaving));
 
             // Çıkış tamamlanınca kapıdan 6 birim uzaklaşmış olur (gövde 4.12 + boşluk).

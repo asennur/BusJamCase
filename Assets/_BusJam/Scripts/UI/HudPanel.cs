@@ -7,23 +7,17 @@ using UnityEngine.UI;
 
 namespace BusJam.UI
 {
-    /// <summary>Shows the level badge, countdown and life-consuming restart.</summary>
+    /// <summary>Shows the level badge and the countdown. Restart lives in the settings panel (PauseMenu).</summary>
     public class HudPanel : MonoBehaviour
     {
         [SerializeField] private GameManager gameManager;
         [SerializeField] private LevelTimer levelTimer;
         [SerializeField] private TMP_Text levelText;
         [SerializeField] private TMP_Text timeText;
-        [SerializeField] private Button restartButton;
         private readonly char[] timeBuffer = new char[12];
         private Tween punch;
 
-        private void Awake() => restartButton.onClick.AddListener(gameManager.Restart);
-        private void OnDestroy()
-        {
-            restartButton.onClick.RemoveListener(gameManager.Restart);
-            punch?.Kill();
-        }
+        private void OnDestroy() => punch?.Kill();
 
         private void OnEnable()
         {

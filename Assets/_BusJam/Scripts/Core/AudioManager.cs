@@ -39,6 +39,20 @@ namespace BusJam.Core
         private static AudioManager instance;
         private Entry[] bySound;
 
+        private const string MutedKey = "SoundMuted";
+
+        /// <summary>Sound on/off from the settings panel; saved so it survives a restart of the game.</summary>
+        public static bool Muted
+        {
+            get => PlayerPrefs.GetInt(MutedKey, 0) == 1;
+            set
+            {
+                PlayerPrefs.SetInt(MutedKey, value ? 1 : 0);
+                PlayerPrefs.Save();
+                AudioListener.volume = value ? 0f : 1f;
+            }
+        }
+
         /// <summary>Plays a sound if an AudioManager exists in the scene and has a clip for it.</summary>
         public static void Play(Sfx sound)
         {
@@ -48,6 +62,7 @@ namespace BusJam.Core
         private void Awake()
         {
             instance = this;
+            AudioListener.volume = Muted ? 0f : 1f;
             // Index the inspector list by enum value once, so Play is a direct array lookup.
             bySound = new Entry[Enum.GetValues(typeof(Sfx)).Length];
             foreach (var entry in sounds) bySound[(int)entry.sound] = entry;

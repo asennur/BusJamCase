@@ -80,6 +80,7 @@ namespace BusJam.Core
         // Ready displays the full constraint; only Playing advances the timer.
         private void SetState(GameState newState)
         {
+            if (newState != GameState.Playing && IsPaused) SetPaused(false);
             State = newState;
 
             if (newState == GameState.Playing)
@@ -139,10 +140,33 @@ namespace BusJam.Core
             SetState(GameState.Fail);
         }
 
+        /// <summary>True while the in-game settings panel is open: time stops and taps are ignored.</summary>
+        public bool IsPaused { get; private set; }
+
+        public void SetPaused(bool paused)
+        {
+            if (paused && State != GameState.Playing) return;
+            IsPaused = paused;
+            Time.timeScale = paused ? 0f : 1f;
+        }
+
+        /// <summary>Restart from the settings panel: costs a life, then the level waits for Tap to start again.</summary>
         public void Restart()
         {
-            if (State != GameState.Playing || !livesSystem.TrySpendLife()) return;
+            if (State != GameState.Playing) return;
+            SetPaused(false);
+            if (!livesSystem.TrySpendLife()) return;
             Retry();
+        }
+
+        /// <summary>Main Menu from the settings panel: costs a life and returns to the start screen.</summary>
+        public void QuitToMenu()
+        {
+            if (State != GameState.Playing) return;
+            SetPaused(false);
+            livesSystem.TrySpendLife();
+            LoadLevel(currentLevelIndex);
+            SetState(GameState.Start);
         }
 
         public void LoadNext()

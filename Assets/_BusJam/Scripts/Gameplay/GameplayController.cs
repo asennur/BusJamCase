@@ -137,7 +137,7 @@ namespace BusJam.Gameplay
 
         private void OnPassengerTapped(Passenger passenger)
         {
-            if (gameManager.State != GameState.Playing || passenger.State != PassengerState.Idle)
+            if (gameManager.State != GameState.Playing || gameManager.IsPaused || passenger.State != PassengerState.Idle)
                 return;
 
             // Taşma kuyruğunda bekleyen yolcu eski hücresini yeniden boşaltamaz.
