@@ -12,6 +12,7 @@ namespace BusJam.UI
         public Sprite btn_round_blue;
         public Sprite btn_yellow;
         public Sprite coin_pile;
+        public Sprite counter_plate;
         public Sprite fx_confetti_rect;
         public Sprite fx_confetti_star;
         public Sprite fx_sparkle;

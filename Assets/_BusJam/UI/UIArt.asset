@@ -18,6 +18,7 @@ MonoBehaviour:
   btn_round_blue: {fileID: 21300000, guid: 99c8c08924763e44ea2f4ad066015948, type: 3}
   btn_yellow: {fileID: 21300000, guid: 444beaf4329c79e4bbe754d56ecacb2d, type: 3}
   coin_pile: {fileID: 21300000, guid: 6abf3f172cfe3bd41b853e32d7d7f9da, type: 3}
+  counter_plate: {fileID: 21300000, guid: ccfd71c26abe2934681145d4618d40f6, type: 3}
   fx_confetti_rect: {fileID: 21300000, guid: 6bb80cead45a96d40a41f257836399b5, type: 3}
   fx_confetti_star: {fileID: 21300000, guid: b84cd134c606726488c8fe7e8508af30, type: 3}
   fx_sparkle: {fileID: 21300000, guid: 293389cfb3250e24797f7db4e0e31fe8, type: 3}
