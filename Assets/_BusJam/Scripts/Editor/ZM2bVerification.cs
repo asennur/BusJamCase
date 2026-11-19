@@ -265,7 +265,7 @@ namespace BusJam.Editor
                 var rect = buttonObject.GetComponent<RectTransform>();
                 rect.anchoredPosition = new Vector2(292, -556);
                 var solve = buttonObject.GetComponent<Button>(); solve.onClick = new Button.ButtonClickedEvent();
-                UnityEventTools.AddPersistentListener(solve.onClick, panel.SolveLevel);
+                UnityEventTools.AddPersistentListener(solve.onClick, panel.Solve);
                 buttonObject.GetComponentInChildren<TMP_Text>().text = "Çöz";
                 var status = (TMP_Text)Get(panel, "status");
                 var result = Object.Instantiate(status, status.transform.parent);

@@ -77,7 +77,7 @@ namespace BusJam.LevelEditor
         }
 
         private readonly Level.LevelData level;
-        private readonly int slotCount, stateLimit;
+        private readonly int slotCount, stateLimit, maxSolutions;
         private readonly double milliseconds;
         private readonly bool findLoss;
         private readonly Stopwatch watch = new Stopwatch();
@@ -85,9 +85,10 @@ namespace BusJam.LevelEditor
         private bool limited;
         private int states;
 
-        private LevelSolver(Level.LevelData level, int levelNumber, int stateLimit, double milliseconds, bool findLoss)
+        private LevelSolver(Level.LevelData level, int levelNumber, int stateLimit, double milliseconds, bool findLoss, int maxSolutions)
         {
             this.level = level;
+            this.maxSolutions = Mathf.Max(1, maxSolutions);
             this.stateLimit = stateLimit;
             this.milliseconds = milliseconds;
             this.findLoss = findLoss;
@@ -96,10 +97,10 @@ namespace BusJam.LevelEditor
         }
 
         public static Result Solve(Level.LevelData level, int levelNumber, int stateLimit = 200000,
-            double milliseconds = 5000, bool findLosingSequence = false)
+            double milliseconds = 5000, bool findLosingSequence = false, int maxSolutions = 3)
         {
             if (!level.Validate(out string error)) return new Result { Error = "Geçersiz: " + error };
-            var solver = new LevelSolver(level, levelNumber, stateLimit, milliseconds, findLosingSequence);
+            var solver = new LevelSolver(level, levelNumber, stateLimit, milliseconds, findLosingSequence, maxSolutions);
             var start = new State
             {
                 Cells = (Level.CellData[])level.cells.Clone(), Slots = new int[solver.slotCount],
@@ -139,7 +140,7 @@ namespace BusJam.LevelEditor
         public static string ReplaySettled(LevelData level, int levelNumber, int[] sequence)
         {
             if (!level.Validate(out string error)) return error;
-            var solver = new LevelSolver(level, levelNumber, 0, 0, false);
+            var solver = new LevelSolver(level, levelNumber, 0, 0, false, 3);
             var state = new State { Cells = (CellData[])level.cells.Clone(), Slots = new int[solver.slotCount],
                 TunnelOffsets = new int[level.tunnels.Count] };
             for (int i = 0; i < level.tunnels.Count; i++) solver.Emerge(state, i);
@@ -214,9 +215,9 @@ namespace BusJam.LevelEditor
             return result;
         }
 
-        private bool Enough(Paths paths) => paths.Wins.Count >= 3 && (!findLoss || paths.Loss != null);
+        private bool Enough(Paths paths) => paths.Wins.Count >= maxSolutions && (!findLoss || paths.Loss != null);
 
-        private static void Merge(Paths result, Paths child, int tap)
+        private void Merge(Paths result, Paths child, int tap)
         {
             foreach (int[] suffix in child.Wins)
             {
@@ -229,7 +230,7 @@ namespace BusJam.LevelEditor
                     for (int i = 0; i < existing.Length; i++) if (existing[i] != sequence[i]) { equal = false; break; }
                     if (equal) { duplicate = true; break; }
                 }
-                if (!duplicate && result.Wins.Count < 3) result.Wins.Add(sequence);
+                if (!duplicate && result.Wins.Count < maxSolutions) result.Wins.Add(sequence);
             }
             if (result.Loss == null && child.Loss != null) result.Loss = Prepend(tap, child.Loss);
         }
