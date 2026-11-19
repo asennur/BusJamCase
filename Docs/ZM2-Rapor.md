@@ -88,6 +88,6 @@ Play'i durdur. Database'den yalnız `Test_Cloak` girdisini kaldır (bu kurulumda
 
 ## Vault ve kapsam
 
-AsenOS notları Beyin `note-read` ile okundu; `note-edit` yükseltilmiş komutla da `Gorev-Listesi.md` atomik yazımında **WinError 5 / erişim engellendi** verdi. Doğrudan dosya yazımıyla aşılmadı. Vault'taki görev/brief, mimari/kod notları ve oturum kartını Luma bu raporun 349 Edit kontrolü kanıtıyla işlemeli.
+AsenOS notları Beyin `note-read` ile okundu. Brief, Mimari, Kod-Notlari, kendi Last-Session kartı ve Kariyer thread'i `note-edit` ile güncellendi; receipt kaydedildi. `sync` başarılı: 176 kayıt, uyarı/çakışma yok. Yalnız `Gorev-Listesi.md` atomik yazımı yükseltilmiş komut ve güncel hash ile ikinci denemede de **WinError 5 / erişim engellendi** verdi. Doğrudan dosya yazımıyla aşılmadı; Luma yalnız 17b kutusunu bu raporun 349 Edit kontrolü ve `56aca9e` kanıtıyla işlemeli.
 
 `M_Purple`, `M_Yellow`, `ArtSource` korunur ve commit'e alınmaz. Push yok. Geçici Play leveli ve database değişikliği ZM2 commit'inden sonra hazırlanır ve commit dışında kalır.
