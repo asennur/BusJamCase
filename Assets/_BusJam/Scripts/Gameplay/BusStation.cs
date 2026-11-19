@@ -125,10 +125,13 @@ namespace BusJam.Gameplay
                 foreach (Passenger passenger in leaving.SeatedPassengers)
                     passenger.Wave();
 
+            // Kapı kapanmadan kalkış yok; son otobüste el sallama da beklenir.
+            float delay = leaving.CloseDoor() + (finalBus ? finalWaveHold : 0f);
             departing.Add(leaving);
             leaving.transform.DOMove(leaving.transform.position + doorPoint.right * exitOffsetX, moveDuration)
-                .SetDelay(finalBus ? finalWaveHold : 0f)
+                .SetDelay(delay)
                 .SetEase(departureEase)
+                .OnStart(leaving.PlayDrive)
                 .OnComplete(() => BusDeparted?.Invoke(leaving));
 
             for (int i = 0; i < queue.Count; i++)
@@ -150,13 +153,17 @@ namespace BusJam.Gameplay
         {
             Bus bus = queue[index];
             bus.transform.DOKill();
+            bus.PlayDrive();
             Tween motion = bus.transform.DOMove(QueuePosition(index), moveDuration).SetEase(arrivalEase);
             if (index == 0)
                 motion.OnComplete(() =>
                 {
+                    bus.PlayStop(true);
                     bus.SetAtDoor(true);
                     BusArrived?.Invoke(bus);
                 });
+            else
+                motion.OnComplete(() => bus.PlayStop(false));
         }
     }
 }
