@@ -8,6 +8,7 @@ namespace BusJam.UI
     {
         [SerializeField] private GameManager gameManager;
         [SerializeField] private LivesSystem livesSystem;
+        [SerializeField] private GameObject coinCounter;
         [SerializeField] private GameObject startPanel;
         [SerializeField] private GameObject hudPanel;
         [SerializeField] private GameObject completePanel;
@@ -34,6 +35,7 @@ namespace BusJam.UI
         private void OnStateChanged(GameState state)
         {
             bool start = state == GameState.Start;
+            if (coinCounter != null) coinCounter.SetActive(state == GameState.Complete);
             startPanel.SetActive(start && livesSystem.Lives > 0);
             noLivesPanel.SetActive(start && livesSystem.Lives == 0);
             hudPanel.SetActive(state == GameState.Playing);
