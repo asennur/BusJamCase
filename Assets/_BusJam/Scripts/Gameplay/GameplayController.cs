@@ -52,6 +52,7 @@ namespace BusJam.Gameplay
             busStation.BusDeparted += OnBusDeparted;
             busStation.AllBusesDone += OnAllBusesDone;
             waitingArea.SlotOpened += OnSlotOpened;
+            gameManager.PlayingStarted += CheckFail;
         }
 
         private void OnDisable()
@@ -62,6 +63,7 @@ namespace BusJam.Gameplay
             busStation.BusDeparted -= OnBusDeparted;
             busStation.AllBusesDone -= OnAllBusesDone;
             waitingArea.SlotOpened -= OnSlotOpened;
+            gameManager.PlayingStarted -= CheckFail;
         }
 
         private void OnLevelLoaded(int levelNumber, LevelData level)
@@ -344,6 +346,7 @@ namespace BusJam.Gameplay
             }
 
             busStation.ReleaseBus(bus);
+            CheckFail();
         }
 
         private void OnAllBusesDone()
@@ -361,18 +364,47 @@ namespace BusJam.Gameplay
             CheckFail();
         }
 
-        // Devam eden koşular ve otobüsün kapıya gelişi sonuçlandıktan sonra kalan slotlara bakılır.
+        // Yalnız yerleşmiş durumda karar verilir; otomatik biniş ve geçişler önce tamamlanır.
         private void CheckFail()
         {
-            if (gameManager.State != GameState.Playing || runningCount > 0 || waitingArea.HasFreeSlot)
+            if (gameManager.State != GameState.Playing || runningCount > 0 || busStation.IsTransitioning)
                 return;
 
             Bus bus = busStation.ActiveBus;
             if (bus == null || !bus.IsAtDoor)
                 return;
 
-            LevelFailed?.Invoke(FailReason.NoSpace);
-            gameManager.Fail(FailReason.NoSpace);
+            if (!bus.IsReservedFull && waitingArea.HasQueuedColor(bus.Color))
+                return;
+
+            if (!waitingArea.HasFreeSlot)
+            {
+                ReportFail(FailReason.NoSpace);
+                return;
+            }
+
+            if (overflowQueue.Count > 0)
+                return;
+
+            bool hasPassenger = false;
+            for (int i = 0; i < board.CellCount; i++)
+            {
+                Passenger passenger = board.GetOccupant(i);
+                if (passenger == null)
+                    continue;
+                hasPassenger = true;
+                if (passenger.State == PassengerState.Idle && reachable[i] && passenger.RopesLeft == 0
+                    && (!passenger.IsCloaked || passenger.CloakOpen))
+                    return;
+            }
+            if (hasPassenger)
+                ReportFail(FailReason.NoMoves);
+        }
+
+        private void ReportFail(FailReason reason)
+        {
+            LevelFailed?.Invoke(reason);
+            gameManager.Fail(reason);
         }
 
         private void RefreshReachable()

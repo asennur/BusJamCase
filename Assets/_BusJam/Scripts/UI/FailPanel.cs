@@ -19,6 +19,7 @@ namespace BusJam.UI
         private static string ToText(FailReason reason) => reason switch
         {
             FailReason.OutOfTime => "Out of time",
+            FailReason.NoMoves => "No moves left!",
             _ => "No space"
         };
     }

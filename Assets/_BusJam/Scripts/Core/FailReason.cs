@@ -4,6 +4,7 @@ namespace BusJam.Core
     public enum FailReason
     {
         OutOfTime,
-        NoSpace
+        NoSpace,
+        NoMoves
     }
 }

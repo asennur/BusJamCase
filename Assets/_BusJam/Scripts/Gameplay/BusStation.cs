@@ -33,6 +33,7 @@ namespace BusJam.Gameplay
         private ObjectPool<Bus> busPool;
 
         public Bus ActiveBus => queue.Count > 0 ? queue[0] : null;
+        public bool IsTransitioning => departing.Count > 0 || (ActiveBus != null && !ActiveBus.IsAtDoor);
 
         /// <summary>Kapıdaki/kapıya gelmekte olan aktif otobüsten sonra kuyrukta duran otobüs (yoksa null).</summary>
         public Bus NextBus => queue.Count > 1 ? queue[1] : null;

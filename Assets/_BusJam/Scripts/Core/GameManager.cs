@@ -27,6 +27,7 @@ namespace BusJam.Core
         public int CurrentLevelNumber { get; private set; }
 
         public event Action<GameState> StateChanged;
+        public event Action PlayingStarted;
         public event Action<int, LevelData> LevelLoaded;
 
         private void Awake()
@@ -108,6 +109,7 @@ namespace BusJam.Core
                 return;
 
             SetState(GameState.Playing);
+            PlayingStarted?.Invoke();
         }
 
         // İndeks ve kayıt kazanınca hemen ilerler; LoadNext yalnız o (zaten ilerlemiş) leveli sahneye kurar.

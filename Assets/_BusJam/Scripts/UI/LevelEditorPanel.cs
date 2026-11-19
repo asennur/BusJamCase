@@ -20,6 +20,7 @@ namespace BusJam.LevelEditor
         [SerializeField] private UnityEngine.UI.Toggle hidden;
         [SerializeField] private TMP_InputField width, height, seconds, buses, tunnelQueue;
         [SerializeField] private TMP_Text status;
+        [SerializeField] private TMP_Text solverResult;
 
         private readonly Board board = new Board();
         private LevelData source;
@@ -72,6 +73,7 @@ namespace BusJam.LevelEditor
             seconds.text = draft.timeLimit.ToString(CultureInfo.CurrentCulture);
             buses.text = string.Join(", ", draft.busOrder);
             status.text = asset == null ? "Yeni level" : asset.name;
+            if (solverResult != null) solverResult.text = "";
             Preview();
         }
 
@@ -209,6 +211,18 @@ namespace BusJam.LevelEditor
             status.text = $"{source.name} kaydedildi.";
 #else
             status.text = "Asset kaydı Unity Editor içinde kullanılabilir.";
+#endif
+        }
+
+        public void SolveLevel()
+        {
+#if UNITY_EDITOR
+            if (!ReadColors(buses.text, out var order)) return;
+            draft.busOrder = order;
+            int levelNumber = source == null ? database.Count + 1 : levelList.value + 1;
+            string result = LevelSolver.Solve(draft, levelNumber).Describe(draft.width);
+            if (solverResult != null) solverResult.text = result;
+            else status.text = result;
 #endif
         }
     }
