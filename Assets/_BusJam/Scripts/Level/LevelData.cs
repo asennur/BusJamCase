@@ -14,7 +14,6 @@ namespace BusJam.Level
         [Min(1)] public int width = 3;
         [Min(1)] public int height = 3;
         [Min(1f)] public float timeLimit = 60f;
-        [Min(1)] public int waitingSlotCount = 5;
         public CellData[] cells = new CellData[9];
         public List<PassengerColor> busOrder = new List<PassengerColor>();
         public List<TunnelData> tunnels = new List<TunnelData>();

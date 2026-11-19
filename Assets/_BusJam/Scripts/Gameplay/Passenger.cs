@@ -121,6 +121,9 @@ namespace BusJam.Gameplay
         /// <summary>Bekleme slotuna vardı; otobüs gelince WaitingArea bunu otobüse koşturur.</summary>
         public void SetInSlot() => State = PassengerState.InSlot;
 
+        /// <summary>Slotlar doluyken taşıp WaitingArea'nın arkasında durdu; oyun o anda Fail olur (GameplayController.OnOverflowArrived).</summary>
+        public void SetIdle() => State = PassengerState.Idle;
+
         /// <summary>Otobüste koltuğa ışınlandı; koltuğa parent'lanır, otobüsle birlikte hareket eder.</summary>
         public void SetSeated(Transform seatPoint)
         {

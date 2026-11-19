@@ -18,7 +18,7 @@ namespace BusJam.LevelEditor
         [SerializeField] private Camera boardCamera;
         [SerializeField] private TMP_Dropdown levelList, brush, color, facing;
         [SerializeField] private UnityEngine.UI.Toggle hidden;
-        [SerializeField] private TMP_InputField width, height, seconds, slots, buses, tunnelQueue;
+        [SerializeField] private TMP_InputField width, height, seconds, buses, tunnelQueue;
         [SerializeField] private TMP_Text status;
 
         private readonly Board board = new Board();
@@ -68,7 +68,6 @@ namespace BusJam.LevelEditor
             width.text = draft.width.ToString();
             height.text = draft.height.ToString();
             seconds.text = draft.timeLimit.ToString(CultureInfo.CurrentCulture);
-            slots.text = draft.waitingSlotCount.ToString();
             buses.text = string.Join(", ", draft.busOrder);
             status.text = asset == null ? "Yeni level" : asset.name;
             Preview();
@@ -163,16 +162,14 @@ namespace BusJam.LevelEditor
                 status.text = "Önce boyutu uygula.";
                 return;
             }
-            if (!float.TryParse(seconds.text, out float duration) || !(duration >= 1f) || float.IsInfinity(duration)
-                || !int.TryParse(slots.text, out int count) || count < 1)
+            if (!float.TryParse(seconds.text, out float duration) || !(duration >= 1f) || float.IsInfinity(duration))
             {
-                status.text = "Süre ve slot sayısı en az 1 olmalı.";
+                status.text = "Süre en az 1 olmalı.";
                 return;
             }
             if (!ReadColors(buses.text, out var order))
                 return;
             draft.timeLimit = duration;
-            draft.waitingSlotCount = count;
             draft.busOrder = order;
             if (!draft.Validate(out string error))
             {

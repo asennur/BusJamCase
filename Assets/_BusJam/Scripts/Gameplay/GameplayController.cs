@@ -8,7 +8,8 @@ namespace BusJam.Gameplay
 {
     /// <summary>
     /// Kuralların tek yeri: dokunma kararı, hedef rezervasyonu, erişilebilirlik, kazan/kaybet.
-    /// Hedef sırası: otobüs (kapıda + aynı renk + boş koltuk) → bekleme slotu → yoksa kızgın yüz.
+    /// Hedef sırası: otobüs (kapıda + aynı renk + boş koltuk, slotlar doluyken devre dışı) → bekleme slotu →
+    /// slotlar doluysa slot sırasının arkası (varınca Fail, Asen kararı 19 Kasım).
     /// </summary>
     public class GameplayController : MonoBehaviour
     {
@@ -64,7 +65,7 @@ namespace BusJam.Gameplay
 
             runningCount = 0;
             SetupTunnels(level);
-            waitingArea.Setup(level.waitingSlotCount);
+            waitingArea.Setup(levelNumber);
             busStation.Setup(level.busOrder);
             RefreshReachable();
         }
@@ -123,14 +124,9 @@ namespace BusJam.Gameplay
                 return;
             }
 
+            bool hasFreeSlot = waitingArea.HasFreeSlot;
             Bus bus = busStation.ActiveBus;
-            bool toBus = bus != null && bus.IsAtDoor && bus.Color == passenger.Color && !bus.IsReservedFull;
-
-            if (!waitingArea.HasFreeSlot)
-            {
-                passenger.ShowAngry();
-                return;
-            }
+            bool toBus = hasFreeSlot && bus != null && bus.IsAtDoor && bus.Color == passenger.Color && !bus.IsReservedFull;
 
             passenger.ShowTap();
             Vector2Int startCell = passenger.Cell;
@@ -158,7 +154,7 @@ namespace BusJam.Gameplay
                     OnSeatArrived(bus, seatIndex, passenger);
                 });
             }
-            else
+            else if (hasFreeSlot)
             {
                 waitingArea.TryReserveSlot(passenger, out Vector3 slotPos);
                 worldPathBuffer.Add(slotPos);
@@ -170,6 +166,27 @@ namespace BusJam.Gameplay
                         BoardWaitingPassengers(atDoor);
                     OnRunFinished();
                 });
+            }
+            else
+            {
+                // Slotlar doluyken dokunulan yolcu otobüse gitmez, slot sırasının arkasına koşar (Asen kararı, 19 Kasım).
+                worldPathBuffer.Add(waitingArea.OverflowPosition());
+                passenger.RunTo(worldPathBuffer, runSpeed, () =>
+                {
+                    passenger.SetIdle();
+                    OnOverflowArrived();
+                });
+            }
+        }
+
+        // Taşan yolcu vardı: slot sonradan açılmış olsa bile kaybedilir.
+        private void OnOverflowArrived()
+        {
+            runningCount--;
+            if (gameManager.State == GameState.Playing)
+            {
+                LevelFailed?.Invoke(FailReason.NoSpace);
+                gameManager.Fail(FailReason.NoSpace);
             }
         }
 
