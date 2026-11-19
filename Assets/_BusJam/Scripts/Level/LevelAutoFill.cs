@@ -39,14 +39,18 @@ namespace BusJam.Level
                 message = "Nothing to fill: every bus already has its passengers.";
                 return false;
             }
-            if (needed.Count > free.Count)
+            // Empty tunnels get up to 3 of the needed passengers (decided per attempt below).
+            var emptyTunnels = level.tunnels.FindAll(t => t.queue.Count == 0);
+            int tunnelShare = Mathf.Min(needed.Count / 3, emptyTunnels.Count * 3);
+            if (needed.Count - tunnelShare > free.Count)
             {
-                message = $"Not enough free tiles: {needed.Count} passengers need a place, {free.Count} tiles are free.";
+                message = $"Not enough free tiles: {needed.Count - tunnelShare} passengers need a tile, {free.Count} tiles are free.";
                 return false;
             }
 
             CellData[] original = (CellData[])level.cells.Clone();
             CellData[] best = null;
+            List<List<PassengerColor>> bestQueues = null;
             int bestCount = 0;
             var random = new System.Random();
             for (int attempt = 0; attempt < attempts; attempt++)
@@ -54,8 +58,12 @@ namespace BusJam.Level
                 var cells = (CellData[])original.Clone();
                 Shuffle(free, random);
                 Shuffle(needed, random);
-                for (int i = 0; i < needed.Count; i++)
-                    cells[free[i]] = new CellData { type = CellType.Passenger, color = needed[i] };
+                int next = 0;
+                foreach (var tunnel in emptyTunnels) tunnel.queue.Clear();
+                for (int t = 0; next < tunnelShare; t = (t + 1) % emptyTunnels.Count)
+                    emptyTunnels[t].queue.Add(needed[next++]);
+                for (int i = 0; next < needed.Count; i++)
+                    cells[free[i]] = new CellData { type = CellType.Passenger, color = needed[next++] };
 
                 level.cells = cells;
                 var result = LevelSolver.Solve(level, levelNumber, 60000, 1200, false, 2);
@@ -63,10 +71,16 @@ namespace BusJam.Level
                 {
                     bestCount = result.SolutionCount;
                     best = cells;
+                    bestQueues = emptyTunnels.ConvertAll(t => new List<PassengerColor>(t.queue));
                 }
                 if (bestCount >= 2) break;
             }
 
+            for (int t = 0; t < emptyTunnels.Count; t++)
+            {
+                emptyTunnels[t].queue.Clear();
+                if (bestQueues != null) emptyTunnels[t].queue.AddRange(bestQueues[t]);
+            }
             if (best == null)
             {
                 level.cells = original;

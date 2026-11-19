@@ -45,6 +45,8 @@ namespace BusJam.LevelEditor
         public event Action<Vector2Int> TunnelSelected;
 
         public LevelData Draft => draft;
+        /// <summary>Colour picked in the palette; while set, left click places this passenger.</summary>
+        public PassengerColor? SelectedColor { get; private set; }
         public Camera BoardCamera => boardCamera;
         public int LevelNumber => sourceIndex >= 0 ? sourceIndex + 1 : database.Count + 1;
 
@@ -53,6 +55,7 @@ namespace BusJam.LevelEditor
         private LevelData source;
         private LevelData draft;
         private int sourceIndex = -1;
+        private string lastMessage = "";
 
         private void Start()
         {
@@ -86,6 +89,16 @@ namespace BusJam.LevelEditor
         private void StyleLevelList()
         {
             if (levelList.template == null) return;
+            // The viewport used a stencil Mask whose graphic was transparent, which hid the rows and their TMP
+            // labels. A RectMask2D clips by rectangle, needs no graphic and works with TextMeshPro.
+            foreach (var mask in levelList.template.GetComponentsInChildren<UnityEngine.UI.Mask>(true))
+            {
+                var go = mask.gameObject;
+                var graphic = mask.graphic;
+                DestroyImmediate(mask);
+                if (graphic != null) graphic.enabled = false;
+                if (go.GetComponent<UnityEngine.UI.RectMask2D>() == null) go.AddComponent<UnityEngine.UI.RectMask2D>();
+            }
             var panel = levelList.template.GetComponent<UnityEngine.UI.Image>();
             if (panel != null) panel.color = new Color(0.04f, 0.13f, 0.33f, 0.97f);
             foreach (var toggle in levelList.template.GetComponentsInChildren<UnityEngine.UI.Toggle>(true))
@@ -100,8 +113,19 @@ namespace BusJam.LevelEditor
             }
             if (levelList.itemText != null)
             {
-                levelList.itemText.color = Color.white;
-                levelList.itemText.fontSize = Mathf.Max(levelList.itemText.fontSize, 30f);
+                // The scene's item row was 20 px tall with 29 pt text, so TMP truncated every label to nothing.
+                var label = levelList.itemText;
+                label.color = Color.white;
+                label.fontSize = 30f;
+                label.enableAutoSizing = false;
+                label.enableWordWrapping = false;
+                label.overflowMode = TMPro.TextOverflowModes.Ellipsis;
+                label.alignment = TMPro.TextAlignmentOptions.MidlineLeft;
+                var item = (RectTransform)label.transform.parent;
+                item.sizeDelta = new Vector2(item.sizeDelta.x, 64f);
+                if (item.parent is RectTransform content) content.sizeDelta = new Vector2(content.sizeDelta.x, 64f);
+                var template = levelList.template;
+                template.sizeDelta = new Vector2(template.sizeDelta.x, 64f * 8f);
             }
         }
 
@@ -131,6 +155,7 @@ namespace BusJam.LevelEditor
             if (draft != null) Destroy(draft);
             source = isNew ? null : asset;
             sourceIndex = isNew ? -1 : index;
+            SelectedColor = null;
             draft = isNew ? asset : Instantiate(asset);
             width.SetTextWithoutNotify(draft.width.ToString());
             height.SetTextWithoutNotify(draft.height.ToString());
@@ -147,7 +172,7 @@ namespace BusJam.LevelEditor
             if (!int.TryParse(width.text, out int w) || !int.TryParse(height.text, out int h)
                 || w < 1 || h < 1 || w > GameRules.MaxWidth || h > GameRules.MaxHeight)
             {
-                SetStatus($"Size must be 1–{GameRules.MaxWidth} × 1–{GameRules.MaxHeight}.");
+                SetStatus($"Size must be 1-{GameRules.MaxWidth} × 1-{GameRules.MaxHeight}.");
                 return;
             }
             draft.Resize(w, h);
@@ -244,9 +269,19 @@ namespace BusJam.LevelEditor
                 SetStatus($"Passengers go on tiles, not on a {Describe(data.type)}.");
                 return false;
             }
-            bool sameColor = data.type == CellType.Passenger && data.color == color;
-            if (!sameColor && !CanAdd(color)) return false;
+            if (data.type == CellType.Passenger && data.color == color)
+            {
+                SetStatus($"There is already a {color} passenger here.");
+                return false;
+            }
+            if (!CanAdd(color)) return false;
             draft.SetCell(cell.x, cell.y, new CellData { type = CellType.Passenger, color = color });
+            SetStatus($"Placed {color} at ({cell.x}, {cell.y}).");
+            if (Remaining(color) <= 0 && SelectedColor == color)
+            {
+                SelectedColor = null;
+                SetStatus($"All {color} passengers are placed. Placing stopped.");
+            }
             Rebuild(false);
             return true;
         }
@@ -280,6 +315,31 @@ namespace BusJam.LevelEditor
             draft.SetCell(cell.x, cell.y, edit(data));
             Rebuild(false);
         }
+
+        // ---------- palette selection ----------
+
+        public void ToggleSelection(PassengerColor color)
+        {
+            if (SelectedColor == color) { ClearSelection(); return; }
+            if (Remaining(color) <= 0)
+            {
+                CanAdd(color);
+                return;
+            }
+            SelectedColor = color;
+            SetStatus($"Placing {color}: {Remaining(color)} left.");
+            Changed?.Invoke();
+        }
+
+        public void ClearSelection()
+        {
+            if (!SelectedColor.HasValue) return;
+            SelectedColor = null;
+            SetStatus("Placing stopped.");
+            Changed?.Invoke();
+        }
+
+        public void Hint(string text) => SetStatus(text);
 
         // ---------- bus order ----------
 
@@ -362,6 +422,20 @@ namespace BusJam.LevelEditor
 #endif
         }
 
+        /// <summary>Generates the grid shape (holes, obstacles, a tunnel) for the size in the inputs. Clears passengers; keeps buses and time.</summary>
+        public void AutoGrid()
+        {
+            if (int.TryParse(width.text, out int w) && int.TryParse(height.text, out int h)
+                && w >= 2 && h >= 2 && w <= GameRules.MaxWidth && h <= GameRules.MaxHeight
+                && (w != draft.width || h != draft.height))
+                draft.Resize(w, h);
+            bool ok = LevelAutoGrid.Generate(draft, out string message);
+            SelectedColor = null;
+            ShowSolver(message);
+            SetStatus(message);
+            if (ok) Rebuild(false);
+        }
+
         public void AutoFill()
         {
 #if UNITY_EDITOR
@@ -424,6 +498,7 @@ namespace BusJam.LevelEditor
             DrawVoidMarkers();
             if (busesChanged && busStation != null && draft.busOrder.Count > 0) busStation.Setup(draft.busOrder);
             if (waitingArea != null) waitingArea.Setup(LevelNumber);
+            RenderStatus();
             Changed?.Invoke();
         }
 
@@ -447,7 +522,18 @@ namespace BusJam.LevelEditor
 
         private void SetStatus(string text)
         {
-            if (status != null) status.text = text;
+            lastMessage = text;
+            RenderStatus();
+        }
+
+        // First line: what the mouse does right now. Second line: the result of the last action.
+        private void RenderStatus()
+        {
+            if (status == null) return;
+            string help = SelectedColor.HasValue
+                ? $"<b>Placing {SelectedColor.Value}</b> ({Remaining(SelectedColor.Value)} left): left-click a tile to place · click {SelectedColor.Value} again or Esc to stop · middle-click a passenger to remove · right-click a passenger for options"
+                : "<b>Tiles</b>: left-click cycles Tile > Hole > Obstacle > Tunnel · right-click a tunnel to rotate / fill it · right-click a passenger for options · middle-click removes a passenger · pick a colour on the left to place passengers";
+            status.text = string.IsNullOrEmpty(lastMessage) ? help : $"{help}\n<color=#FFE066>{lastMessage}</color>";
         }
 
         private void ShowSolver(string text)

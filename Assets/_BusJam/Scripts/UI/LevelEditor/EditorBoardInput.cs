@@ -5,22 +5,16 @@ using UnityEngine.EventSystems;
 namespace BusJam.LevelEditor
 {
     /// <summary>
-    /// Transparent full-screen catcher behind the editor panels. Left click cycles the tile type, right click on a
-    /// tunnel opens its panel, double right click on a passenger opens its options, and dragging a passenger moves it
-    /// (dropping it off the grid removes it).
+    /// Transparent full-screen catcher behind the editor panels.
+    /// Colour selected in the palette: left click places that passenger on a tile.
+    /// Nothing selected: left click cycles the tile (Tile > Hole > Obstacle > Tunnel).
+    /// Always: right click opens passenger options or the tunnel panel, middle click removes a passenger.
     /// </summary>
-    public class EditorBoardInput : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class EditorBoardInput : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField] private LevelEditorPanel editor;
-        [SerializeField] private EditorDragGhost ghost;
         [SerializeField] private PassengerOptionsPopup passengerPopup;
         [SerializeField] private TunnelPanel tunnelPanel;
-        [SerializeField, Min(0.1f)] private float doubleClickSeconds = 0.35f;
-
-        private float lastRightClick = -1f;
-        private Vector2Int lastRightCell = new Vector2Int(-1, -1);
-        private bool dragging;
-        private Vector2Int dragFrom;
 
         private void OnEnable() => editor.TunnelSelected += OpenTunnel;
         private void OnDisable() => editor.TunnelSelected -= OpenTunnel;
@@ -29,59 +23,33 @@ namespace BusJam.LevelEditor
 
         public void OnPointerClick(PointerEventData pointer)
         {
-            if (pointer.dragging || !editor.TryScreenToCell(pointer.position, out var cell)) return;
+            if (!editor.TryScreenToCell(pointer.position, out var cell)) return;
             var data = editor.GetCell(cell);
 
-            if (pointer.button == PointerEventData.InputButton.Left)
+            switch (pointer.button)
             {
-                if (data.type != CellType.Passenger) editor.CycleTile(cell);
-                return;
+                case PointerEventData.InputButton.Left:
+                    if (editor.SelectedColor.HasValue) editor.PlacePassenger(cell, editor.SelectedColor.Value);
+                    else if (data.type == CellType.Passenger) editor.Hint("This is a passenger: right-click for its options, middle-click to remove it.");
+                    else editor.CycleTile(cell);
+                    break;
+
+                case PointerEventData.InputButton.Middle:
+                    if (data.type == CellType.Passenger) editor.RemovePassenger(cell);
+                    break;
+
+                case PointerEventData.InputButton.Right:
+                    if (data.type == CellType.Passenger) passengerPopup.Show(cell, pointer.position);
+                    else if (data.type == CellType.Tunnel) tunnelPanel.Show(cell);
+                    break;
             }
-
-            if (pointer.button != PointerEventData.InputButton.Right) return;
-            if (data.type == CellType.Tunnel)
-            {
-                tunnelPanel.Show(cell);
-                return;
-            }
-            if (data.type != CellType.Passenger) return;
-
-            bool isDouble = cell == lastRightCell && Time.unscaledTime - lastRightClick <= doubleClickSeconds;
-            lastRightClick = Time.unscaledTime;
-            lastRightCell = cell;
-            if (isDouble)
-            {
-                lastRightClick = -1f;
-                passengerPopup.Show(cell, pointer.position);
-            }
-        }
-
-        public void OnBeginDrag(PointerEventData pointer)
-        {
-            dragging = pointer.button == PointerEventData.InputButton.Left
-                && editor.TryScreenToCell(pointer.pressPosition, out dragFrom)
-                && editor.GetCell(dragFrom).type == CellType.Passenger;
-            if (dragging) ghost.Begin(editor.DisplayColor(editor.GetCell(dragFrom).color), pointer.position);
-        }
-
-        public void OnDrag(PointerEventData pointer)
-        {
-            if (dragging) ghost.Move(pointer.position);
-        }
-
-        public void OnEndDrag(PointerEventData pointer)
-        {
-            if (!dragging) return;
-            dragging = false;
-            ghost.End();
-            if (editor.TryScreenToCell(pointer.position, out var to)) editor.MovePassenger(dragFrom, to);
-            else editor.RemovePassenger(dragFrom);
         }
 
         private void Update()
         {
-            // R rotates the tunnel whose panel is open.
+            // R rotates the tunnel whose panel is open; Escape stops placing.
             if (tunnelPanel.IsOpen && Input.GetKeyDown(KeyCode.R)) editor.RotateTunnel(tunnelPanel.Cell);
+            if (Input.GetKeyDown(KeyCode.Escape)) editor.ClearSelection();
         }
     }
 }

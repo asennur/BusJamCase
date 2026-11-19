@@ -15,6 +15,10 @@ namespace BusJam.LevelEditor
         [SerializeField] private Toggle hidden;
         [SerializeField] private TMP_Text ropes, cloak;
         [SerializeField] private Button ropesMinus, ropesPlus, cloakButton, removeButton, closeButton;
+        [Tooltip("Optional: if set, the cloak is chosen from this dropdown (No cloak / Starts open / Starts closed) instead of the cycle button")]
+        [SerializeField] private TMP_Dropdown cloakDropdown;
+
+        private static readonly Color OnColor = new Color(0.35f, 0.85f, 0.3f), OffColor = new Color(0.55f, 0.55f, 0.6f);
 
         private Vector2Int cell;
 
@@ -27,6 +31,13 @@ namespace BusJam.LevelEditor
             cloakButton.onClick.AddListener(NextCloak);
             removeButton.onClick.AddListener(() => { editor.RemovePassenger(cell); Hide(); });
             closeButton.onClick.AddListener(Hide);
+            if (cloakDropdown != null)
+            {
+                cloakDropdown.ClearOptions();
+                cloakDropdown.AddOptions(new System.Collections.Generic.List<string> { "No cloak", "Cloak · starts open", "Cloak · starts closed" });
+                cloakDropdown.onValueChanged.AddListener(value => editor.SetCloak(cell, (Cloak)value));
+                cloakButton.gameObject.SetActive(false);
+            }
         }
 
         private void Start() => editor.Changed += Refresh;
@@ -67,13 +78,19 @@ namespace BusJam.LevelEditor
             if (data.type != CellType.Passenger) { Hide(); return; }
             title.text = $"{data.color} passenger ({cell.x}, {cell.y})";
             hidden.SetIsOnWithoutNotify(data.hidden);
+            // Make the toggle state obvious: label says ON/OFF and the box turns green when on.
+            var hiddenLabel = hidden.GetComponentInChildren<TMP_Text>(true);
+            if (hiddenLabel != null) hiddenLabel.text = data.hidden ? "Hidden (?): ON" : "Hidden (?): OFF";
+            if (hidden.targetGraphic != null) hidden.targetGraphic.color = data.hidden ? OnColor : OffColor;
+            if (hidden.graphic != null) hidden.graphic.enabled = data.hidden;
             ropes.text = $"Ropes: {data.ropes}";
             cloak.text = data.cloak switch
             {
-                Cloak.StartsOpen => "Cloak: starts open",
-                Cloak.StartsClosed => "Cloak: starts closed",
-                _ => "Cloak: none"
+                Cloak.StartsOpen => "Cloak: ON · starts open",
+                Cloak.StartsClosed => "Cloak: ON · starts closed",
+                _ => "Cloak: OFF"
             };
+            if (cloakDropdown != null) cloakDropdown.SetValueWithoutNotify((int)data.cloak);
         }
 
         private Vector2 ClampInside(RectTransform parent, Vector2 local)

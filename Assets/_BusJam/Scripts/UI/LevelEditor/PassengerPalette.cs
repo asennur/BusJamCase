@@ -3,11 +3,10 @@ using UnityEngine;
 
 namespace BusJam.LevelEditor
 {
-    /// <summary>Scrollable left column: one draggable passenger per colour with its placed / needed count.</summary>
+    /// <summary>Scrollable left column: one selectable passenger per colour with how many are still to place.</summary>
     public class PassengerPalette : MonoBehaviour
     {
         [SerializeField] private LevelEditorPanel editor;
-        [SerializeField] private EditorDragGhost ghost;
         [Tooltip("Inactive template inside the scroll content; cloned once per colour")]
         [SerializeField] private PaletteItem template;
 
@@ -21,7 +20,7 @@ namespace BusJam.LevelEditor
                 var item = Instantiate(template, template.transform.parent);
                 item.gameObject.SetActive(true);
                 item.name = $"Palette_{color}";
-                item.Setup(editor, ghost, color);
+                item.Setup(editor, color);
                 items.Add(item);
             }
             editor.Changed += Refresh;
