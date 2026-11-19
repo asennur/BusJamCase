@@ -13,10 +13,18 @@ namespace BusJam.Gameplay
         Seated
     }
 
-    /// <summary>Gridde bir yolcunun görünümü ve verisi. Karar vermez; ne yapacağını GameplayController söyler.</summary>
+    /// <summary>Gridde bir yolcunun görünümü ve verisi. Karar vermez; ne yapacağını GameplayController söyler.
+    /// Animator bağlıysa durumlar klip ile oynar; yoksa eski stride/kol tween'leri çalışır.</summary>
     public class Passenger : MonoBehaviour
     {
+        private static readonly int IdleHash = Animator.StringToHash("Idle");
+        private static readonly int RunHash = Animator.StringToHash("Run");
+        private static readonly int SitHash = Animator.StringToHash("Sit");
+        private static readonly int WaveHash = Animator.StringToHash("Wave");
+
         [SerializeField] private Renderer body;
+        [SerializeField] private Animator animator;
+        [SerializeField, Min(0f)] private float crossFade = 0.1f;
         [SerializeField] private GameObject outline;
         [SerializeField] private Transform angryIcon;
         [SerializeField] private GameObject hiddenMark;
@@ -29,6 +37,8 @@ namespace BusJam.Gameplay
         [SerializeField] private Transform waveArm;
         [SerializeField, Range(0f, 70f)] private float waveAngle = 32f;
         [SerializeField, Min(0.01f)] private float halfWave = 0.14f;
+        [Tooltip("Koltuk kemiğine parent'lanınca yerel rotasyon düzeltmesi (model ekseni koltuktan farklıysa)")]
+        [SerializeField] private Vector3 seatRotation;
 
         private Vector3 bodyRestPosition;
         private Tween strideTween;
@@ -73,6 +83,12 @@ namespace BusJam.Gameplay
 
         public void Wave()
         {
+            if (animator != null)
+            {
+                Play(WaveHash);
+                return;
+            }
+
             if (waveArm == null)
                 return;
 
@@ -89,6 +105,7 @@ namespace BusJam.Gameplay
             Cell = cell;
             IsHidden = hidden;
             State = PassengerState.Idle;
+            Play(IdleHash);
             body.sharedMaterial = material;
             outline.SetActive(false);
             angryIcon.gameObject.SetActive(false);
@@ -123,10 +140,18 @@ namespace BusJam.Gameplay
         }
 
         /// <summary>Bekleme slotuna vardı; otobüs gelince WaitingArea bunu otobüse koşturur.</summary>
-        public void SetInSlot() => State = PassengerState.InSlot;
+        public void SetInSlot()
+        {
+            State = PassengerState.InSlot;
+            Play(IdleHash);
+        }
 
         /// <summary>Slotlar doluyken taşıp WaitingArea'nın taşma kuyruğunda bekliyor; bir slot ayrılınca GameplayController onu oradan alır.</summary>
-        public void SetIdle() => State = PassengerState.Idle;
+        public void SetIdle()
+        {
+            State = PassengerState.Idle;
+            Play(IdleHash);
+        }
 
         /// <summary>Otobüste koltuğa ışınlandı; koltuğa parent'lanır, otobüsle birlikte hareket eder.</summary>
         public void SetSeated(Transform seatPoint)
@@ -134,7 +159,8 @@ namespace BusJam.Gameplay
             State = PassengerState.Seated;
             transform.SetParent(seatPoint, false);
             transform.localPosition = Vector3.zero;
-            transform.localRotation = Quaternion.identity;
+            transform.localRotation = Quaternion.Euler(seatRotation);
+            Play(SitHash);
         }
 
         /// <summary>Yol boyunca sabit hızla koşar (süre = uzunluk / hız), yöne dönerek. Varınca onArrived çağrılır.</summary>
@@ -142,6 +168,7 @@ namespace BusJam.Gameplay
         {
             State = PassengerState.Running;
             SetReachable(false);
+            Play(RunHash);
 
             float length = 0f;
             Vector3 prev = transform.position;
@@ -155,14 +182,15 @@ namespace BusJam.Gameplay
 
             runTween?.Kill();
             strideTween?.Kill();
-            strideTween = body.transform.DOLocalMoveY(bodyRestPosition.y + strideHeight, halfStride)
-                .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
+            if (animator == null)
+                strideTween = body.transform.DOLocalMoveY(bodyRestPosition.y + strideHeight, halfStride)
+                    .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
             runTween = transform.DOPath(path.ToArray(), duration, PathType.Linear)
                 .SetEase(Ease.Linear)
                 .SetLookAt(0.01f)
                 .OnComplete(() =>
                 {
-                    strideTween.Kill();
+                    strideTween?.Kill();
                     body.transform.localPosition = bodyRestPosition;
                     onArrived();
                 });
@@ -180,6 +208,12 @@ namespace BusJam.Gameplay
         {
             runTween?.Kill();
             runTween = transform.DOMove(worldTarget, 0.25f).SetEase(Ease.OutQuad);
+        }
+
+        private void Play(int stateHash)
+        {
+            if (animator != null)
+                animator.CrossFadeInFixedTime(stateHash, crossFade);
         }
 
         /// <summary>Üstte kısa süre kırmızı ikon: zıplar, kaybolur. Art arda tıklamada tween yeniden başlar.</summary>
