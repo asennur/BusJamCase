@@ -29,6 +29,9 @@ namespace BusJam.Gameplay
         [SerializeField] private Transform angryIcon;
         [SerializeField] private GameObject hiddenMark;
         [SerializeField] private GameObject[] ropeLayers;
+        [SerializeField] private Transform cloakVisual;
+        [SerializeField] private Material cloakMaterial;
+        [SerializeField, Min(0.01f)] private float cloakDuration = 0.18f;
         [SerializeField] private float angryDuration = 0.6f;
 
         [SerializeField, Min(0f)] private float strideHeight = 0.085f;
@@ -48,11 +51,16 @@ namespace BusJam.Gameplay
         private Tween angryTween;
         private Tween revealTween;
         private Vector3 angryRestPosition;
+        private Material colorMaterial;
+        private Tween cloakTween;
+        private bool isReachable;
 
         public PassengerColor Color { get; private set; }
         public Vector2Int Cell { get; private set; }
         public bool IsHidden { get; private set; }
         public int RopesLeft { get; private set; }
+        public bool IsCloaked { get; private set; }
+        public bool CloakOpen { get; private set; }
         public PassengerState State { get; private set; }
 
         /// <summary>Taşma kuyruğunda beklerken bir slot kendisine ayrıldıysa slot index'i; yoksa -1 (GameplayController kullanır).</summary>
@@ -71,6 +79,7 @@ namespace BusJam.Gameplay
             revealTween?.Kill();
             strideTween?.Kill();
             armTween?.Kill();
+            cloakTween?.Pause();
             body.transform.localPosition = bodyRestPosition;
             if (waveArm != null)
                 waveArm.gameObject.SetActive(false);
@@ -101,14 +110,18 @@ namespace BusJam.Gameplay
                 .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
         }
 
-        public void Setup(PassengerColor color, Vector2Int cell, bool hidden, Material material)
+        public void Setup(PassengerColor color, Vector2Int cell, bool hidden, Material material, Cloak cloak = Cloak.None)
         {
             Color = color;
             Cell = cell;
             IsHidden = hidden;
+            colorMaterial = material;
+            IsCloaked = cloak != Cloak.None;
+            CloakOpen = cloak != Cloak.StartsClosed;
+            isReachable = false;
             State = PassengerState.Idle;
             Play(IdleHash);
-            body.sharedMaterial = material;
+            body.sharedMaterial = CloakOpen ? material : cloakMaterial;
             body.enabled = true;
             outline.SetActive(false);
             angryIcon.gameObject.SetActive(false);
@@ -120,7 +133,49 @@ namespace BusJam.Gameplay
             transform.localScale = Vector3.one;
             PendingSlotIndex = -1;
             SetRopes(0);
+            ResetCloakVisual();
         }
+
+        // Tween havuzdaki yolcu başına bir kez kurulur; dokunuşta liste veya tween yaratılmaz.
+        private void ResetCloakVisual()
+        {
+            if (cloakVisual == null)
+                return;
+            if (cloakTween == null && IsCloaked)
+                cloakTween = cloakVisual.DOScale(Vector3.one, cloakDuration).From(Vector3.zero)
+                    .SetEase(Ease.OutBack).SetAutoKill(false).OnRewind(HideOpenCloak).Pause();
+            cloakTween?.Goto(CloakOpen ? 0f : cloakDuration, false);
+            cloakVisual.gameObject.SetActive(IsCloaked && !CloakOpen);
+        }
+
+        /// <summary>Pelerin rengi gizler; açılıp kapanırken aynı kısa ölçek tween'i iki yönde oynar.</summary>
+        public void SetCloak(bool open)
+        {
+            if (!IsCloaked || CloakOpen == open)
+                return;
+            CloakOpen = open;
+            body.sharedMaterial = open ? colorMaterial : cloakMaterial;
+            SetReachable(isReachable);
+            if (cloakVisual == null)
+                return;
+            cloakVisual.gameObject.SetActive(true);
+            if (open)
+            {
+                cloakTween.PlayBackwards();
+                if (cloakTween.position == 0f)
+                    HideOpenCloak();
+            }
+            else
+                cloakTween.PlayForward();
+        }
+
+        private void HideOpenCloak()
+        {
+            if (CloakOpen)
+                cloakVisual.gameObject.SetActive(false);
+        }
+
+        private void OnDestroy() => cloakTween?.Kill();
 
         /// <summary>Havuzdan gelen yolcunun iplerini ve görünür katlarını sıfırlar.</summary>
         public void SetRopes(int count)
@@ -163,8 +218,10 @@ namespace BusJam.Gameplay
         /// <summary>Erişilebilir yolcu outline'lı görünür.</summary>
         public void SetReachable(bool reachable)
         {
-            if (outline.activeSelf != reachable)
-                outline.SetActive(reachable);
+            isReachable = reachable;
+            bool visible = reachable && RopesLeft == 0 && (!IsCloaked || CloakOpen);
+            if (outline.activeSelf != visible)
+                outline.SetActive(visible);
         }
 
         /// <summary>Bekleme slotuna vardı; otobüs gelince WaitingArea bunu otobüse koşturur.</summary>

@@ -27,6 +27,7 @@ namespace BusJam.Gameplay
         private readonly List<Vector2Int> pathBuffer = new List<Vector2Int>();
         private readonly List<Vector3> worldPathBuffer = new List<Vector3>();
         private readonly List<TunnelGroup> tunnelGroups = new List<TunnelGroup>();
+        private readonly List<Passenger> cloakedPassengers = new List<Passenger>();
 
         // Slotlar doluyken dokunulan, bir slot açılınca sırayla yerleşecek yolcular (FIFO, index 0 = en önde).
         private readonly List<Passenger> overflowQueue = new List<Passenger>();
@@ -73,6 +74,14 @@ namespace BusJam.Gameplay
             for (int i = 0; i < overflowQueue.Count; i++)
                 boardView.ReleasePassenger(overflowQueue[i]);
             overflowQueue.Clear();
+
+            cloakedPassengers.Clear();
+            for (int i = 0; i < board.CellCount; i++)
+            {
+                Passenger passenger = board.GetOccupant(i);
+                if (passenger != null && passenger.IsCloaked)
+                    cloakedPassengers.Add(passenger);
+            }
 
             SetupTunnels(level);
             waitingArea.Setup(levelNumber);
@@ -132,7 +141,8 @@ namespace BusJam.Gameplay
             if (!board.InBounds(passenger.Cell) || board.GetOccupant(passenger.Cell) != passenger)
                 return;
 
-            if (passenger.RopesLeft > 0 || !reachable[board.ToIndex(passenger.Cell)])
+            if ((passenger.IsCloaked && !passenger.CloakOpen)
+                || passenger.RopesLeft > 0 || !reachable[board.ToIndex(passenger.Cell)])
             {
                 passenger.ShowAngry();
                 return;
@@ -206,6 +216,19 @@ namespace BusJam.Gameplay
                         OnRunFinished();
                     }
                 });
+            }
+
+            ToggleGridCloaks();
+        }
+
+        private void ToggleGridCloaks()
+        {
+            for (int i = 0; i < cloakedPassengers.Count; i++)
+            {
+                Passenger passenger = cloakedPassengers[i];
+                if (passenger.State == PassengerState.Idle && passenger.IsCloaked
+                    && board.GetOccupant(passenger.Cell) == passenger)
+                    passenger.SetCloak(!passenger.CloakOpen);
             }
         }
 

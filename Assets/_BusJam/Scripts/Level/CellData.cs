@@ -16,6 +16,13 @@ namespace BusJam.Level
         Obstacle
     }
 
+    public enum Cloak : byte
+    {
+        None,
+        StartsOpen,
+        StartsClosed
+    }
+
     /// <summary>Gridde tek hücrenin kayıtlı hali.</summary>
     [Serializable]
     public struct CellData
@@ -24,6 +31,7 @@ namespace BusJam.Level
         public PassengerColor color;
         public bool hidden;
         public byte ropes;
+        public Cloak cloak;
 
         public bool IsWalkable => type != CellType.Void && type != CellType.Tunnel && type != CellType.Obstacle;
     }

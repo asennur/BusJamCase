@@ -65,8 +65,30 @@ namespace BusJam.Level
                 return false;
             }
 
-            return ValidateTunnels(out error) && ValidateRopes(out error)
+            return ValidateCloaks(out error) && ValidateTunnels(out error) && ValidateRopes(out error)
                 && ValidateColorCounts(out error) && ValidateConnectivity(out error);
+        }
+
+        private bool ValidateCloaks(out string error)
+        {
+            for (int i = 0; i < cells.Length; i++)
+            {
+                CellData cell = cells[i];
+                if (cell.cloak == Cloak.None)
+                    continue;
+
+                string reason = cell.cloak > Cloak.StartsClosed ? "Geçersiz pelerin değeri"
+                    : cell.type != CellType.Passenger ? "Pelerin yalnız Passenger hücresinde olabilir"
+                    : cell.hidden ? "Pelerin ve gizli yolcu (hidden) birlikte kullanılamaz" : null;
+                if (reason != null)
+                {
+                    error = $"({i % width},{i / width}) {reason}";
+                    return false;
+                }
+            }
+
+            error = null;
+            return true;
         }
 
         // Her komşu en fazla bir kez sayılır; dolu tünel ağzı başlangıçta kuyruktan da dolabilir.

@@ -49,7 +49,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - **Erişilebilir yolcu:** çıkış satırında ya da çıkışa boş hücrelerle bağlı. Erişilebilir olan outline'lı.
 - **Dokunma:**
   1. Oyun `Playing` değilse yok say.
-  2. Erişilemezse → kızgın yüz.
+  2. Pelerin kapalıysa veya erişilemezse → kızgın yüz; pelerinler değişmez.
   3. Hedef seç: otobüs kapıdaysa, rengi aynıysa ve boş (rezerve edilmemiş) koltuk varsa → koltuk. Yoksa boş slot. Slotların hepsi rezerve/doluysa: devam eden koşular ve otobüs gelişleri sonunda bir slot açılacaksa (slottaki/slota koşan bir yolcunun rengi kapıdaki/kapıya gelen otobüsle, o dolacaksa sıradaki otobüsle eşleşiyorsa) yolcu slot sırasının arkasına (taşma kuyruğu, FIFO) koşar, orada bekler; slot açılınca sırayla yerleşir. Hiç açılmayacaksa dokunma hiçbir şey yapmaz, kızgın yüz de yok (Asen kararı, 19 Kasım; ZD2, ZD'deki "varışta hemen fail" iptal).
   4. Hedefi **hemen rezerve et**, yolcunun hücresini **hemen boşalt**, erişilebilirliği yeniden hesapla (outline güncellenir).
   5. Yolcu yol boyunca akıcı koşar (DOTween path). Otobüse varınca koltuğa ışınlanır.
@@ -58,6 +58,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - Gridde yolcu kendiliğinden hareket etmez; yalnız oyuncu dokununca koşar. Kendiliğinden hareket eden tek şey slottakilerin otobüse binişidir.
 - **Gizli yolcu:** erişilemezken gri ve "?" görünür, rengi bilinmez. Erişilebilir olduğu an rengi açılır ve bir daha gizlenmez.
 - **İpli yolcu (Asen kuralı, 19 Kasım):** 0–4 kat ip taşır. İp varken erişilemez, outline göstermez, dokununca kızar ve hücresi dolu kalır. Dört yöndeki her komşu hücre dokunulan yolcu ayrılınca bir kat çözer; aynı tünel ağzının her yeniden boşalması sayılır, ağza yolcu gelişi sayılmaz. Son ip çözülünce erişilebilirlik yeniden hesaplanır. Gizli yolcuyla birlikte kullanılabilir; renk erişilebilir olunca açılır.
+- **Gizemli/pelerinli yolcu (Asen kuralı, 19 Kasım):** Her yolcu ayrı açık ya da kapalı başlar. Kapalıyken gri kukuleta/pelerin gerçek rengi gizler; dokununca kızar. Açıkken normal yol/ipuçları kuralları geçerlidir; outline yalnız açık ve erişilebilir olanda görünür. Kabul edilen her dokunuşta, yolcu koşmaya başladıktan sonra gridde kalan bütün pelerinliler (yolu kapalı veya ipli olanlar dahil) durumunu tersine çevirir. Otobüs, slot ve dolu slotların arkasına koşma sayılır; reddedilen/yok sayılan dokunuş ve otomatik biniş sayılmaz. Ayrılan yolcu etkilenmez. İple birlikte kullanılabilir, `hidden` ile kullanılamaz. Liste level kurulumunda bir kez toplanır; pelerin geçiş tween'i yolcu başına bir kez kurulur ve iki yönde tekrar kullanılır.
 - **Tünel:** bir hücre kaplar, yürünmez (engel gibi). Bir yöne bakar; baktığı komşu hücre ağzıdır. İçinde levelde tanımlı sıralı yolcu kuyruğu vardır. Ağız hücresi boşaldığı an (oradaki yolcu dokunulup kalktığında) kuyruktaki sıradaki yolcu ağız hücresine çıkar, erişilebilirlik yeniden hesaplanır. Kuyruk bitince tünel engel olarak kalır.
 - **Kazan:** son otobüs dolup gitti.
 - **Kaybet (yer):** Devam eden koşular ve otobüsün kapıya gelişi sonuçlandıktan sonra hâlâ boş slot yoksa (taşma kuyruğunda bekleyen varsa dahil) kaybedilir; griddeki renkler sonucu değiştirmez (Asen kararı, 19 Kasım; ZD2).
@@ -68,9 +69,10 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - `PassengerColor : byte` enum: `Red, Pink, Purple, Blue, Green, Yellow, White` (videodaki 7 renk).
 - `CellType : byte` → `Empty`, `Passenger`, `Void` (karo yok, delik, çizilmez), `Tunnel`, `Obstacle` (karo var, üstünde yürünmez fiziksel engel). Yeni değerler sona eklenir ki var olan level asset'lerindeki sayılar kaymasın.
 - `TunnelData` (serializable class) → `Vector2Int cell`, `Direction facing` (`Up, Down, Left, Right`), `List<PassengerColor> queue`. `LevelData.tunnels` listesinde; hücre tipi `Tunnel` olur.
-- `CellData` struct → `type`, `color`, `hidden`, `byte ropes` (sona eklenir, eski assetlerde 0 = ipsiz; Asen kuralı, 19 Kasım).
+- `CellData` struct → `type`, `color`, `hidden`, `byte ropes`, en sonda `Cloak cloak`. `Cloak : byte { None, StartsOpen, StartsClosed }`; eski assetlerde 0 = pelerinsiz/ipsiz (Asen kuralı, 19 Kasım).
 - `LevelData : ScriptableObject` → `width`, `height`, `CellData[] cells` (`index = y * width + x`), `timeLimit`, `List<PassengerColor> busOrder`. `Resize` örtüşen hücreleri korur. Bekleme slotu sayısı level verisinde **tutulmaz**: ekranda her zaman 7 sabit slot vardır, uçtaki ikisi level numarasına göre açılır (`GameRules.VisibleSlotCount/FirstSlotUnlockLevel/LastSlotUnlockLevel`, Asen kuralı 19 Kasım).
 - `Validate(out string error)`:
+  - pelerin yalnız Passenger hücresinde; `hidden` ile birleşimi ve tanımsız pelerin değeri koordinatlı hata verir; ip+pelerin geçerlidir (Asen kuralı, 19 Kasım),
   - ip yalnız Passenger hücresinde; ip sayısı başlangıçta dolu, sonradan boşalabilecek dört yön komşularının (Passenger ya da kuyruğu dolu tünel ağzı) sayısını aşamaz (Asen kuralı, 19 Kasım),
   - her renkte yolcu sayısı (gridde + tünel kuyruklarında) = o renkteki otobüs × 3,
   - her tünelin ağız hücresi grid içinde ve `Void`/`Tunnel` değil,
@@ -105,6 +107,7 @@ Akış: `GameManager` açılışta kayıtlı leveli yükler → `Start` → ekra
 - Var olan leveli seç/yükle ya da yeni oluştur.
 - Genişlik/yükseklik, hücreye tıklayarak boya: araç = `Void`, `Empty`, renkli yolcu, gizli aç/kapa.
 - Yolcu fırçasında ip sayısı 0–4 seçilir; diğer hücre tipleri ipsiz yazılır (Asen kuralı, 19 Kasım).
+- Yolcu fırçasında pelerin: yok / açık başlar / kapalı başlar. `hidden` ile birlikte boyama hata verir; diğer hücre tiplerinde pelerin temizlenir (Asen kuralı, 19 Kasım).
 - Otobüs sırası: renk ekle/sil/sırala. Süre alanı (slot sayısı sabit, editörden ayarlanmaz).
 - Kaydet: `Validate` geçmezse hatayı göster, kaydetme. Geçerse `#if UNITY_EDITOR` ile `EditorUtility.SetDirty` + `AssetDatabase.SaveAssets`; yeni level `AssetDatabase.CreateAsset` + `LevelDatabase.Add`.
 
