@@ -27,9 +27,9 @@ namespace BusJam.Gameplay
         [Tooltip("Door-close duration to wait before departure.")]
         [SerializeField, Min(0f)] private float doorCloseDuration = 0.3f;
         [SerializeField] private Transform model;
-        [SerializeField, Min(0f)] private float idleShakeHeight = 0.003f;
-        [SerializeField, Min(0f)] private float idleShakeRoll = 0.12f;
-        [SerializeField, Range(12f, 15f)] private float idleShakeFrequency = 13.5f;
+        [SerializeField, Min(0f)] private float idleShakeHeight = 0.0012f;
+        [SerializeField, Min(0f)] private float idleShakeRoll = 0.04f;
+        [SerializeField, Range(4f, 15f)] private float idleShakeFrequency = 8f;
 
         private Material[] bodyMaterials;
         private int reservedCount;
@@ -38,6 +38,8 @@ namespace BusJam.Gameplay
         private Vector3 modelRestPosition;
         private Quaternion modelRestRotation;
         private bool idleShake = true;
+        // Per-bus phase so queued buses do not shake in sync (reads as a screen shake otherwise).
+        private float shakePhase;
 
         public PassengerColor Color { get; private set; }
         public bool IsReservedFull => reservedCount >= seatPoints.Length;
@@ -52,6 +54,7 @@ namespace BusJam.Gameplay
             if (model == null) return;
             modelRestPosition = model.localPosition;
             modelRestRotation = model.localRotation;
+            shakePhase = Random.value * Mathf.PI * 2f;
         }
 
         private void OnDisable()
@@ -63,7 +66,7 @@ namespace BusJam.Gameplay
         private void LateUpdate()
         {
             if (!idleShake || model == null) return;
-            float phase = Time.time * idleShakeFrequency * Mathf.PI * 2f;
+            float phase = Time.time * idleShakeFrequency * Mathf.PI * 2f + shakePhase;
             model.localPosition = modelRestPosition + Vector3.up * (Mathf.Sin(phase) * idleShakeHeight);
             model.localRotation = modelRestRotation * Quaternion.Euler(0f, 0f, Mathf.Sin(phase + 0.8f) * idleShakeRoll);
         }

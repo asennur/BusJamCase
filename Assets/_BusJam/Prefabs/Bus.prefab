@@ -89,9 +89,9 @@ MonoBehaviour:
   brakeDuration: 0.6
   doorCloseDuration: 0.33333334
   model: {fileID: 1842860265637475666}
-  idleShakeHeight: 0.003
-  idleShakeRoll: 0.12
-  idleShakeFrequency: 13.5
+  idleShakeHeight: 0.0012
+  idleShakeRoll: 0.04
+  idleShakeFrequency: 8
 --- !u!1001 &2168939349037388473
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -18,10 +18,11 @@ namespace BusJam.UI
         [SerializeField] private TMP_Text rewardText;
         [SerializeField] private Image[] confetti, sparkles, coins;
         [SerializeField, Min(0)] private int coinReward = 25;
-        [SerializeField] private float confettiDuration = 1.4f, dimStart = .15f, dimDuration = .25f;
-        [SerializeField] private float headerStart = .3f, headerDuration = .35f;
-        [SerializeField] private float pileDuration = .3f;
-        [SerializeField] private float buttonStart = 1.1f, buttonDuration = .3f, idleDuration = .7f;
+        // Confetti bursts across the whole screen first; the texts arrive once the pieces start to fall.
+        [SerializeField] private float confettiBurst = .45f, confettiLifetime = 2.4f, dimStart = .1f, dimDuration = .25f;
+        [SerializeField] private float headerDelay = .45f, headerDuration = .35f;
+        [SerializeField] private float pileDelay = .8f, pileDuration = .3f;
+        [SerializeField] private float buttonDelay = 1.25f, buttonDuration = .3f, idleDuration = .7f;
         [SerializeField] private float sparkleDuration = .6f, rayPulseDuration = .9f, rayDegreesPerSecond = 20;
         [SerializeField] private float flightDuration = .6f, flightStagger = .05f, flightArc = 170;
         private Sequence entry, ambient, transfer;
@@ -29,37 +30,60 @@ namespace BusJam.UI
         private bool collecting, credited;
         private readonly Vector3[] flightStarts = new Vector3[10];
         private readonly Vector3[] flightEnds = new Vector3[10];
+        private Vector2[] confettiStarts;
 
         private void Awake()
         {
             nextButton.onClick.AddListener(Continue);
+            PlaceConfettiBehindHeader();
             Build();
         }
+        // Texts must read on top of the falling pieces: confetti sits just below the header in draw order.
+        private void PlaceConfettiBehindHeader()
+        {
+            if (confetti == null || confetti.Length == 0) return;
+            Transform parent = confetti[0].transform.parent;
+            if (parent == header.parent)
+            {
+                for (int i = 0; i < confetti.Length; i++)
+                    confetti[i].transform.SetSiblingIndex(header.GetSiblingIndex());
+            }
+            else if (parent.parent == header.parent)
+                parent.SetSiblingIndex(header.GetSiblingIndex());
+        }
+
         private Sequence Reusable() => DOTween.Sequence().SetUpdate(true).SetAutoKill(false).Pause();
         private void Build()
         {
             entry = Reusable();
+            // Burst points cover the whole panel; positions are fixed once so replays allocate nothing.
+            Vector2 size = ((RectTransform)transform).rect.size;
+            if (size.x < 10f || size.y < 10f) size = new Vector2(1080f, 1920f);
+            confettiStarts = new Vector2[confetti.Length];
+            float fall = Mathf.Max(.1f, confettiLifetime - confettiBurst);
             for (int i = 0; i < confetti.Length; i++)
             {
                 var image = confetti[i];
                 var rect = image.rectTransform;
-                float spread = (i - 19.5f) / 19.5f;
-                var apex = new Vector2(spread * 450, 480 + i % 5 * 50);
-                var end = new Vector2(spread * 560, -750 - i % 4 * 50);
+                var start = new Vector2(Random.Range(-.45f, .45f) * size.x, Random.Range(-.3f, .4f) * size.y);
+                confettiStarts[i] = start;
+                var burst = start + Random.insideUnitCircle.normalized * Random.Range(140f, 280f);
+                var end = new Vector2(burst.x + Random.Range(-160f, 160f), -.6f * size.y - Random.Range(0f, 200f));
                 var piece = DOTween.Sequence();
-                piece.Append(rect.DOAnchorPos(apex, confettiDuration * .35f).SetEase(Ease.OutQuad));
-                piece.Append(rect.DOAnchorPos(end, confettiDuration * .65f).SetEase(Ease.InQuad));
+                piece.Append(rect.DOAnchorPos(burst, confettiBurst).SetEase(Ease.OutCubic));
+                piece.Append(rect.DOAnchorPos(end, fall).SetEase(Ease.InQuad));
                 entry.Insert(0, piece);
-                entry.Insert(0, rect.DOLocalRotate(new Vector3(0, 0, (i % 2 == 0 ? 1 : -1) * 720), confettiDuration, RotateMode.FastBeyond360));
-                entry.Insert(confettiDuration * .5f, image.DOFade(0, confettiDuration * .5f));
+                entry.Insert(0, rect.DOScale(Random.Range(.8f, 1.25f), confettiBurst * .6f).SetEase(Ease.OutBack));
+                entry.Insert(0, rect.DOLocalRotate(new Vector3(0, 0, (i % 2 == 0 ? 1 : -1) * Random.Range(540f, 900f)), confettiLifetime, RotateMode.FastBeyond360));
+                entry.Insert(confettiLifetime * .65f, image.DOFade(0, confettiLifetime * .35f));
             }
             entry.Insert(dimStart, dim.DOFade(.65f, dimDuration));
-            entry.Insert(headerStart, header.DOScale(1, headerDuration).SetEase(Ease.OutBack, 1.7f));
-            entry.Insert(0, pile.DOScale(1, pileDuration).SetEase(Ease.OutBack));
-            entry.Insert(0, rewardText.transform.DOScale(1, pileDuration).SetEase(Ease.OutBack));
-            entry.Insert(buttonStart, nextButton.transform.DOScale(1, buttonDuration).SetEase(Ease.OutBack));
-            entry.InsertCallback(0, () => ambient.Restart());
-            entry.InsertCallback(buttonStart + buttonDuration, () => { nextButton.interactable = true; buttonIdle.Restart(); });
+            entry.Insert(headerDelay, header.DOScale(1, headerDuration).SetEase(Ease.OutBack, 1.7f));
+            entry.Insert(pileDelay, pile.DOScale(1, pileDuration).SetEase(Ease.OutBack));
+            entry.Insert(pileDelay, rewardText.transform.DOScale(1, pileDuration).SetEase(Ease.OutBack));
+            entry.Insert(buttonDelay, nextButton.transform.DOScale(1, buttonDuration).SetEase(Ease.OutBack));
+            entry.InsertCallback(pileDelay, () => ambient.Restart());
+            entry.InsertCallback(buttonDelay + buttonDuration, () => { nextButton.interactable = true; buttonIdle.Restart(); });
             ambient = Reusable().SetLoops(-1);
             ambient.AppendInterval(idleDuration * 2);
             buttonIdle = nextButton.transform.DOScale(1.05f, idleDuration).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetUpdate(true).SetAutoKill(false).Pause();
@@ -124,8 +148,9 @@ namespace BusJam.UI
             for (int i = 0; i < confetti.Length; i++)
             {
                 var image = confetti[i]; var color = image.color; color.a = 1; image.color = color;
-                image.rectTransform.anchoredPosition = new Vector2(0, 350);
+                image.rectTransform.anchoredPosition = confettiStarts != null ? confettiStarts[i] : Vector2.zero;
                 image.rectTransform.localRotation = Quaternion.identity;
+                image.rectTransform.localScale = Vector3.zero;
             }
             foreach (var image in sparkles) image.color = Color.white;
             foreach (var image in coins) image.gameObject.SetActive(false);
