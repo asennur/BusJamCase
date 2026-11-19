@@ -34,6 +34,9 @@ namespace BusJam.Gameplay
 
         public Bus ActiveBus => queue.Count > 0 ? queue[0] : null;
 
+        /// <summary>Kapıdaki/kapıya gelmekte olan aktif otobüsten sonra kuyrukta duran otobüs (yoksa null).</summary>
+        public Bus NextBus => queue.Count > 1 ? queue[1] : null;
+
         public event Action<Bus> BusArrived;
         public event Action<Bus> BusDeparted;
         public event Action AllBusesDone;

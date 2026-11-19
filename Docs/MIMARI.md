@@ -50,7 +50,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - **Dokunma:**
   1. Oyun `Playing` değilse yok say.
   2. Erişilemezse → kızgın yüz.
-  3. Hedef seç: otobüs kapıdaysa, rengi aynıysa ve boş (rezerve edilmemiş) koltuk varsa → koltuk. Yoksa boş slot. O da yoksa → kızgın yüz. Slotların hepsi rezerve/doluysa otobüs hedefi seçilmez; yolcu slot sırasının arkasına koşar, varınca Kaybet (yer) (Asen kararı, 19 Kasım).
+  3. Hedef seç: otobüs kapıdaysa, rengi aynıysa ve boş (rezerve edilmemiş) koltuk varsa → koltuk. Yoksa boş slot. Slotların hepsi rezerve/doluysa: devam eden koşular ve otobüs gelişleri sonunda bir slot açılacaksa (slottaki/slota koşan bir yolcunun rengi kapıdaki/kapıya gelen otobüsle, o dolacaksa sıradaki otobüsle eşleşiyorsa) yolcu slot sırasının arkasına (taşma kuyruğu, FIFO) koşar, orada bekler; slot açılınca sırayla yerleşir. Hiç açılmayacaksa dokunma hiçbir şey yapmaz, kızgın yüz de yok (Asen kararı, 19 Kasım; ZD2, ZD'deki "varışta hemen fail" iptal).
   4. Hedefi **hemen rezerve et**, yolcunun hücresini **hemen boşalt**, erişilebilirliği yeniden hesapla (outline güncellenir).
   5. Yolcu yol boyunca akıcı koşar (DOTween path). Otobüse varınca koltuğa ışınlanır.
 - Input kilidi yok: art arda dokunulan yolcular aynı anda koşar.
@@ -59,7 +59,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - **Gizli yolcu:** erişilemezken gri ve "?" görünür, rengi bilinmez. Erişilebilir olduğu an rengi açılır ve bir daha gizlenmez.
 - **Tünel:** bir hücre kaplar, yürünmez (engel gibi). Bir yöne bakar; baktığı komşu hücre ağzıdır. İçinde levelde tanımlı sıralı yolcu kuyruğu vardır. Ağız hücresi boşaldığı an (oradaki yolcu dokunulup kalktığında) kuyruktaki sıradaki yolcu ağız hücresine çıkar, erişilebilirlik yeniden hesaplanır. Kuyruk bitince tünel engel olarak kalır.
 - **Kazan:** son otobüs dolup gitti.
-- **Kaybet (yer):** Slotlar doluyken dokunulan yolcu slotların arkasına vardığında ya da koşular ve otobüs gelişi bittiğinde slot açılmamışsa kaybedilir; griddeki renkler sonucu değiştirmez (Asen kararı, 19 Kasım).
+- **Kaybet (yer):** Devam eden koşular ve otobüsün kapıya gelişi sonuçlandıktan sonra hâlâ boş slot yoksa (taşma kuyruğunda bekleyen varsa dahil) kaybedilir; griddeki renkler sonucu değiştirmez (Asen kararı, 19 Kasım; ZD2).
 - **Kaybet (süre):** timer 0.
 
 ## 4. Veri (`BusJam.Level`)

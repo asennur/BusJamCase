@@ -43,6 +43,9 @@ namespace BusJam.Gameplay
         public bool IsHidden { get; private set; }
         public PassengerState State { get; private set; }
 
+        /// <summary>Taşma kuyruğunda beklerken bir slot kendisine ayrıldıysa slot index'i; yoksa -1 (GameplayController kullanır).</summary>
+        public int PendingSlotIndex { get; set; } = -1;
+
         private void Awake()
         {
             bodyRestPosition = body.transform.localPosition;
@@ -95,6 +98,7 @@ namespace BusJam.Gameplay
             revealTween?.Kill();
             transform.localRotation = Quaternion.identity;
             transform.localScale = Vector3.one;
+            PendingSlotIndex = -1;
         }
 
         /// <summary>Erişilebilir olan gizli yolcunun rengi açılır: gerçek materyal, "?" kalkar, kısa punch. Bir kez açılan geri gizlenmez.</summary>
@@ -121,7 +125,7 @@ namespace BusJam.Gameplay
         /// <summary>Bekleme slotuna vardı; otobüs gelince WaitingArea bunu otobüse koşturur.</summary>
         public void SetInSlot() => State = PassengerState.InSlot;
 
-        /// <summary>Slotlar doluyken taşıp WaitingArea'nın arkasında durdu; oyun o anda Fail olur (GameplayController.OnOverflowArrived).</summary>
+        /// <summary>Slotlar doluyken taşıp WaitingArea'nın taşma kuyruğunda bekliyor; bir slot ayrılınca GameplayController onu oradan alır.</summary>
         public void SetIdle() => State = PassengerState.Idle;
 
         /// <summary>Otobüste koltuğa ışınlandı; koltuğa parent'lanır, otobüsle birlikte hareket eder.</summary>
@@ -169,6 +173,13 @@ namespace BusJam.Gameplay
         {
             runTween?.Kill();
             runTween = transform.DOLocalMove(localTarget, 0.3f).SetEase(Ease.OutQuad);
+        }
+
+        /// <summary>Taşma kuyruğunda beklerken öndeki biri ayrılınca bir adım öne kayar (kısa tween).</summary>
+        public void ShiftOverflow(Vector3 worldTarget)
+        {
+            runTween?.Kill();
+            runTween = transform.DOMove(worldTarget, 0.25f).SetEase(Ease.OutQuad);
         }
 
         /// <summary>Üstte kısa süre kırmızı ikon: zıplar, kaybolur. Art arda tıklamada tween yeniden başlar.</summary>

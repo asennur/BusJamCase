@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BusJam.Core;
+using BusJam.Level;
 using UnityEngine;
 
 namespace BusJam.Gameplay
@@ -8,6 +9,8 @@ namespace BusJam.Gameplay
     /// <summary>
     /// Bekleme slotları: her zaman 7 karo (Asen kuralı), uçtaki ikisi level numarasına göre kilitli/açık.
     /// Rezervasyon, slot pozisyonu, otobüs gelince aynı renk yolcuları otobüse koşturur.
+    /// Taşma kuyruğu (slotlar doluyken dokunulan yolcular) GameplayController'da tutulur; burası yalnız
+    /// slot açıldığını bildirir (SlotOpened) ve dışarıdan verilen yolcuyu doğrudan bir slota yazar.
     /// </summary>
     public class WaitingArea : MonoBehaviour
     {
@@ -26,7 +29,9 @@ namespace BusJam.Gameplay
         private readonly List<GameObject> lockIcons = new List<GameObject>();
         private readonly List<Vector3> singlePointPath = new List<Vector3>(1) { Vector3.zero };
         private Material unlockedMaterial;
-        private int overflowCount;
+
+        /// <summary>Bir slot otobüse biniş yüzünden boşalınca slotIndex ile atılır (GameplayController taşma kuyruğunu bu slota atar).</summary>
+        public event Action<int> SlotOpened;
 
         public bool HasFreeSlot
         {
@@ -42,7 +47,6 @@ namespace BusJam.Gameplay
         // Karolar her levelde aynı 7 tane; yalnız kilit durumu ve görünümü güncellenir, Destroy/Instantiate yok.
         public void Setup(int levelNumber)
         {
-            overflowCount = 0;
             Array.Clear(slots, 0, slots.Length);
 
             for (int i = 0; i < GameRules.VisibleSlotCount; i++)
@@ -69,12 +73,17 @@ namespace BusJam.Gameplay
         public Vector3 SlotPosition(int index) =>
             transform.TransformPoint(new Vector3((index - (GameRules.VisibleSlotCount - 1) * 0.5f) * slotSpacing, 0f, 0f));
 
-        /// <summary>Slotlar doluyken dokunulan yolcunun koşacağı, slot sırasının grid tarafına dizilen nokta (Asen kararı, 19 Kasım).</summary>
-        public Vector3 OverflowPosition()
+        /// <summary>Taşma kuyruğundaki sıraya (0 = en önde) göre, slot şeridinin grid tarafında dizilen nokta (Asen kararı, 19 Kasım).</summary>
+        public Vector3 OverflowPosition(int queueIndex) =>
+            transform.TransformPoint(new Vector3(0f, 0f, -(overflowBaseDistance + queueIndex * overflowSpacing)));
+
+        /// <summary>Slottaki ya da slota koşmakta olan (rezerve edilmiş) bir yolcu bu renkte mi.</summary>
+        public bool HasQueuedColor(PassengerColor color)
         {
-            Vector3 point = transform.TransformPoint(new Vector3(0f, 0f, -(overflowBaseDistance + overflowCount * overflowSpacing)));
-            overflowCount++;
-            return point;
+            for (int i = 0; i < slots.Length; i++)
+                if (slots[i] != null && slots[i].Color == color)
+                    return true;
+            return false;
         }
 
         /// <summary>Boş ve açık slotu hemen rezerve eder (passenger referansı anında yazılır).</summary>
@@ -94,6 +103,9 @@ namespace BusJam.Gameplay
             return false;
         }
 
+        /// <summary>Taşma kuyruğundan gelen yolcuyu doğrudan bu slota yazar (GameplayController zaten hangi slotun boşaldığını SlotOpened ile öğrendi).</summary>
+        public void ReserveSlotDirect(int slotIndex, Passenger passenger) => slots[slotIndex] = passenger;
+
         /// <summary>Kapıdaki (IsAtDoor) otobüsün rengiyle eşleşen slottaki yolcuları, boş koltuk kalmayana kadar otobüse koşturur. Döndürdüğü sayı, koşmaya başlayan yolcu sayısıdır (çağıran runningCount'u buna göre artırmalı).</summary>
         public int SendMatchingPassengers(Bus bus, Action<Bus, int, Passenger> onSeatArrived)
         {
@@ -106,6 +118,7 @@ namespace BusJam.Gameplay
                     continue;
 
                 slots[i] = null;
+                SlotOpened?.Invoke(i);
                 Transform seatPoint = bus.ReserveSeat(out int seatIndex);
                 startedCount++;
 
