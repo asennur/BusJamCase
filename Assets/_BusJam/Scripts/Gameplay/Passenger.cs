@@ -20,6 +20,7 @@ namespace BusJam.Gameplay
         private static readonly int RunHash = Animator.StringToHash("Run");
         private static readonly int SitHash = Animator.StringToHash("Sit");
         private static readonly int WaveHash = Animator.StringToHash("Wave");
+        private static readonly int SlotIdleHash = Animator.StringToHash("SlotIdle");
 
         [SerializeField] private Renderer body;
         [SerializeField] private Transform visualRoot;
@@ -234,7 +235,7 @@ namespace BusJam.Gameplay
             State = PassengerState.InSlot;
             transform.rotation = facing;
             transform.localScale = Vector3.one * scale;
-            Play(IdleHash);
+            Play(WaitingHash);
         }
 
         /// <summary>Waits in overflow until GameplayController reserves a slot.</summary>
@@ -242,8 +243,11 @@ namespace BusJam.Gameplay
         {
             State = PassengerState.Idle;
             transform.rotation = facing;
-            Play(IdleHash);
+            Play(WaitingHash);
         }
+
+        // Slot and overflow waiting use the SlotIdle pose when the controller has it; grid passengers keep Idle.
+        private int WaitingHash => animator != null && animator.HasState(0, SlotIdleHash) ? SlotIdleHash : IdleHash;
 
         /// <summary>Parents to the seat while retaining the grid's full world scale.</summary>
         public void SetSeated(Transform seatPoint)
