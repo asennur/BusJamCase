@@ -14,6 +14,7 @@ namespace BusJam.UI
         [SerializeField] private GameObject completePanel;
         [SerializeField] private GameObject failPanel;
         [SerializeField] private GameObject noLivesPanel;
+        [SerializeField] private GameObject readyPanel;
 
         private void OnEnable()
         {
@@ -38,7 +39,8 @@ namespace BusJam.UI
             if (coinCounter != null) coinCounter.SetActive(state == GameState.Complete);
             startPanel.SetActive(start && livesSystem.Lives > 0);
             noLivesPanel.SetActive(start && livesSystem.Lives == 0);
-            hudPanel.SetActive(state == GameState.Playing);
+            hudPanel.SetActive(state == GameState.Ready || state == GameState.Playing);
+            readyPanel.SetActive(state == GameState.Ready);
             completePanel.SetActive(state == GameState.Complete);
             failPanel.SetActive(state == GameState.Fail);
         }

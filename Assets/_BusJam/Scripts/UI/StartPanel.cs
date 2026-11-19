@@ -15,10 +15,10 @@ namespace BusJam.UI
         [SerializeField] private TMP_Text levelText;
         private Tween pulse;
 
-        private void Awake() => startButton.onClick.AddListener(gameManager.StartPlaying);
+        private void Awake() => startButton.onClick.AddListener(gameManager.PrepareLevel);
         private void OnDestroy()
         {
-            startButton.onClick.RemoveListener(gameManager.StartPlaying);
+            startButton.onClick.RemoveListener(gameManager.PrepareLevel);
             pulse?.Kill();
         }
 

@@ -19,6 +19,7 @@ namespace BusJam.Core
 
         private int currentLevelIndex;
         private LevelData currentLevel;
+        private int readyFrame;
 
         public GameState State { get; private set; }
         public Board Board { get; private set; }
@@ -53,12 +54,16 @@ namespace BusJam.Core
 
         private void OnEnable()
         {
+            if (inputHandler != null)
+                inputHandler.ScreenTapped += OnScreenTapped;
             if (levelTimer != null)
                 levelTimer.Expired += OnTimerExpired;
         }
 
         private void OnDisable()
         {
+            if (inputHandler != null)
+                inputHandler.ScreenTapped -= OnScreenTapped;
             if (levelTimer != null)
                 levelTimer.Expired -= OnTimerExpired;
         }
@@ -72,13 +77,18 @@ namespace BusJam.Core
             LevelLoaded?.Invoke(CurrentLevelNumber, currentLevel);
         }
 
-        // Retrying publishes Start again so the UI resets; the timer runs only while Playing.
+        // Ready displays the full constraint; only Playing advances the timer.
         private void SetState(GameState newState)
         {
             State = newState;
 
             if (newState == GameState.Playing)
                 levelTimer.StartTimer(currentLevel.timeLimit);
+            else if (newState == GameState.Ready)
+            {
+                readyFrame = Time.frameCount;
+                levelTimer.PrepareTimer(currentLevel.timeLimit);
+            }
             else
                 levelTimer.StopTimer();
 
@@ -91,12 +101,24 @@ namespace BusJam.Core
                 Fail(FailReason.OutOfTime);
         }
 
-        public void StartPlaying()
+        public void PrepareLevel()
         {
             livesSystem.Refresh();
             if (State != GameState.Start || livesSystem.Lives == 0)
                 return;
 
+            SetState(GameState.Ready);
+        }
+
+        private void OnScreenTapped()
+        {
+            if (Time.frameCount > readyFrame)
+                StartPlaying();
+        }
+
+        public void StartPlaying()
+        {
+            if (State != GameState.Ready) return;
             SetState(GameState.Playing);
             PlayingStarted?.Invoke();
         }
@@ -126,13 +148,19 @@ namespace BusJam.Core
         public void LoadNext()
         {
             LoadLevel(currentLevelIndex);
-            SetState(GameState.Start);
+            PrepareLoadedLevel();
         }
 
         public void Retry()
         {
             LoadLevel(currentLevelIndex);
-            SetState(GameState.Start);
+            PrepareLoadedLevel();
+        }
+
+        private void PrepareLoadedLevel()
+        {
+            livesSystem.Refresh();
+            SetState(livesSystem.Lives > 0 ? GameState.Ready : GameState.Start);
         }
 
         public void ResetProgress()

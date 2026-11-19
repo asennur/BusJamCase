@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace BusJam.Gameplay
 {
-    /// <summary>Dokunma girişini yolcu tap'ı veya ekran tap'ına dönüştürür.</summary>
+    /// <summary>Dispatches passenger input before the screen tap that starts play.</summary>
     public class InputHandler : MonoBehaviour
     {
         [SerializeField] private Camera cam;
@@ -18,8 +18,7 @@ namespace BusJam.Gameplay
                 HandleTap();
         }
 
-        // Önce PassengerTapped, sonra ScreenTapped: Start ekranında bir yolcuya denk gelen başlatma
-        // dokunuşu önce oyunu başlatırsa (ScreenTapped önce olsaydı) aynı dokunuş yolcuyu da koşturur.
+        // Passenger input runs while still Ready; the screen event then starts play.
         private void HandleTap()
         {
             var ray = cam.ScreenPointToRay(Input.mousePosition);

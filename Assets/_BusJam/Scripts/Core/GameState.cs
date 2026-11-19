@@ -5,6 +5,7 @@ namespace BusJam.Core
         Start,
         Playing,
         Complete,
-        Fail
+        Fail,
+        Ready
     }
 }

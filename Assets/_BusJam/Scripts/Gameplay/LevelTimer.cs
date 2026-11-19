@@ -32,9 +32,15 @@ namespace BusJam.Gameplay
 
         public void StartTimer(float duration)
         {
+            PrepareTimer(duration);
+            enabled = true;
+        }
+
+        public void PrepareTimer(float duration)
+        {
             remaining = duration;
             lastSecond = -1;
-            enabled = true;
+            enabled = false;
             UpdateDisplay();
         }
 

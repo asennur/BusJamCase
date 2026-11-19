@@ -20,12 +20,12 @@ namespace BusJam.UI
         [SerializeField, Min(0)] private int coinReward = 25;
         [SerializeField] private float confettiDuration = 1.4f, dimStart = .15f, dimDuration = .25f;
         [SerializeField] private float headerStart = .3f, headerDuration = .35f;
-        [SerializeField] private float pileStart = .7f, pileDuration = .3f, countDuration = .9f;
+        [SerializeField] private float pileDuration = .3f;
         [SerializeField] private float buttonStart = 1.1f, buttonDuration = .3f, idleDuration = .7f;
         [SerializeField] private float sparkleDuration = .6f, rayPulseDuration = .9f, rayDegreesPerSecond = 20;
         [SerializeField] private float flightDuration = .6f, flightStagger = .05f, flightArc = 170;
         private Sequence entry, ambient, transfer;
-        private int shownReward = -1, startCoins;
+        private int shownReward = -1;
         private bool collecting, credited;
         private readonly Vector3[] flightStarts = new Vector3[10];
         private readonly Vector3[] flightEnds = new Vector3[10];
@@ -55,10 +55,10 @@ namespace BusJam.UI
             }
             entry.Insert(dimStart, dim.DOFade(.65f, dimDuration));
             entry.Insert(headerStart, header.DOScale(1, headerDuration).SetEase(Ease.OutBack, 1.7f));
-            entry.Insert(pileStart, pile.DOScale(1, pileDuration).SetEase(Ease.OutBack));
-            entry.Insert(pileStart, DOVirtual.Float(0, coinReward, countDuration, v => SetReward(Mathf.RoundToInt(v))).SetEase(Ease.Linear));
+            entry.Insert(0, pile.DOScale(1, pileDuration).SetEase(Ease.OutBack));
+            entry.Insert(0, rewardText.transform.DOScale(1, pileDuration).SetEase(Ease.OutBack));
             entry.Insert(buttonStart, nextButton.transform.DOScale(1, buttonDuration).SetEase(Ease.OutBack));
-            entry.InsertCallback(pileStart, () => ambient.Restart());
+            entry.InsertCallback(0, () => ambient.Restart());
             entry.InsertCallback(buttonStart + buttonDuration, () => { nextButton.interactable = true; buttonIdle.Restart(); });
             ambient = Reusable().SetLoops(-1);
             ambient.AppendInterval(idleDuration * 2);
@@ -80,7 +80,7 @@ namespace BusJam.UI
                     point.y += Mathf.Sin(t * Mathf.PI) * flightArc * transform.lossyScale.y;
                     coins[index].rectTransform.position = point;
                     coins[index].gameObject.SetActive(t < 1);
-                }).SetEase(Ease.InOutSine).OnComplete(() => coinCounter.Arrive((int)System.Math.Min(int.MaxValue, (long)startCoins + (long)coinReward * (index + 1) / coins.Length))));
+                }).SetEase(Ease.InOutSine));
             }
             transfer.OnComplete(() =>
             {
@@ -93,7 +93,7 @@ namespace BusJam.UI
             if (credited) return false;
             credited = true;
             SaveSystem.AddCoins(coinReward);
-            coinCounter.Show(SaveSystem.Coins);
+            coinCounter.Arrive(SaveSystem.Coins);
             return true;
         }
         private Tween rayRotation, rayPulse, buttonIdle;
@@ -119,7 +119,8 @@ namespace BusJam.UI
             dim.color = new Color(26 / 255f, 11 / 255f, 46 / 255f, 0);
             rays.localRotation = Quaternion.identity;
             var rayImage = rays.GetComponent<Image>(); rayImage.color = new Color(1, 1, 1, .7f);
-            shownReward = -1; SetReward(0);
+            shownReward = -1; SetReward(coinReward);
+            rewardText.transform.localScale = Vector3.zero;
             for (int i = 0; i < confetti.Length; i++)
             {
                 var image = confetti[i]; var color = image.color; color.a = 1; image.color = color;
@@ -133,7 +134,6 @@ namespace BusJam.UI
         {
             if (collecting) return;
             collecting = true; nextButton.interactable = false;
-            startCoins = SaveSystem.Coins;
             Canvas.ForceUpdateCanvases();
             for (int i = 0; i < coins.Length; i++)
             {
@@ -157,6 +157,7 @@ namespace BusJam.UI
             dim.color = new Color(26 / 255f, 11 / 255f, 46 / 255f, .65f);
             foreach (var image in confetti) { var c = image.color; c.a = 0; image.color = c; }
             SetReward(coinReward); nextButton.interactable = true;
+            rewardText.transform.localScale = Vector3.one;
         }
     }
 }

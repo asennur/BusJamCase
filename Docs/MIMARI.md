@@ -95,7 +95,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 
 | Sınıf | Tür | Sorumluluk |
 | --- | --- | --- |
-| `GameManager` (Core) | MonoBehaviour | Akış ve durum (`GameState { Start, Playing, Complete, Fail }`). Level yükle, kaydet, sonraki/tekrar. Event: `StateChanged`, `LevelLoaded(int levelNumber, LevelData)`. |
+| `GameManager` (Core) | MonoBehaviour | Controls `GameState { Start, Ready, Playing, Complete, Fail }`, level loading, progress, next and retry. Events: `StateChanged`, `PlayingStarted`, `LevelLoaded(int levelNumber, LevelData)`. |
 | `LivesSystem` (Core) | MonoBehaviour | Persistent life count, offline UTC regeneration, rollback guard and changed-count/countdown events (Asen rule, 19 November). |
 | `GameRules` (Core) | static | Sabitler (`BusCapacity = 3`). |
 | `Board` (Gameplay) | düz C# sınıfı | Hücre doluluğu (hücredeki `Passenger` referansı), yürünebilirlik, `TryFindPath` (BFS), `ComputeReachable` (çıkıştan tek flood-fill). MonoBehaviour değil, sahneye bağlı değil. BFS kuyruk/parent dizileri bir kez ayrılır, tekrar kullanılır. |
@@ -108,9 +108,11 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 | `LevelTimer` (Gameplay) | MonoBehaviour | Yalnız çalışırken `enabled`. Görünen saniye değişince `TimeChanged`, 0'da `Expired`. |
 | `SaveSystem` (Save) | static | PlayerPrefs: son level indeksi. |
 | `UIManager` (UI) | MonoBehaviour | `StateChanged`'i dinler, panelleri açar/kapar. Paneller birbirini bilmez. |
-| `StartPanel`, `HudPanel`, `CompletePanel`, `FailPanel` (UI) | MonoBehaviour | Start: "Tap to start" + süre. HUD: sol üstte "Level N", timer. Complete: Next. Fail: sebep + Retry. Metin yalnız değer değişince güncellenir. |
+| `StartPanel`, `ReadyPanel`, `HudPanel`, `CompletePanel`, `FailPanel` (UI) | MonoBehaviour | Start: Level button. Ready: centered pulsing Fredoka Bold "Tap to start" over a light dim. HUD: level and timer. Complete: immediate +25 pop; flying coins credit once at the final arrival, with one counter punch and one save. Fail: reason and Retry. |
 
-Akış: `GameManager` açılışta kayıtlı leveli yükler → `Start` → ekrana dokunulunca `Playing` + timer başlar → `GameplayController` sonucu → `Complete` (kaydet, indeks +1) ya da `Fail` → UI butonu → `GameManager.LoadNext/Retry`.
+Flow: `GameManager` loads the saved level into `Start` (menu). The Level button checks lives and enters `Ready`: board, buses and HUD are visible with the full stopped timer. The next tap anywhere enters `Playing`, removes the overlay and starts the timer. Passenger input runs before screen input, so this tap cannot move a passenger. The menu activation frame cannot also start play. Retry, Restart and Next load into `Ready`; zero lives routes to Start/NoLives. `PlayingStarted` shows the Level 1/6/8 tutorial only after the ready tap.
+
+Decision: Ready is an explicit state, and coins use a single update with a pop/punch instead of numerical counting (19 November 2026, ZTS). ZTS validation runs in Edit mode only by explicit request.
 
 ## 6. Level Editor sahnesi (`Scenes/LevelEditor`)
 
