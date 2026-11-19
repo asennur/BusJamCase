@@ -7207,7 +7207,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: a6f899608bbd6894c91c04e136da1c79, type: 2}
   - {fileID: 2100000, guid: 8b0665dba53bd5247adffc0e89b986ce, type: 2}
   doorPoint: {fileID: 577869125}
-  queueSpacing: 4.4
+  queueSpacing: 4.8
   exitOffsetX: 6
   moveDuration: 0.6
   visibleQueueCount: 3
