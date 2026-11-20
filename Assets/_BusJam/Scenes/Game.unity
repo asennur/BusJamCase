@@ -4600,6 +4600,7 @@ MonoBehaviour:
   failPanel: {fileID: 1165738345}
   noLivesPanel: {fileID: 1653669552}
   readyPanel: {fileID: 1202597088}
+  noLivesDuration: 3.5
 --- !u!114 &660659639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12286,7 +12287,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.06, g: 0.03, b: 0.16, a: 0.72}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:

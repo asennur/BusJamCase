@@ -1,9 +1,10 @@
+using System.Collections;
 using BusJam.Core;
 using UnityEngine;
 
 namespace BusJam.UI
 {
-    /// <summary>Selects the current panel and gates the start screen on available lives.</summary>
+    /// <summary>Selects the current panel and shows a temporary warning when play needs lives.</summary>
     public class UIManager : MonoBehaviour
     {
         [SerializeField] private GameManager gameManager;
@@ -15,30 +16,61 @@ namespace BusJam.UI
         [SerializeField] private GameObject failPanel;
         [SerializeField] private GameObject noLivesPanel;
         [SerializeField] private GameObject readyPanel;
+        [SerializeField, Min(0f)] private float noLivesDuration = 3.5f;
+
+        private Coroutine noLivesWarning;
+        private float hideAt;
 
         private void OnEnable()
         {
             gameManager.StateChanged += OnStateChanged;
+            gameManager.PlayBlockedNoLives += ShowNoLives;
             livesSystem.Changed += OnLivesChanged;
         }
 
         private void OnDisable()
         {
             gameManager.StateChanged -= OnStateChanged;
+            gameManager.PlayBlockedNoLives -= ShowNoLives;
             livesSystem.Changed -= OnLivesChanged;
+            HideNoLives();
         }
 
         private void OnLivesChanged(int lives, int seconds)
         {
-            if (gameManager.State == GameState.Start) OnStateChanged(GameState.Start);
+            if (lives > 0) HideNoLives();
+        }
+
+        private void ShowNoLives()
+        {
+            if (gameManager.State != GameState.Start) return;
+            hideAt = Time.unscaledTime + noLivesDuration;
+            noLivesPanel.SetActive(true);
+            if (noLivesWarning == null) noLivesWarning = StartCoroutine(HideNoLivesWhenDue());
+        }
+
+        // Repeated presses only extend the deadline; the running coroutine is reused.
+        private IEnumerator HideNoLivesWhenDue()
+        {
+            do { yield return null; }
+            while (Time.unscaledTime < hideAt);
+            noLivesWarning = null;
+            noLivesPanel.SetActive(false);
+        }
+
+        private void HideNoLives()
+        {
+            if (noLivesWarning != null) StopCoroutine(noLivesWarning);
+            noLivesWarning = null;
+            noLivesPanel.SetActive(false);
         }
 
         private void OnStateChanged(GameState state)
         {
             bool start = state == GameState.Start;
             if (coinCounter != null) coinCounter.SetActive(state == GameState.Complete);
-            startPanel.SetActive(start && livesSystem.Lives > 0);
-            noLivesPanel.SetActive(start && livesSystem.Lives == 0);
+            startPanel.SetActive(start);
+            HideNoLives();
             hudPanel.SetActive(state == GameState.Ready || state == GameState.Playing);
             readyPanel.SetActive(state == GameState.Ready);
             completePanel.SetActive(state == GameState.Complete);

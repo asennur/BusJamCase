@@ -29,6 +29,7 @@ namespace BusJam.Core
 
         public event Action<GameState> StateChanged;
         public event Action PlayingStarted;
+        public event Action PlayBlockedNoLives;
         public event Action<int, LevelData> LevelLoaded;
 
         private void Awake()
@@ -105,8 +106,12 @@ namespace BusJam.Core
         public void PrepareLevel()
         {
             livesSystem.Refresh();
-            if (State != GameState.Start || livesSystem.Lives == 0)
+            if (State != GameState.Start) return;
+            if (livesSystem.Lives == 0)
+            {
+                PlayBlockedNoLives?.Invoke();
                 return;
+            }
 
             SetState(GameState.Ready);
         }
