@@ -1,0 +1,2 @@
+Fredoka-Bold SDF|sampling=96|padding=14|2048x2048|Alpha8|glyphs=191|editor texture bytes=8389288
+LilitaOne SDF|sampling=96|padding=14|2048x2048|Alpha8|glyphs=190|editor texture bytes=8389288

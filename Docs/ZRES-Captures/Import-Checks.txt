@@ -1,0 +1,2 @@
+3 expected validation failures caught (undersized cap, mipmaps, wrong Android format); final native import validation passed.
+Undersized panel atlas rejected as expected; atlas profile restored and full source/atlas validation passed.

@@ -12,6 +12,8 @@ namespace BusJam.Gameplay
     /// </summary>
     public class BoardView : MonoBehaviour
     {
+        public event System.Action<LevelData> Built;
+        public float CellSize => cellSize;
         [SerializeField] private Passenger passengerPrefab;
         [SerializeField] private Transform tilePrefab;
         [SerializeField] private TunnelView tunnelPrefab;
@@ -136,6 +138,7 @@ namespace BusJam.Gameplay
 
             BuildRim(level);
             BuildBase(level);
+            Built?.Invoke(level);
         }
 
         // Tek mesh yalnız zemin hücrelerini örter; Void ve çukurlar açık kalır.

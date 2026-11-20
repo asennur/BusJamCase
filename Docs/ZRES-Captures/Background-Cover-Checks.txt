@@ -1,0 +1,1 @@
+20/20 Start and NoLives full-screen background coverage checks passed at all ten requested dimensions.

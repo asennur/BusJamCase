@@ -1,0 +1,1 @@
+Unity 2022.3.19f1; compilation finished; Edit mode; final Console read: 0 entries; disposable preview roots: 0; Sprite Packer: AlwaysOnAtlas.

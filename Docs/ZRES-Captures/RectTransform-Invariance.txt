@@ -1,0 +1,2 @@
+Game: 160 RectTransforms; changed=0
+LevelEditor: 100 RectTransforms; changed=0

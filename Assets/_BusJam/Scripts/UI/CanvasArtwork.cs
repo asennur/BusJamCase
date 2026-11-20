@@ -11,9 +11,20 @@ namespace BusJam.UI
         [SerializeField] private Image image;
         [SerializeField] private Rect frame = new Rect(0, 0, 1, 1);
         private bool applying;
+        private Vector2 fittedCanvasSize;
 
-        private void OnEnable() => Fit();
+        private void OnEnable()
+        {
+            Canvas.willRenderCanvases += OnCanvasRendering;
+            Fit();
+        }
+        private void OnDisable() => Canvas.willRenderCanvases -= OnCanvasRendering;
         private void OnRectTransformDimensionsChange() => Fit();
+
+        private void OnCanvasRendering()
+        {
+            if (canvasRect != null && canvasRect.rect.size != fittedCanvasSize) Fit();
+        }
 
         public void Fit()
         {
@@ -23,6 +34,7 @@ namespace BusJam.UI
             {
                 var rect = (RectTransform)transform;
                 var canvas = canvasRect.rect;
+                fittedCanvasSize = canvas.size;
                 var size = image.sprite.rect.size;
                 float scale = Mathf.Max(canvas.width * frame.width / size.x, canvas.height * frame.height / size.y);
                 Vector2 center = canvas.min + Vector2.Scale(canvas.size, frame.center);

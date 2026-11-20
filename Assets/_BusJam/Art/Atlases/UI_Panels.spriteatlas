@@ -1,0 +1,120 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: UI_Panels
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 0
+      compressionQuality: 0
+      maxTextureSize: 0
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 4096
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 4
+      m_TextureCompression: 1
+      m_CompressionQuality: 100
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_IgnorePlatformSupport: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    - serializedVersion: 3
+      m_BuildTarget: Android
+      m_MaxTextureSize: 4096
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 48
+      m_TextureCompression: 1
+      m_CompressionQuality: 100
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 1
+      m_IgnorePlatformSupport: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    - serializedVersion: 3
+      m_BuildTarget: iPhone
+      m_MaxTextureSize: 4096
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 48
+      m_TextureCompression: 1
+      m_CompressionQuality: 100
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 1
+      m_IgnorePlatformSupport: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    - serializedVersion: 3
+      m_BuildTarget: Standalone
+      m_MaxTextureSize: 4096
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 4
+      m_TextureCompression: 1
+      m_CompressionQuality: 100
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 1
+      m_IgnorePlatformSupport: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 0
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 21300000, guid: a0925cf83a23e0642b1fb63a26f47daf, type: 3}
+    - {fileID: 21300000, guid: aa322e176deffbe439239feedc6214a7, type: 3}
+    - {fileID: 21300000, guid: 444beaf4329c79e4bbe754d56ecacb2d, type: 3}
+    - {fileID: 21300000, guid: ccfd71c26abe2934681145d4618d40f6, type: 3}
+    - {fileID: 21300000, guid: 7da9b0b3c09b8a44c9556517184dad22, type: 3}
+    - {fileID: 21300000, guid: d57b6d6666172ed448628eb9da8bb95b, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys:
+    - ccfd71c26abe2934681145d4618d40f6: 21300000
+    - 7da9b0b3c09b8a44c9556517184dad22: 21300000
+    - 444beaf4329c79e4bbe754d56ecacb2d: 21300000
+    - d57b6d6666172ed448628eb9da8bb95b: 21300000
+    - aa322e176deffbe439239feedc6214a7: 21300000
+    - a0925cf83a23e0642b1fb63a26f47daf: 21300000
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: ccfd71c26abe2934681145d4618d40f6, type: 3}
+  - {fileID: 21300000, guid: 7da9b0b3c09b8a44c9556517184dad22, type: 3}
+  - {fileID: 21300000, guid: 444beaf4329c79e4bbe754d56ecacb2d, type: 3}
+  - {fileID: 21300000, guid: d57b6d6666172ed448628eb9da8bb95b, type: 3}
+  - {fileID: 21300000, guid: aa322e176deffbe439239feedc6214a7, type: 3}
+  - {fileID: 21300000, guid: a0925cf83a23e0642b1fb63a26f47daf, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - counter_plate
+  - panel_header
+  - btn_yellow
+  - panel_tip
+  - btn_red
+  - btn_green
+  m_RenderDataMap: {}
+  m_Tag: UI_Panels
+  m_IsVariant: 0
