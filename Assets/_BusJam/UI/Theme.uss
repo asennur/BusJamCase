@@ -1,0 +1,136 @@
+.ui-root {
+    flex-grow: 1;
+    -unity-font-definition: url("Fonts/Fredoka-Bold.asset");
+    font-size: 58px;
+    color: white;
+    -unity-text-align: middle-center;
+    -unity-text-outline-color: rgb(48, 25, 72);
+    -unity-text-outline-width: 2px;
+    text-shadow: 0 4px 0 rgba(27, 12, 45, 0.65);
+}
+.fill { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+.hidden { display: none; }
+.safe-area { flex-grow: 1; }
+.start-screen { justify-content: flex-start; }
+.menu-background {
+    background-image: url("../Art/Textures/bg_menu.png");
+    -unity-background-scale-mode: scale-and-crop;
+}
+.ready-dim { background-color: rgba(10, 15, 31, 0.22); }
+.top-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 42px;
+    padding-right: 42px;
+    padding-top: 22px;
+    height: 202px;
+    flex-shrink: 0;
+}
+.start-bar { justify-content: flex-end; }
+.counter {
+    flex-direction: row;
+    align-items: center;
+    width: 290px;
+    height: 116px;
+    margin-right: 26px;
+    padding-right: 20px;
+    background-image: url("../Art/UI/panel_inner.png");
+    -unity-slice-left: 330; -unity-slice-right: 190;
+    -unity-slice-top: 235; -unity-slice-bottom: 175;
+    -unity-slice-scale: 0.2;
+}
+.counter-text { flex-grow: 1; font-size: 48px; padding: 0; margin: 0; }
+.heart-icon, .coin-icon { width: 110px; height: 150px; flex-shrink: 0; -unity-background-scale-mode: scale-to-fit; }
+.heart-icon { background-image: url("../Art/UI/icon_heart.png"); justify-content: center; }
+.lives-count { font-size: 60px; padding: 0; margin: 0; }
+.coin-icon { background-image: url("../Art/UI/icon_coin.png"); }
+Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; color: white; -unity-font-style: normal; }
+.gear { width: 120px; height: 120px; flex-shrink: 0; background-image: url("../Art/UI/btn_settings.png"); -unity-background-scale-mode: scale-to-fit; }
+.gear:hover, .close-button:hover { -unity-background-image-tint-color: rgb(230, 240, 255); }
+.gear:active, .close-button:active { scale: 0.95 0.95; }
+.start-body { flex-grow: 1; align-items: center; justify-content: space-around; padding-bottom: 140px; }
+.logo { width: 100%; max-width: 1000px; height: 550px; flex-shrink: 1; background-image: url("../Art/UI/Renkli Bus Jam Oyun Logosu.png"); -unity-background-scale-mode: scale-to-fit; }
+.art-button {
+    width: 600px; max-width: 100%; height: 170px; min-height: 110px;
+    flex-shrink: 0; font-size: 64px;
+    -unity-slice-left: 425; -unity-slice-right: 370;
+    -unity-slice-top: 300; -unity-slice-bottom: 350;
+    -unity-slice-scale: 0.2;
+    transition-property: scale, -unity-background-image-tint-color;
+    transition-duration: 0.12s;
+}
+.green { background-image: url("../Art/UI/btn_green.png"); }
+.red { background-image: url("../Art/UI/btn_red.png"); }
+.yellow { background-image: url("../Art/UI/btn_yellow.png"); -unity-slice-bottom: 340; }
+.art-button:hover { -unity-background-image-tint-color: rgb(238, 246, 255); }
+.art-button:active { scale: 0.97 0.97; -unity-background-image-tint-color: rgb(210, 224, 240); }
+.start-button { width: 594px; height: 190px; font-size: 76px; }
+.level-badge {
+    width: 180px; height: 160px; flex-shrink: 0; justify-content: center;
+    background-image: url("../Art/UI/badge_level.png");
+    -unity-slice-left: 410; -unity-slice-right: 270;
+    -unity-slice-top: 350; -unity-slice-bottom: 270;
+    -unity-slice-scale: 0.14;
+}
+.level-title { font-size: 40px; padding: 0; margin: 0; }
+.hud > .gear { margin-left: 60px; }
+.level-number { font-size: 70px; padding: 0; margin: 0; }
+.timer-counter {
+    width: 310px; height: 116px; flex-shrink: 0; flex-direction: row; align-items: center;
+    background-image: url("../Art/UI/panel_header.png");
+    -unity-slice-left: 370; -unity-slice-right: 260;
+    -unity-slice-top: 250; -unity-slice-bottom: 260;
+    -unity-slice-scale: 0.2;
+}
+.clock-icon { width: 110px; height: 160px; flex-shrink: 0; background-image: url("../Art/UI/icon_clock.png"); -unity-background-scale-mode: scale-to-fit; }
+.timer-text { flex-grow: 1; padding: 0; margin: 0; font-size: 66px; }
+.urgent { color: rgb(255, 41, 46); }
+.ready-overlay { align-items: center; justify-content: center; }
+.ready-prompt { font-size: 88px; }
+.modal-overlay { align-items: center; justify-content: center; background-color: rgba(15, 8, 41, 0.72); }
+.modal {
+    width: 864px; max-width: 92%; max-height: 92%;
+    align-items: center; justify-content: space-around;
+    padding: 66px 64px;
+    background-image: url("../Art/UI/panel_modal.png");
+    -unity-slice-left: 330; -unity-slice-right: 250;
+    -unity-slice-top: 340; -unity-slice-bottom: 230;
+    -unity-slice-scale: 0.5;
+}
+.settings-modal { min-height: 640px; }
+.pause-modal { height: 1000px; }
+.modal-heading {
+    width: 100%; height: 160px; flex-shrink: 0; flex-direction: row; align-items: center; justify-content: space-between;
+    padding-left: 28px; padding-right: 16px;
+    background-image: url("../Art/UI/panel_header.png");
+    -unity-slice-left: 370; -unity-slice-right: 260;
+    -unity-slice-top: 250; -unity-slice-bottom: 260;
+    -unity-slice-scale: 0.22;
+}
+.modal-title { flex-grow: 1; font-size: 64px; }
+.close-button { width: 96px; height: 96px; flex-shrink: 0; background-image: url("../Art/UI/icon_close.png"); -unity-background-scale-mode: scale-to-fit; }
+.confirmation { width: 100%; align-items: center; }
+.question { white-space: normal; font-size: 58px; margin: 20px 0 32px 0; -unity-text-align: middle-center; }
+.button-row { width: 100%; flex-direction: row; justify-content: space-between; }
+.button-row .art-button { width: 46%; height: 140px; font-size: 56px; }
+.confirm-modal { min-height: 560px; background-image: url("../Art/UI/panel_inner.png"); -unity-slice-left: 330; -unity-slice-right: 190; -unity-slice-top: 235; -unity-slice-bottom: 175; }
+.sound-toggle {
+    width: 100%; height: 130px; flex-shrink: 0; flex-direction: row; align-items: center;
+    padding-left: 30px; padding-right: 20px;
+    background-image: url("../Art/UI/panel_inner.png");
+    -unity-slice-left: 330; -unity-slice-right: 190; -unity-slice-top: 235; -unity-slice-bottom: 175; -unity-slice-scale: 0.2;
+}
+.sound-toggle > .unity-toggle__label { flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 0; font-size: 56px; }
+.sound-toggle > .unity-toggle__input { width: 96px; min-width: 96px; height: 96px; flex-grow: 0; flex-shrink: 0; }
+.sound-toggle .unity-toggle__checkmark { width: 96px; height: 96px; border-width: 0; background-color: transparent; background-image: url("../Art/UI/btn_round_blue.png"); -unity-background-scale-mode: scale-to-fit; }
+.sound-toggle:checked .unity-toggle__checkmark { -unity-background-image-tint-color: rgb(150, 255, 160); }
+.sound-toggle .unity-toggle__checkmark > VisualElement { display: none; }
+.square .start-body { padding-bottom: 80px; }
+.square .logo { height: 530px; }
+.landscape .start-body { flex-direction: row; padding: 50px 8% 100px 8%; }
+.landscape .logo { width: 55%; height: 800px; max-width: 1400px; }
+.landscape .start-button { width: 32%; max-width: 700px; }
+.square .top-bar, .landscape .top-bar { padding-top: 20px; }
+/* Shared sharp title treatment for the later Complete/Fail migration. */
+.result-title { -unity-font-definition: url("Fonts/LilitaOne.asset"); font-size: 140px; color: rgb(255, 221, 116); -unity-text-outline-width: 5px; -unity-text-outline-color: rgb(99, 40, 74); text-shadow: 0 8px 0 rgba(44, 16, 54, 0.8); }

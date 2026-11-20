@@ -1,0 +1,76 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="Theme.uss" />
+    <ui:VisualElement name="ui-root" class="ui-root portrait" picking-mode="Ignore">
+        <ui:VisualElement name="menu-background" class="fill menu-background" picking-mode="Ignore" />
+        <ui:VisualElement name="ready-dim" class="fill ready-dim hidden" picking-mode="Ignore" />
+        <ui:VisualElement name="safe-area" class="safe-area" picking-mode="Ignore">
+            <ui:VisualElement name="start-screen" class="fill start-screen" picking-mode="Ignore">
+                <ui:VisualElement class="top-bar start-bar" picking-mode="Ignore">
+                    <ui:VisualElement class="counter lives-plate" picking-mode="Ignore">
+                        <ui:VisualElement class="heart-icon" picking-mode="Ignore"><ui:Label name="lives-count" text="5" class="lives-count" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:Label name="life-countdown" text="FULL" class="counter-text" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="counter coins-plate" picking-mode="Ignore">
+                        <ui:VisualElement class="coin-icon" picking-mode="Ignore" />
+                        <ui:Label name="coin-count" text="0" class="counter-text" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Button name="start-settings" class="gear" tooltip="Settings" />
+                </ui:VisualElement>
+                <ui:VisualElement class="start-body" picking-mode="Ignore">
+                    <ui:VisualElement name="logo" class="logo" picking-mode="Ignore" />
+                    <ui:Button name="start-button" text="Level 1" class="art-button green start-button" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="hud" class="top-bar hud hidden" picking-mode="Ignore">
+                <ui:VisualElement class="level-badge" picking-mode="Ignore">
+                    <ui:Label text="Level" class="level-title" picking-mode="Ignore" />
+                    <ui:Label name="level-number" text="1" class="level-number" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement class="timer-counter" picking-mode="Ignore">
+                    <ui:VisualElement class="clock-icon" picking-mode="Ignore" />
+                    <ui:Label name="timer-text" text="0:30" class="timer-text" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:Button name="pause-settings" class="gear" tooltip="Settings" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ready-overlay" class="fill ready-overlay hidden" picking-mode="Ignore">
+                <ui:Label name="ready-prompt" text="Tap to start" class="ready-prompt" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="settings-overlay" class="fill modal-overlay hidden">
+                <ui:VisualElement class="modal settings-modal">
+                    <ui:VisualElement class="modal-heading">
+                        <ui:Label text="Settings" class="modal-title" />
+                        <ui:Button name="settings-close" class="close-button" tooltip="Close" />
+                    </ui:VisualElement>
+                    <ui:Button name="reset-button" text="Reset Progress" class="art-button red" />
+                    <ui:VisualElement name="reset-confirmation" class="confirmation hidden">
+                        <ui:Label text="Are you sure?" class="question" />
+                        <ui:VisualElement class="button-row">
+                            <ui:Button name="reset-yes" text="Yes" class="art-button red" />
+                            <ui:Button name="reset-no" text="No" class="art-button green" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="pause-overlay" class="fill modal-overlay hidden">
+                <ui:VisualElement class="modal pause-modal">
+                    <ui:VisualElement class="modal-heading">
+                        <ui:Label text="Settings" class="modal-title" />
+                        <ui:Button name="pause-close" class="close-button" tooltip="Close" />
+                    </ui:VisualElement>
+                    <ui:Toggle name="sound-toggle" class="sound-toggle" label="Sound: ON" value="true" />
+                    <ui:Button name="restart-button" text="Restart" class="art-button green" />
+                    <ui:Button name="menu-button" text="Main Menu" class="art-button yellow" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="pause-confirmation" class="fill modal-overlay hidden">
+                <ui:VisualElement class="modal confirm-modal">
+                    <ui:Label name="confirm-text" text="Restart this level?&#10;You will lose a life." class="question" />
+                    <ui:VisualElement class="button-row">
+                        <ui:Button name="confirm-yes" text="Yes" class="art-button red" />
+                        <ui:Button name="confirm-no" text="No" class="art-button green" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

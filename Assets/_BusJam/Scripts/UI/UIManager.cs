@@ -16,6 +16,7 @@ namespace BusJam.UI
         [SerializeField] private GameObject failPanel;
         [SerializeField] private GameObject noLivesPanel;
         [SerializeField] private GameObject readyPanel;
+        [SerializeField] private bool toolkitScreens;
         [SerializeField, Min(0f)] private float noLivesDuration = 3.5f;
 
         private Coroutine noLivesWarning;
@@ -69,10 +70,10 @@ namespace BusJam.UI
         {
             bool start = state == GameState.Start;
             if (coinCounter != null) coinCounter.SetActive(state == GameState.Complete);
-            startPanel.SetActive(start);
+            startPanel.SetActive(start && !toolkitScreens);
             HideNoLives();
-            hudPanel.SetActive(state == GameState.Ready || state == GameState.Playing);
-            readyPanel.SetActive(state == GameState.Ready);
+            hudPanel.SetActive(!toolkitScreens && (state == GameState.Ready || state == GameState.Playing));
+            readyPanel.SetActive(!toolkitScreens && state == GameState.Ready);
             completePanel.SetActive(state == GameState.Complete);
             failPanel.SetActive(state == GameState.Fail);
         }
