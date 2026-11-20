@@ -37,11 +37,12 @@ namespace BusJam.UI
 
         private void Awake()
         {
+            // One reusable sequence combines the gentle hop with the tap squash.
             tapping = DOTween.Sequence()
-                .Append(hand.DOAnchorPosY(18, .4f).SetEase(Ease.InOutSine))
-                .Append(hand.DOAnchorPosY(0, .18f).SetEase(Ease.InQuad))
-                .Join(hand.DOScale(.9f, .18f))
-                .Append(hand.DOScale(1f, .18f))
+                .Append(hand.DOAnchorPosY(hand.rect.height * .125f, .3f).SetEase(Ease.OutQuad))
+                .Append(hand.DOAnchorPosY(0, .3f).SetEase(Ease.InOutSine))
+                .Join(hand.DOScale(.9f, .15f).SetEase(Ease.InOutSine))
+                .Insert(.45f, hand.DOScale(1f, .15f).SetEase(Ease.InOutSine))
                 .SetLoops(-1).SetUpdate(true).SetAutoKill(false).Pause();
             Hide();
         }
@@ -127,6 +128,7 @@ namespace BusJam.UI
                 || bus != busStation.ActiveBus || !bus.IsAtDoor || bus.Color != TunnelColor) return;
 
             tunnelLessonActive = true;
+            firstBus = bus;
             hint.text = "Tap the passenger at the tunnel; the next one steps out behind.";
             RefreshTunnelTarget();
             if (introduction != 0) tip.SetActive(true);
@@ -229,7 +231,11 @@ namespace BusJam.UI
                 }
                 if (introduction == TunnelIntroduction)
                 {
-                    if (passenger.Color == TunnelColor) Complete();
+                    // TapAccepted runs after the next queued passenger has emerged.
+                    Passenger mouthPassenger = gameManager.Board.GetOccupant(tunnelMouth);
+                    if (passenger.Color == TunnelColor
+                        && !gameplay.TunnelContainsColor(tunnelMouth, TunnelColor)
+                        && (mouthPassenger == null || mouthPassenger.Color != TunnelColor)) Complete();
                     else RefreshTunnelTarget();
                     return;
                 }
@@ -247,6 +253,7 @@ namespace BusJam.UI
         private void OnBusFilled(Bus bus)
         {
             if (introduction == 1 && bus == firstBus && steps == GameRules.BusCapacity) Complete();
+            else if (introduction == TunnelIntroduction && tunnelLessonActive && bus == firstBus) Complete();
         }
 
         private void Complete()
