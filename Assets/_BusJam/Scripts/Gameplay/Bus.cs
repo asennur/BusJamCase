@@ -23,10 +23,12 @@ namespace BusJam.Gameplay
         [SerializeField] private GameObject[] seatIndicators;
         [SerializeField] private Animator animator;
         [SerializeField, Min(0f)] private float crossFade = 0.05f;
-        [SerializeField, Min(0f)] private float brakeDuration = 0.3f;
-        [Tooltip("Door-close duration to wait before departure.")]
+        [Tooltip("Authored door-close clip duration; compressed into the anticipation.")]
         [SerializeField, Min(0f)] private float doorCloseDuration = 0.16666667f;
         [SerializeField] private Transform model;
+        [SerializeField] private Transform[] wheels;
+        [SerializeField, Min(0.01f)] private float wheelRadius = 0.24f;
+        [SerializeField, Range(2f, 4f)] private float motionPitch = 3f;
         [SerializeField, Min(0f)] private float idleShakeHeight = 0.0012f;
         [SerializeField, Min(0f)] private float idleShakeRoll = 0.04f;
         [SerializeField, Range(4f, 15f)] private float idleShakeFrequency = 8f;
@@ -37,6 +39,15 @@ namespace BusJam.Gameplay
         private Passenger[] seatedPassengers;
         private Vector3 modelRestPosition;
         private Quaternion modelRestRotation;
+        private Vector3 modelRestScale;
+        private Quaternion[] wheelRestRotations;
+        private Vector3 previousMotionPosition, arrivalPosition;
+        private float wheelAngle;
+        private float motionTime;
+        private bool arriving, motionActive;
+        private Sequence anticipation;
+        private Passenger[] bufferedPassengers;
+        private TweenCallback[] bufferedCallbacks;
         private bool idleShake = true;
         // Per-bus phase so queued buses do not shake in sync (reads as a screen shake otherwise).
         private float shakePhase;
@@ -44,6 +55,8 @@ namespace BusJam.Gameplay
         public PassengerColor Color { get; private set; }
         public bool IsReservedFull => reservedCount >= seatPoints.Length;
         public Transform DoorEntry => doorEntry;
+        public bool CanApproach { get; private set; }
+        public Vector3 ArrivalEntryPosition => doorEntry.position + arrivalPosition - transform.position;
 
         /// <summary>Allows boarding only after the bus reaches the door.</summary>
         public bool IsAtDoor { get; private set; }
@@ -51,20 +64,38 @@ namespace BusJam.Gameplay
         private void Awake()
         {
             bodyMaterials = body.sharedMaterials;
+            seatedPassengers = new Passenger[seatPoints.Length];
+            bufferedPassengers = new Passenger[seatPoints.Length];
+            bufferedCallbacks = new TweenCallback[seatPoints.Length];
+            wheelRestRotations = new Quaternion[wheels == null ? 0 : wheels.Length];
+            for (int i = 0; i < wheelRestRotations.Length; i++)
+                wheelRestRotations[i] = wheels[i].localRotation;
             if (model == null) return;
             modelRestPosition = model.localPosition;
             modelRestRotation = model.localRotation;
+            modelRestScale = model.localScale;
             shakePhase = Random.value * Mathf.PI * 2f;
+            anticipation = DOTween.Sequence()
+                .Append(model.DOScale(Vector3.Scale(modelRestScale, new Vector3(1.025f, 0.95f, 1.025f)), 0.04f).SetEase(Ease.OutSine))
+                .Append(model.DOScale(modelRestScale, 0.04f).SetEase(Ease.InSine))
+                .SetAutoKill(false).Pause();
         }
 
         private void OnDisable()
         {
             DOTween.Kill(this);
+            transform.DOKill();
+            anticipation?.Pause();
+            motionActive = false;
             RestoreModel();
         }
 
+        private void OnDestroy() => anticipation?.Kill();
+
         private void LateUpdate()
         {
+            if (motionActive) { ApplyMotionPose(); return; }
+            ApplyWheelPose();
             if (!idleShake || model == null) return;
             float phase = Time.time * idleShakeFrequency * Mathf.PI * 2f + shakePhase;
             model.localPosition = modelRestPosition + Vector3.up * (Mathf.Sin(phase) * idleShakeHeight);
@@ -76,6 +107,7 @@ namespace BusJam.Gameplay
             if (model == null) return;
             model.localPosition = modelRestPosition;
             model.localRotation = modelRestRotation;
+            model.localScale = modelRestScale;
         }
 
         public void Setup(PassengerColor color, Material material)
@@ -84,7 +116,17 @@ namespace BusJam.Gameplay
             reservedCount = 0;
             arrivedCount = 0;
             IsAtDoor = false;
+            CanApproach = false;
+            motionActive = false;
+            arrivalPosition = transform.position;
+            wheelAngle = 0f;
+            for (int i = 0; i < wheelRestRotations.Length; i++)
+                wheels[i].localRotation = wheelRestRotations[i];
+            System.Array.Clear(bufferedPassengers, 0, bufferedPassengers.Length);
+            System.Array.Clear(bufferedCallbacks, 0, bufferedCallbacks.Length);
             DOTween.Kill(this);
+            anticipation?.Pause();
+            RestoreModel();
             Play(IdleHash);
 
             bodyMaterials[0] = material;
@@ -100,7 +142,91 @@ namespace BusJam.Gameplay
                     seatIndicators[i].SetActive(false);
         }
 
-        public void SetAtDoor(bool value) => IsAtDoor = value;
+        public void SetAtDoor(bool value)
+        {
+            IsAtDoor = value;
+            if (!value) { CanApproach = false; return; }
+            CanApproach = true;
+            for (int i = 0; i < bufferedPassengers.Length; i++)
+            {
+                if (bufferedPassengers[i] == null) continue;
+                Passenger passenger = bufferedPassengers[i];
+                TweenCallback callback = bufferedCallbacks[i];
+                bufferedPassengers[i] = null;
+                bufferedCallbacks[i] = null;
+                passenger.EnterBus(doorEntry, seatPoints[i], callback);
+            }
+        }
+
+        public void BoardWhenReady(int seatIndex, Passenger passenger, TweenCallback onSeated)
+        {
+            if (IsAtDoor) passenger.EnterBus(doorEntry, seatPoints[seatIndex], onSeated);
+            else
+            {
+                bufferedPassengers[seatIndex] = passenger;
+                bufferedCallbacks[seatIndex] = onSeated;
+            }
+        }
+
+        public void AnticipateDeparture()
+        {
+            idleShake = false;
+            RestoreModel();
+            if (model == null) return;
+            anticipation.Restart();
+        }
+
+        public void BeginMotion(Vector3 destination, bool isArrival)
+        {
+            PlayDrive();
+            arrivalPosition = destination;
+            arriving = isArrival;
+            motionActive = true;
+            motionTime = 0f;
+            previousMotionPosition = transform.position;
+        }
+
+        public void SampleMotion(float time)
+        {
+            motionTime = time;
+            wheelAngle += Vector3.Distance(previousMotionPosition, transform.position) / wheelRadius * Mathf.Rad2Deg;
+            previousMotionPosition = transform.position;
+            ApplyMotionPose();
+        }
+
+        private void ApplyMotionPose()
+        {
+            if (model != null)
+            {
+                float pitch = arriving ? -motionPitch * Mathf.Sin(Mathf.InverseLerp(0.45f, 1f, motionTime) * Mathf.PI)
+                    : motionPitch * Mathf.Sin(motionTime * Mathf.PI);
+                float bob = arriving && motionTime > 0.7f
+                    ? Mathf.Sin((motionTime - 0.7f) / 0.3f * Mathf.PI * 2f) * 0.025f : 0f;
+                model.localPosition = modelRestPosition + Vector3.up * bob;
+                model.localRotation = Quaternion.AngleAxis(pitch, Vector3.forward) * modelRestRotation;
+            }
+            ApplyWheelPose();
+        }
+
+        private void ApplyWheelPose()
+        {
+            for (int i = 0; i < wheelRestRotations.Length; i++)
+                wheels[i].localRotation = wheelRestRotations[i] * Quaternion.AngleAxis(-wheelAngle, Vector3.up);
+        }
+
+        public void AllowApproach()
+        {
+            CanApproach = true;
+            PlayStop(true);
+        }
+
+        public void EndMotion()
+        {
+            SampleMotion(1f);
+            motionActive = false;
+            idleShake = true;
+            RestoreModel();
+        }
 
         /// <summary>Plays while advancing through the queue or departing.</summary>
         public void PlayDrive()
@@ -109,7 +235,7 @@ namespace BusJam.Gameplay
             Play(DriveHash);
         }
 
-        /// <summary>Opens the door after braking and holds its final pose until closing.</summary>
+        /// <summary>Opens during the final settling motion; readiness still belongs to the station.</summary>
         public void PlayStop(bool atDoor, System.Action onReady = null)
         {
             DOTween.Kill(this);
@@ -120,12 +246,8 @@ namespace BusJam.Gameplay
                 return;
             }
 
-            Play(BrakeHash);
-            DOVirtual.DelayedCall(brakeDuration, () =>
-            {
-                Play(DoorOpenHash);
-                onReady?.Invoke();
-            }).SetTarget(this);
+            Play(DoorOpenHash);
+            onReady?.Invoke();
         }
 
         /// <summary>Closes the full bus and returns the delay before departure.</summary>
@@ -136,7 +258,9 @@ namespace BusJam.Gameplay
 
             DOTween.Kill(this);
             Play(DoorCloseHash);
-            return doorCloseDuration;
+            animator.Play(DoorCloseHash, 0, 0f);
+            animator.speed = doorCloseDuration / 0.08f;
+            return 0.08f;
         }
 
         /// <summary>Reserves a seat immediately without changing the door animation.</summary>
@@ -165,7 +289,10 @@ namespace BusJam.Gameplay
             idleShake = stateHash != BrakeHash && stateHash != DriveHash;
             if (!idleShake) RestoreModel();
             if (animator != null)
+            {
+                animator.speed = 1f;
                 animator.CrossFadeInFixedTime(stateHash, crossFade);
+            }
         }
     }
 }

@@ -8,19 +8,18 @@ using UnityEngine.Pool;
 namespace BusJam.Gameplay
 {
     /// <summary>
-    /// Otobüs sırası ve kapıdaki aktif otobüs. Dolunca kapıdaki ayrılır, kuyruk ilerler, sıradaki gelir.
-    /// BusArrived yalnız otobüs fiilen kapıya varınca (kuyruk tween'i bitince) atılır.
+    /// Overlaps departure and queue movement, keeping boarding gated by physical arrival.
     /// </summary>
     public class BusStation : MonoBehaviour
     {
         [SerializeField] private Bus busPrefab;
-        [Tooltip("PassengerColor sırasıyla")]
+        [Tooltip("In PassengerColor order.")]
         [SerializeField] private Material[] colorMaterials;
         [SerializeField] private Transform doorPoint;
         [SerializeField] private float queueSpacing = 2.2f;
         [SerializeField] private float exitOffsetX = 6f;
         [SerializeField] private float moveDuration = 0.3f;
-        [Tooltip("Kapıda + kuyrukta aynı anda sahnede duran otobüs sayısı")]
+        [Tooltip("Visible buses, including the bus at the door.")]
         [SerializeField] private int visibleQueueCount = 3;
 
         private readonly List<Bus> queue = new List<Bus>();
@@ -38,6 +37,7 @@ namespace BusJam.Gameplay
         public Bus NextBus => queue.Count > 1 ? queue[1] : null;
 
         public event Action<Bus> BusArrived;
+        public event Action<Bus> BusApproaching;
         public event Action<Bus> BusFilled;
         public event Action<Bus> BusDeparted;
         /// <summary>A full bus starts driving away (after its door closed); used for the departure sound.</summary>
@@ -131,27 +131,31 @@ namespace BusJam.Gameplay
                 foreach (Passenger passenger in leaving.SeatedPassengers)
                     passenger.Wave();
 
-            // Normal buses wait for the door to close. The last bus leaves at once and silently,
-            // because the Complete screen opens right away (Asen, 19 Nov).
-            float delay = finalBus ? 0f : leaving.CloseDoor();
+            // Door closing shares the anticipation; final completion keeps its immediate event.
+            float delay = finalBus ? 0f : Mathf.Max(0.08f, leaving.CloseDoor());
+            leaving.AnticipateDeparture();
             departing.Add(leaving);
-            leaving.transform.DOMove(leaving.transform.position + doorPoint.right * exitOffsetX, moveDuration)
+            Vector3 exit = leaving.transform.position + doorPoint.right * exitOffsetX;
+            Tween departure = null;
+            departure = leaving.transform.DOMove(exit, moveDuration)
                 .SetDelay(delay)
                 .SetEase(departureEase)
-                .OnStart(() => { leaving.PlayDrive(); if (!finalBus) BusDeparting?.Invoke(leaving); })
-                .OnComplete(() => BusDeparted?.Invoke(leaving));
+                .SetRecyclable(true)
+                .OnStart(() => { leaving.BeginMotion(exit, false); if (!finalBus) BusDeparting?.Invoke(leaving); })
+                .OnUpdate(() => leaving.SampleMotion(departure.ElapsedPercentage()))
+                .OnComplete(() => { leaving.EndMotion(); BusDeparted?.Invoke(leaving); });
 
-            // Çıkış tamamlanınca kapıdan 6 birim uzaklaşmış olur (gövde 4.12 + boşluk).
-            float queueDelay = delay + moveDuration;
+            // A 60% overlap preserves clearance between the 4.12-unit bodies.
+            float queueDelay = delay + moveDuration * 0.4f;
             for (int i = 0; i < queue.Count; i++)
-                MoveToQueuePosition(i, queueDelay);
+                MoveToQueuePosition(i, queueDelay + i * 0.04f);
 
             if (nextSpawnIndex < order.Count)
             {
                 SpawnAtQueueEnd();
                 int tail = queue.Count - 1;
                 queue[tail].transform.position = QueuePosition(tail + 1);
-                MoveToQueuePosition(tail, queueDelay);
+                MoveToQueuePosition(tail, queueDelay + tail * 0.04f);
             }
 
             if (finalBus)
@@ -162,19 +166,34 @@ namespace BusJam.Gameplay
         {
             Bus bus = queue[index];
             bus.transform.DOKill();
-            Tween motion = bus.transform.DOMove(QueuePosition(index), moveDuration)
-                .SetDelay(delay).SetEase(arrivalEase).OnStart(bus.PlayDrive);
-            if (index == 0)
-                motion.OnComplete(() =>
+            Vector3 destination = QueuePosition(index);
+            bool approachSent = false;
+            Tween motion = null;
+            motion = bus.transform.DOMove(destination, moveDuration)
+                .SetDelay(delay).SetEase(arrivalEase).SetRecyclable(true)
+                .OnStart(() => bus.BeginMotion(destination, true))
+                .OnUpdate(() =>
                 {
-                    bus.PlayStop(true, () =>
+                    float t = motion.ElapsedPercentage();
+                    float distanceProgress = DOVirtual.EasedValue(0f, 1f, t, arrivalEase);
+                    bus.SampleMotion(t);
+                    if (index == 0 && !approachSent && distanceProgress >= 0.85f)
+                    {
+                        approachSent = true;
+                        bus.AllowApproach();
+                        BusApproaching?.Invoke(bus);
+                    }
+                })
+                .OnComplete(() =>
+                {
+                    bus.EndMotion();
+                    if (index == 0)
                     {
                         bus.SetAtDoor(true);
                         BusArrived?.Invoke(bus);
-                    });
+                    }
+                    else bus.PlayStop(false);
                 });
-            else
-                motion.OnComplete(() => bus.PlayStop(false));
         }
     }
 }

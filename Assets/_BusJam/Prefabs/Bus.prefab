@@ -86,9 +86,15 @@ MonoBehaviour:
   seatIndicators: []
   animator: {fileID: 5724932132711509800}
   crossFade: 0.05
-  brakeDuration: 0.3
   doorCloseDuration: 0.16666667
   model: {fileID: 1842860265637475666}
+  wheels:
+  - {fileID: 6346890041406183225}
+  - {fileID: 8515277380277181009}
+  - {fileID: 695435885354931495}
+  - {fileID: 4864378940365407415}
+  wheelRadius: 0.24
+  motionPitch: 3
   idleShakeHeight: 0.0012
   idleShakeRoll: 0.04
   idleShakeFrequency: 8
@@ -181,6 +187,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
+--- !u!4 &695435885354931495 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1711140913941464990, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
+  m_PrefabInstance: {fileID: 2168939349037388473}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &990539380634937817 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1415964857344883552, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
@@ -196,9 +207,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -6245510818246341332, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
   m_PrefabInstance: {fileID: 2168939349037388473}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &4864378940365407415 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6744175656556467726, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
+  m_PrefabInstance: {fileID: 2168939349037388473}
+  m_PrefabAsset: {fileID: 0}
 --- !u!95 &5724932132711509800 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
+  m_PrefabInstance: {fileID: 2168939349037388473}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &6346890041406183225 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4175628480852572800, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
   m_PrefabInstance: {fileID: 2168939349037388473}
   m_PrefabAsset: {fileID: 0}
 --- !u!137 &6847421843936425676 stripped
@@ -209,5 +230,10 @@ SkinnedMeshRenderer:
 --- !u!4 &6908999794064922236 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4469773780805155643, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
+  m_PrefabInstance: {fileID: 2168939349037388473}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8515277380277181009 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -1714242591783221016, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
   m_PrefabInstance: {fileID: 2168939349037388473}
   m_PrefabAsset: {fileID: 0}

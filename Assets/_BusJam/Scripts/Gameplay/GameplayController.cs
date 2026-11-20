@@ -51,6 +51,7 @@ namespace BusJam.Gameplay
             gameManager.LevelLoaded += OnLevelLoaded;
             inputHandler.PassengerTapped += OnPassengerTapped;
             busStation.BusArrived += BoardWaitingPassengers;
+            busStation.BusApproaching += BoardWaitingPassengers;
             busStation.BusDeparted += OnBusDeparted;
             busStation.AllBusesDone += OnAllBusesDone;
             waitingArea.SlotOpened += OnSlotOpened;
@@ -62,6 +63,7 @@ namespace BusJam.Gameplay
             gameManager.LevelLoaded -= OnLevelLoaded;
             inputHandler.PassengerTapped -= OnPassengerTapped;
             busStation.BusArrived -= BoardWaitingPassengers;
+            busStation.BusApproaching -= BoardWaitingPassengers;
             busStation.BusDeparted -= OnBusDeparted;
             busStation.AllBusesDone -= OnAllBusesDone;
             waitingArea.SlotOpened -= OnSlotOpened;

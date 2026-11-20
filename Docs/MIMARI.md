@@ -113,7 +113,9 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 
 Flow: `GameManager` loads the saved level into `Start` (menu). The Level button checks lives and enters `Ready`: board, buses and HUD are visible with the full stopped timer. The next tap anywhere enters `Playing`, removes the overlay and starts the timer. Passenger input runs before screen input, so this tap cannot move a passenger. The menu activation frame cannot also start play. Retry, Restart and Next load into `Ready`; zero lives returns to the normal Start menu. `PlayingStarted` shows unseen Level 1/6/8 tutorials after the ready tap and arms Level 3 to wait for the green bus.
 
-### Feedback tempo (ZFEEL, 20 November 2026)
+### Feedback tempo (ZFEEL baseline, 20 November 2026)
+
+This table records the ZFEEL baseline. ZJUICE-A overrides the bus presentation timings below.
 
 | Setting | Previous | Current |
 | --- | --- | --- |
@@ -130,6 +132,14 @@ Flow: `GameManager` loads the saved level into `Start` (menu). The Level button 
 The nonfinal bus change takes 1.066667 s from physical fill to the next boarding-ready event (previously 2.133333 s). Door opening still starts at boarding readiness; its clip runs at twice the previous speed, along with Brake and DoorClose. Drive, idle shake, boarding pops and the immediate silent final departure keep their existing behavior. Serialized values in Game and LevelEditor, the bus/passenger prefabs and code defaults agree. Run cadence increases with translation speed; idle and seated animation speeds stay unchanged.
 
 Bus movement never locks normal passenger input. Seat/slot reservations happen on acceptance. `IsTransitioning`, `runningCount`, `SlotWillOpen` and the physical arrival/fill callbacks still govern automatic boarding and failure checks; timing changes add no timer-based failure decisions. Outline visibility still depends on reachability, ropes and cloak state; only the shared hull material thickness changes.
+
+### Continuous bus flow (ZJUICE-A, 20 November 2026)
+
+- Nonfinal fill starts a reusable 0.08-second model squash/recovery; the existing door-close clip is compressed into that interval. Departure then accelerates with InQuad over the existing 0.3 seconds. The next bus starts 0.12 seconds into departure, giving 60% movement overlap; followers start 0.04 seconds apart. Arrival remains 0.3 seconds with OutCubic, zero positional overshoot, a 3-degree model-child pitch and one 0.025-unit suspension bob. Four Inspector-bound wheel bones rotate from actual travel distance, with a 0.24-unit radius.
+- `BusApproaching` fires once at 85% of arrival distance and opens the door during settling. Matching passengers already in slots may reserve seats and run to the stationary final door position then. `Bus.BoardWhenReady` buffers early runners until `IsAtDoor` becomes true; physical seat callbacks still drive fill. Direct grid taps retain the existing door-only rule. No runner spacing, traffic scheduling or extra target reservations are added.
+- Fill to next boarding-ready event is now 0.500 seconds nominal, versus the 1.066667-second ZFEEL baseline. Final-bus waving, immediate `AllBusesDone`/completion and silent departure retain their existing event timing. Failure guards, timer rules and passenger travel speed are unchanged. Reset/pooling cancels motion and clears buffered passengers/callbacks.
+
+Decision: Overlap bus presentation and allow slot approach at 85%, while gating boarding at the door and retaining immediate final completion (Asen's ZJUICE-A scope, 20 November 2026). Edit-mode timing evidence and the five-frame handoff strip are in `ZJUICE-A-Report.md`.
 
 ### Tutorials (ZTUT2 + ZTUT3, 20 November 2026)
 

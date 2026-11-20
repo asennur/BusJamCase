@@ -104,9 +104,10 @@ namespace BusJam.Gameplay
         /// <summary>Taşma kuyruğundan gelen yolcuyu doğrudan bu slota yazar (GameplayController zaten hangi slotun boşaldığını SlotOpened ile öğrendi).</summary>
         public void ReserveSlotDirect(int slotIndex, Passenger passenger) => slots[slotIndex] = passenger;
 
-        /// <summary>Kapıdaki (IsAtDoor) otobüsün rengiyle eşleşen slottaki yolcuları, boş koltuk kalmayana kadar otobüse koşturur. Döndürdüğü sayı, koşmaya başlayan yolcu sayısıdır (çağıran runningCount'u buna göre artırmalı).</summary>
+        /// <summary>Starts matching slot passengers during settling; boarding waits for physical arrival.</summary>
         public int SendMatchingPassengers(Bus bus, Action<Bus, int, Passenger> onSeatArrived)
         {
+            if (!bus.CanApproach) return 0;
             int startedCount = 0;
 
             for (int i = 0; i < slots.Length && !bus.IsReservedFull; i++)
@@ -117,13 +118,13 @@ namespace BusJam.Gameplay
 
                 slots[i] = null;
                 SlotOpened?.Invoke(i);
-                Transform seatPoint = bus.ReserveSeat(out int seatIndex);
+                bus.ReserveSeat(out int seatIndex);
                 startedCount++;
 
-                singlePointPath[0] = bus.DoorEntry.position;
+                singlePointPath[0] = bus.ArrivalEntryPosition;
                 passenger.RunTo(singlePointPath, runSpeed, () =>
                 {
-                    passenger.EnterBus(bus.DoorEntry, seatPoint, () => onSeatArrived(bus, seatIndex, passenger));
+                    bus.BoardWhenReady(seatIndex, passenger, () => onSeatArrived(bus, seatIndex, passenger));
                 });
             }
 
