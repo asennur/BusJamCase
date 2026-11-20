@@ -192,7 +192,16 @@ namespace BusJam.Gameplay
         private void OnDestroy()
         {
             if (baseMesh != null)
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    DestroyImmediate(baseMesh);
+                    return;
+                }
+#endif
                 Destroy(baseMesh);
+            }
         }
 
         // Her köşe noktası 4 hücreye komşu: NE (x, y-1), SE (x, y), SW (x-1, y), NW (x-1, y-1).
