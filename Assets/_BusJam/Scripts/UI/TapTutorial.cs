@@ -14,7 +14,6 @@ namespace BusJam.UI
         [SerializeField] private GameManager gameManager;
         [SerializeField] private GameplayController gameplay;
         [SerializeField] private BusStation busStation;
-        [SerializeField] private InputHandler inputHandler;
         [SerializeField] private Camera worldCamera;
         [SerializeField] private RectTransform overlay;
         [SerializeField] private RectTransform handAnchor;
@@ -28,10 +27,13 @@ namespace BusJam.UI
         private bool guided;
         private Passenger tiedPassenger;
         private Bus firstBus;
-        private int shownFrame;
+        private Vector2Int tunnelMouth;
+        private bool tunnelLessonActive;
 
         // LevelDatabase first introduces tunnels in Level_03.
         private const int TunnelIntroduction = 3;
+        // Level_03 starts with Green at the mouth and Yellow, Yellow, Green inside.
+        private const PassengerColor TunnelColor = PassengerColor.Green;
 
         private void Awake()
         {
@@ -48,18 +50,16 @@ namespace BusJam.UI
             gameManager.PlayingStarted += Show;
             gameManager.StateChanged += OnState;
             gameplay.TapAccepted += Accepted;
-            gameplay.TutorialAllowsTap += AllowsTap;
             busStation.BusFilled += OnBusFilled;
-            inputHandler.ScreenTapped += OnScreenTapped;
+            busStation.BusArrived += OnBusArrived;
         }
         private void OnDisable()
         {
             gameManager.PlayingStarted -= Show;
             gameManager.StateChanged -= OnState;
             gameplay.TapAccepted -= Accepted;
-            gameplay.TutorialAllowsTap -= AllowsTap;
             busStation.BusFilled -= OnBusFilled;
-            inputHandler.ScreenTapped -= OnScreenTapped;
+            busStation.BusArrived -= OnBusArrived;
             Hide();
         }
         private void OnDestroy() => tapping?.Kill();
@@ -74,7 +74,6 @@ namespace BusJam.UI
             if ((level != 1 && level != TunnelIntroduction && level != 6 && level != 8)
                 || SaveSystem.TutorialSeen(level)) return;
             introduction = level;
-            shownFrame = Time.frameCount;
             if (level == 1)
             {
                 firstBus = busStation.ActiveBus;
@@ -90,26 +89,68 @@ namespace BusJam.UI
             else if (level == TunnelIntroduction)
             {
                 LevelData data = gameManager.CurrentLevel;
-                for (int i = 0; i < data.tunnels.Count && target == null; i++)
-                    target = gameManager.Board.GetOccupant(data.tunnels[i].MouthCell);
+                if (data.tunnels.Count == 0) { Hide(); return; }
+                tunnelMouth = data.tunnels[0].MouthCell;
+                // A bus can arrive during Ready, before PlayingStarted arms the lesson.
+                OnBusArrived(busStation.ActiveBus);
+                return;
             }
             else target = gameplay.FirstTappablePassenger();
 
             // Unsupported layouts keep free play available and do not save a completed lesson.
             if (target == null) { Hide(); return; }
+            if (guided) gameplay.TapFilter = AllowsTap;
             hint.text = level == 6 ? "Free tied passengers by moving their neighbours."
-                : level == TunnelIntroduction ? "Tap the passenger at the tunnel; the next one steps out behind."
                 : level == 8 ? "Cloaked passengers can only move when their colour shows." : "";
             tip.SetActive(level != 1);
             PointAt(target);
         }
 
-        private bool AllowsTap(Passenger passenger) => !guided || passenger == target;
-
-        private void OnScreenTapped()
+        private bool AllowsTap(Passenger passenger)
         {
-            // The Ready tap that opened this lesson must not immediately dismiss it.
-            if (introduction == TunnelIntroduction && Time.frameCount > shownFrame) Complete();
+            // Recheck during input as well as LateUpdate: a stale target must never block a tap.
+            if (!gameplay.CanTapPassenger(target)) ReleaseGuidance();
+            return !guided || passenger == target;
+        }
+
+        private void ReleaseGuidance()
+        {
+            gameplay.TapFilter = null;
+            guided = false;
+            PointAt(null);
+        }
+
+        private void OnBusArrived(Bus bus)
+        {
+            if (introduction != TunnelIntroduction || tunnelLessonActive
+                || gameManager.State != GameState.Playing || bus == null
+                || bus != busStation.ActiveBus || !bus.IsAtDoor || bus.Color != TunnelColor) return;
+
+            tunnelLessonActive = true;
+            hint.text = "Tap the passenger at the tunnel; the next one steps out behind.";
+            RefreshTunnelTarget();
+            if (introduction != 0) tip.SetActive(true);
+        }
+
+        private void RefreshTunnelTarget()
+        {
+            Passenger mouthPassenger = gameManager.Board.GetOccupant(tunnelMouth);
+            bool greenInside = gameplay.TunnelContainsColor(tunnelMouth, TunnelColor);
+            if (greenInside || (mouthPassenger != null && mouthPassenger.Color == TunnelColor))
+                target = gameplay.CanTapPassenger(mouthPassenger) ? mouthPassenger : null;
+            else
+            {
+                target = gameplay.FirstTappablePassenger(TunnelColor);
+                if (target == null) { Complete(); return; }
+            }
+
+            if (target == null) ReleaseGuidance();
+            else
+            {
+                guided = true;
+                gameplay.TapFilter = AllowsTap;
+                PointAt(target);
+            }
         }
 
         private void PointAt(Passenger passenger)
@@ -166,13 +207,18 @@ namespace BusJam.UI
         private void Accepted(Passenger passenger)
         {
             if (introduction == 0) return;
+            if (introduction == TunnelIntroduction && !tunnelLessonActive) return;
+            if (introduction == 1 && steps == GameRules.BusCapacity) return;
+            if (introduction == 1 && !guided) { Hide(); return; }
+            // Safety releases input, but the rope hint still waits for the last rope.
+            if (introduction == 6 && !guided && tiedPassenger != null && tiedPassenger.RopesLeft > 0) return;
             if (guided)
             {
                 if (passenger != target) return;
                 steps++;
                 if (introduction == 1)
                 {
-                    if (steps == GameRules.BusCapacity) PointAt(null);
+                    if (steps == GameRules.BusCapacity) ReleaseGuidance();
                     else
                     {
                         Passenger next = gameplay.FirstTappablePassenger(gameManager.CurrentLevel.busOrder[0]);
@@ -181,10 +227,16 @@ namespace BusJam.UI
                     }
                     return;
                 }
-                if (steps < 2)
+                if (introduction == TunnelIntroduction)
+                {
+                    if (passenger.Color == TunnelColor) Complete();
+                    else RefreshTunnelTarget();
+                    return;
+                }
+                if (tiedPassenger.RopesLeft > 0)
                 {
                     Passenger next = FindTappableNeighbor(tiedPassenger);
-                    if (next == null) Hide();
+                    if (next == null) ReleaseGuidance();
                     else PointAt(next);
                     return;
                 }
@@ -204,11 +256,13 @@ namespace BusJam.UI
         }
         private void Hide()
         {
+            gameplay.TapFilter = null;
             introduction = 0;
             steps = 0;
             guided = false;
             tiedPassenger = null;
             firstBus = null;
+            tunnelLessonActive = false;
             target = null;
             tapping?.Pause();
             handAnchor.gameObject.SetActive(false);
@@ -216,6 +270,7 @@ namespace BusJam.UI
         }
         private void LateUpdate()
         {
+            if (guided && !gameplay.CanTapPassenger(target)) ReleaseGuidance();
             if (target != null) PositionHand();
         }
         private void PositionHand()

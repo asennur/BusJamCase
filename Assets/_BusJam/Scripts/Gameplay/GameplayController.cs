@@ -43,7 +43,7 @@ namespace BusJam.Gameplay
 
         public event Action LevelCompleted;
         public event Action<Passenger> TapAccepted;
-        public event Func<Passenger, bool> TutorialAllowsTap;
+        public Func<Passenger, bool> TapFilter { get; set; }
         public event Action<FailReason> LevelFailed;
 
         private void OnEnable()
@@ -141,7 +141,7 @@ namespace BusJam.Gameplay
             if (gameManager.State != GameState.Playing || gameManager.IsPaused || passenger.State != PassengerState.Idle)
                 return;
 
-            if (TutorialAllowsTap != null && !TutorialAllowsTap(passenger)) return;
+            if (TapFilter != null && !TapFilter(passenger)) return;
 
             // Taşma kuyruğunda bekleyen yolcu eski hücresini yeniden boşaltamaz.
             if (!board.InBounds(passenger.Cell) || board.GetOccupant(passenger.Cell) != passenger)
@@ -251,6 +251,15 @@ namespace BusJam.Gameplay
                 && passenger.State == PassengerState.Idle && reachable[board.ToIndex(passenger.Cell)]
                 && passenger.RopesLeft == 0 && (!passenger.IsCloaked || passenger.CloakOpen)
                 && (waitingArea.HasFreeSlot || SlotWillOpen());
+        }
+
+        /// <summary>Reads the remaining runtime queue without changing the level asset.</summary>
+        public bool TunnelContainsColor(Vector2Int mouthCell, PassengerColor color)
+        {
+            for (int i = 0; i < tunnelGroups.Count; i++)
+                if (tunnelGroups[i].mouthCell == mouthCell)
+                    return tunnelGroups[i].queue.Contains(color);
+            return false;
         }
 
         private void ToggleGridCloaks()

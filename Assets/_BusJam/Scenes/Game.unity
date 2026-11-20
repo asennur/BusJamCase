@@ -15935,7 +15935,6 @@ MonoBehaviour:
   gameManager: {fileID: 134005834}
   gameplay: {fileID: 134005835}
   busStation: {fileID: 1155942856}
-  inputHandler: {fileID: 134005833}
   worldCamera: {fileID: 737060411}
   overlay: {fileID: 2098687366}
   handAnchor: {fileID: 1383829562}
