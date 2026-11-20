@@ -647,5 +647,774 @@
     "protectedFilesChanged": 0,
     "apkRebuilt": false,
     "apkStatus": "Pending for Asen final build"
+  },
+  "tune": {
+    "date": "2026-11-20",
+    "unity": "2022.3.19f1",
+    "method": "5x5 median sRGB; same ZLightPreview fixture/camera; source resolution 1080x1920. Before/After are archived; Tuned is recaptured after final NoSpecular correction.",
+    "samples": {
+      "Before": {
+        "Red": {
+          "passenger": [
+            255,
+            104,
+            107
+          ],
+          "bus": [
+            255,
+            82,
+            85
+          ],
+          "open slot": [
+            255,
+            255,
+            255
+          ],
+          "locked slot": [
+            153,
+            82,
+            239
+          ]
+        },
+        "Pink": {
+          "passenger": [
+            255,
+            199,
+            255
+          ],
+          "bus": [
+            255,
+            158,
+            246
+          ],
+          "open slot": [
+            255,
+            255,
+            255
+          ],
+          "locked slot": [
+            153,
+            82,
+            239
+          ]
+        },
+        "Purple": {
+          "passenger": [
+            239,
+            139,
+            255
+          ],
+          "bus": [
+            189,
+            111,
+            255
+          ],
+          "open slot": [
+            255,
+            255,
+            255
+          ],
+          "locked slot": [
+            153,
+            82,
+            239
+          ]
+        },
+        "Blue": {
+          "passenger": [
+            96,
+            199,
+            255
+          ],
+          "bus": [
+            76,
+            158,
+            255
+          ],
+          "open slot": [
+            255,
+            255,
+            255
+          ],
+          "locked slot": [
+            153,
+            82,
+            239
+          ]
+        },
+        "Green": {
+          "passenger": [
+            120,
+            255,
+            148
+          ],
+          "bus": [
+            95,
+            253,
+            118
+          ],
+          "open slot": [
+            255,
+            255,
+            255
+          ],
+          "locked slot": [
+            153,
+            82,
+            239
+          ]
+        },
+        "Yellow": {
+          "passenger": [
+            255,
+            255,
+            82
+          ],
+          "bus": [
+            255,
+            255,
+            66
+          ],
+          "open slot": [
+            255,
+            255,
+            255
+          ],
+          "locked slot": [
+            153,
+            82,
+            239
+          ]
+        },
+        "White": {
+          "passenger": [
+            255,
+            255,
+            255
+          ],
+          "bus": [
+            255,
+            255,
+            255
+          ],
+          "open slot": [
+            255,
+            255,
+            255
+          ],
+          "locked slot": [
+            153,
+            82,
+            239
+          ]
+        }
+      },
+      "After": {
+        "Red": {
+          "passenger": [
+            254,
+            91,
+            68
+          ],
+          "bus": [
+            254,
+            70,
+            50
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            168,
+            69,
+            213
+          ]
+        },
+        "Pink": {
+          "passenger": [
+            254,
+            197,
+            254
+          ],
+          "bus": [
+            254,
+            166,
+            251
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            168,
+            69,
+            213
+          ]
+        },
+        "Purple": {
+          "passenger": [
+            254,
+            133,
+            254
+          ],
+          "bus": [
+            249,
+            114,
+            254
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            168,
+            69,
+            213
+          ]
+        },
+        "Blue": {
+          "passenger": [
+            83,
+            214,
+            254
+          ],
+          "bus": [
+            69,
+            184,
+            254
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            168,
+            69,
+            213
+          ]
+        },
+        "Green": {
+          "passenger": [
+            107,
+            254,
+            79
+          ],
+          "bus": [
+            74,
+            254,
+            37
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            168,
+            69,
+            213
+          ]
+        },
+        "Yellow": {
+          "passenger": [
+            254,
+            254,
+            0
+          ],
+          "bus": [
+            254,
+            254,
+            0
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            168,
+            69,
+            213
+          ]
+        },
+        "White": {
+          "passenger": [
+            254,
+            254,
+            254
+          ],
+          "bus": [
+            254,
+            254,
+            254
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            168,
+            69,
+            213
+          ]
+        }
+      },
+      "Tuned": {
+        "Red": {
+          "passenger": [
+            254,
+            100,
+            73
+          ],
+          "bus": [
+            254,
+            84,
+            62
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            170,
+            76,
+            194
+          ]
+        },
+        "Pink": {
+          "passenger": [
+            254,
+            202,
+            254
+          ],
+          "bus": [
+            254,
+            171,
+            232
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            170,
+            76,
+            194
+          ]
+        },
+        "Purple": {
+          "passenger": [
+            254,
+            141,
+            254
+          ],
+          "bus": [
+            253,
+            122,
+            254
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            170,
+            76,
+            194
+          ]
+        },
+        "Blue": {
+          "passenger": [
+            114,
+            214,
+            254
+          ],
+          "bus": [
+            99,
+            184,
+            254
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            170,
+            76,
+            194
+          ]
+        },
+        "Green": {
+          "passenger": [
+            184,
+            254,
+            148
+          ],
+          "bus": [
+            172,
+            254,
+            135
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            170,
+            76,
+            194
+          ]
+        },
+        "Yellow": {
+          "passenger": [
+            254,
+            254,
+            29
+          ],
+          "bus": [
+            254,
+            254,
+            1
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            170,
+            76,
+            194
+          ]
+        },
+        "White": {
+          "passenger": [
+            254,
+            254,
+            254
+          ],
+          "bus": [
+            254,
+            254,
+            254
+          ],
+          "open slot": [
+            254,
+            254,
+            254
+          ],
+          "locked slot": [
+            170,
+            76,
+            194
+          ]
+        }
+      }
+    },
+    "pairs": [
+      {
+        "pair": "Red/Pink",
+        "passengerBefore": 175.8664,
+        "passengerAfter": 214.0841,
+        "passengerTuned": 207.7619,
+        "busBefore": 178.0365,
+        "busAfter": 222.7487,
+        "busTuned": 190.9686
+      },
+      {
+        "pair": "Red/Purple",
+        "passengerBefore": 152.9215,
+        "passengerAfter": 190.683,
+        "passengerTuned": 185.5856,
+        "busBefore": 184.6537,
+        "busAfter": 208.751,
+        "busTuned": 195.7269
+      },
+      {
+        "pair": "Red/Blue",
+        "passengerBefore": 237.0865,
+        "passengerAfter": 281.0089,
+        "passengerTuned": 255.6502,
+        "busBefore": 258.2963,
+        "busAfter": 298.0554,
+        "busTuned": 266.2499
+      },
+      {
+        "pair": "Red/Green",
+        "passengerBefore": 206.6567,
+        "passengerAfter": 219.7703,
+        "passengerTuned": 185.0432,
+        "busBefore": 236.4952,
+        "busAfter": 257.7305,
+        "busTuned": 202.3685
+      },
+      {
+        "pair": "Red/Yellow",
+        "passengerBefore": 153.0555,
+        "passengerAfter": 176.6154,
+        "passengerTuned": 160.1624,
+        "busBefore": 174.0402,
+        "busAfter": 190.6725,
+        "busTuned": 180.6128
+      },
+      {
+        "pair": "Red/White",
+        "passengerBefore": 211.4356,
+        "passengerAfter": 247.3156,
+        "passengerTuned": 237.6489,
+        "busBefore": 242.5469,
+        "busAfter": 274.7217,
+        "busTuned": 256.4449
+      },
+      {
+        "pair": "Pink/Purple",
+        "passengerBefore": 62.0967,
+        "passengerAfter": 64.0,
+        "passengerTuned": 61.0,
+        "busBefore": 81.523,
+        "busAfter": 52.3259,
+        "busTuned": 53.7215
+      },
+      {
+        "pair": "Pink/Blue",
+        "passengerBefore": 159.0,
+        "passengerAfter": 171.843,
+        "passengerTuned": 140.5133,
+        "busBefore": 179.2261,
+        "busAfter": 185.8978,
+        "busTuned": 157.0923
+      },
+      {
+        "pair": "Pink/Green",
+        "passengerBefore": 181.1353,
+        "passengerAfter": 235.5483,
+        "passengerTuned": 137.2589,
+        "busBefore": 225.8517,
+        "busAfter": 293.1552,
+        "busTuned": 151.73
+      },
+      {
+        "pair": "Pink/Yellow",
+        "passengerBefore": 181.8378,
+        "passengerAfter": 260.3171,
+        "passengerTuned": 230.9307,
+        "busBefore": 204.4725,
+        "busAfter": 265.9793,
+        "busTuned": 245.4588
+      },
+      {
+        "pair": "Pink/White",
+        "passengerBefore": 56.0,
+        "passengerAfter": 57.0,
+        "passengerTuned": 52.0,
+        "busBefore": 97.4166,
+        "busAfter": 88.0511,
+        "busTuned": 85.8662
+      },
+      {
+        "pair": "Purple/Blue",
+        "passengerBefore": 155.0774,
+        "passengerAfter": 189.2142,
+        "passengerTuned": 157.8892,
+        "busBefore": 122.3846,
+        "busAfter": 193.1321,
+        "busTuned": 166.012
+      },
+      {
+        "pair": "Purple/Green",
+        "passengerBefore": 197.6512,
+        "passengerAfter": 258.602,
+        "passengerTuned": 170.0147,
+        "busBefore": 218.5612,
+        "busAfter": 311.9519,
+        "busTuned": 195.31
+      },
+      {
+        "pair": "Purple/Yellow",
+        "passengerBefore": 208.9043,
+        "passengerAfter": 281.3485,
+        "passengerTuned": 251.7817,
+        "busBefore": 246.6029,
+        "busAfter": 290.0707,
+        "busTuned": 285.3664
+      },
+      {
+        "pair": "Purple/White",
+        "passengerBefore": 117.0982,
+        "passengerAfter": 121.0,
+        "passengerTuned": 113.0,
+        "busBefore": 158.4045,
+        "busAfter": 140.0893,
+        "busTuned": 132.0038
+      },
+      {
+        "pair": "Blue/Green",
+        "passengerBefore": 123.13,
+        "passengerAfter": 181.1105,
+        "passengerTuned": 133.1766,
+        "busBefore": 167.7945,
+        "busAfter": 228.0658,
+        "busTuned": 156.173
+      },
+      {
+        "pair": "Blue/Yellow",
+        "passengerBefore": 241.5492,
+        "passengerAfter": 308.7993,
+        "passengerTuned": 268.0019,
+        "busBefore": 277.7967,
+        "busAfter": 321.9332,
+        "busTuned": 304.8508
+      },
+      {
+        "pair": "Blue/White",
+        "passengerBefore": 168.5734,
+        "passengerAfter": 175.6161,
+        "passengerTuned": 145.6022,
+        "busBefore": 203.5927,
+        "busAfter": 197.8004,
+        "busTuned": 170.0735
+      },
+      {
+        "pair": "Green/Yellow",
+        "passengerBefore": 150.2698,
+        "passengerAfter": 166.8832,
+        "passengerTuned": 138.0616,
+        "busBefore": 168.2498,
+        "busAfter": 183.7634,
+        "busTuned": 157.0987
+      },
+      {
+        "pair": "Green/White",
+        "passengerBefore": 172.2614,
+        "passengerAfter": 228.5476,
+        "passengerTuned": 127.0276,
+        "busBefore": 210.649,
+        "busAfter": 281.9379,
+        "busTuned": 144.5164
+      },
+      {
+        "pair": "Yellow/White",
+        "passengerBefore": 173.0,
+        "passengerAfter": 254.0,
+        "passengerTuned": 225.0,
+        "busBefore": 189.0,
+        "busAfter": 254.0,
+        "busTuned": 253.0
+      }
+    ],
+    "minimumPassengerDistance": 52.0,
+    "minimumBusDistance": 53.7215,
+    "screens": {
+      "Start": {
+        "changedPixelsVs16fd9f6": 0,
+        "meanAbsoluteChannelDelta": 0.0
+      },
+      "Mid": {
+        "changedPixelsVs16fd9f6": 1819360,
+        "meanAbsoluteChannelDelta": 27.2712
+      },
+      "Complete": {
+        "changedPixelsVs16fd9f6": 1765403,
+        "meanAbsoluteChannelDelta": 10.0633
+      }
+    },
+    "grassCoordinate": [
+      900,
+      1600
+    ],
+    "grass": {
+      "Before": [
+        150,
+        215,
+        21
+      ],
+      "After": [
+        155,
+        236,
+        0
+      ],
+      "Tuned": [
+        191,
+        231,
+        102
+      ]
+    },
+    "grassHSVSaturation": {
+      "Before": 0.9023,
+      "After": 1.0,
+      "Tuned": 0.5584
+    },
+    "noSpecularControl": {
+      "method": "Same tuned grade, material colours, pose; only six Simple Lit _SpecularHighlights flags 0 vs 1; black specular RGB and disabled keywords preserved. Camera MSAA temporarily disabled for paired control then restored. Maximum full-frame channel delta tolerance 2/255.",
+      "pairs": [
+        {
+          "colour": "Red",
+          "changedPixels": 3127,
+          "maximumChannelDelta": 2,
+          "passengerRegionMaxDelta": 2,
+          "busRegionMaxDelta": 2
+        },
+        {
+          "colour": "Pink",
+          "changedPixels": 0,
+          "maximumChannelDelta": 0,
+          "passengerRegionMaxDelta": 0,
+          "busRegionMaxDelta": 0
+        },
+        {
+          "colour": "Purple",
+          "changedPixels": 0,
+          "maximumChannelDelta": 0,
+          "passengerRegionMaxDelta": 0,
+          "busRegionMaxDelta": 0
+        },
+        {
+          "colour": "Blue",
+          "changedPixels": 0,
+          "maximumChannelDelta": 0,
+          "passengerRegionMaxDelta": 0,
+          "busRegionMaxDelta": 0
+        },
+        {
+          "colour": "Green",
+          "changedPixels": 0,
+          "maximumChannelDelta": 0,
+          "passengerRegionMaxDelta": 0,
+          "busRegionMaxDelta": 0
+        },
+        {
+          "colour": "Yellow",
+          "changedPixels": 4,
+          "maximumChannelDelta": 1,
+          "passengerRegionMaxDelta": 0,
+          "busRegionMaxDelta": 0
+        },
+        {
+          "colour": "White",
+          "changedPixels": 2119,
+          "maximumChannelDelta": 2,
+          "passengerRegionMaxDelta": 2,
+          "busRegionMaxDelta": 2
+        }
+      ],
+      "passed": true
+    },
+    "protectedFilesChecked": 13,
+    "protectedFilesChanged": 0,
+    "serializedProfileBytes": 13198,
+    "previousSerializedProfileBytes": 4313,
+    "buildPerformed": false,
+    "cost": "SMH and curves bake into existing LDR grading LUT; same fullscreen post passes, no new renderer feature. New device timing and APK size not measured."
   }
 }

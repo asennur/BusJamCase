@@ -1,81 +1,69 @@
-# ZLIGHT — Warm, shadow-free mobile look
+# ZLIGHT — Warm tune, second pass
 
-20 November 2026. **Unity 2022.3.19f1**, Android, `main`. Edit mode only; Play was never entered. [Comparison](ZLIGHT-Compare.png), [colour sheet](ZLIGHT-Colours.png), [measurements](ZLIGHT-Evidence.json), [renderer audit](ZLIGHT-Audit.json).
+20 November 2026. Unity **2022.3.19f1**, `main`, following `16fd9f6`. **Final live validation completed; Console 0.** Only `Assets/_BusJam/Settings/PP_Game.asset` changes among runtime assets. No scripts, scenes or materials changed by this pass. No player/APK build and no push.
+
+[Three-column comparison](ZLIGHT-Compare.png): **before ZLIGHT / 16fd9f6 / tuned**, each with Start, Mid (Level_07 fixture) and Complete. [Colour sheet](ZLIGHT-Colours.png), [NoSpecular control](ZLIGHT-NoSpecular.png), [measurements](ZLIGHT-Evidence.json), [audit](ZLIGHT-Audit.json).
 
 ## Saved values
 
-Game and LevelEditor each have one Global Volume sharing `Assets/_BusJam/Settings/PP_Game.asset`: Default layer, priority **0**, weight **1**.
+Game and LevelEditor retain their shared Global Volume: Default layer, priority **0**, weight **1**, `PP_Game.asset`.
 
-| Setting | Value / reason |
-| --- | --- |
-| Directional key | RGB **255/240/215**, intensity **1.15**, Euler **42/-20/0 degrees**. Bright tops and camera-facing fronts; no additional lights. |
-| Gradient ambient | Intensity **1**. Sky **0.62/0.59/0.53**, equator **0.48/0.46/0.42**, ground **0.30/0.275/0.24**; warm fill replaces cool faces. |
-| Shadows | Light **None**; URP main/additional/any/soft shadows **off**, distance **0**. All MeshRenderer/SkinnedMeshRenderer Cast **Off**, Receive **false**, including inactive prefab children and procedural BoardBase. |
-| Mobile pipeline | Pipeline/camera **HDR off**, existing **2x MSAA**, render scale **1**, SRP Batcher **on**, additional lights **disabled**; no renderer features added. |
-| Camera | Post **on**, post AA **None**, dithering **off**, Stop NaN **off**, volume mask **Default (1)**. Framing unchanged. |
-| Tonemapping | **None**. Neutral reduced the controlled white sample from **254/254/254** to **234/226/218**; None preserves bright whites. |
-| Color Adjustments | Exposure **+0.15**, contrast **+12**, saturation **+20**, white filter, hue shift **0**. |
-| White Balance | Temperature **+10**, tint **+2**. |
-| Bloom | Threshold **0.9**, intensity **0.35**, scatter **0.6**, **Quarter** downscale, **3** iterations, high-quality filtering **off**, white tint, clamp **65472**, no dirt texture/intensity **0**. |
-| Vignette | RGB **0.14/0.075/0.045**, intensity **0.18**, smoothness **0.4**, centre **0.5/0.5**, rounded **false**. |
-| Matte materials | Red/Pink/Blue/Green/White and M_BusBody retain Simple Lit: smoothness **0.08**, specular mode **NoSpecular** (`_SpecularHighlights = 1` in Simple Lit), specular RGBA **0/0/0/1**; specular/gloss keywords disabled. Only Pink's base green changes: **0.5 -> 0.478**. |
-
-No extra rim light, DOF, motion blur, chromatic aberration, film grain, SSAO or Lift/Gamma/Gain. No blob/fake-shadow renderers found or introduced. Background/UI artwork retains its painted shading.
-
-## UI and colour
-
-Both UI canvases already used **Screen Space Overlay** and remain unchanged. Only the background uses Screen Space Camera, existing distance **99**. Frame Debugger places `UGUI.Rendering.RenderOverlays` after post. The entire **1080x1920 Start image is byte-identical: 0 changed pixels**.
-
-Controlled substitutions sample the same passenger/bus surface: **5x5 median sRGB bytes**. Pixel centres, top-left origin: passenger **345/858**, bus **650/438**, open slot **540/700**, locked slot **245/675**.
-
-| Colour | Passenger before -> after | Bus before -> after |
+| Setting | 16fd9f6 | Tuned |
 | --- | --- | --- |
-| Red | 255/104/107 -> 254/91/68 | 255/82/85 -> 254/70/50 |
-| Pink | 255/199/255 -> 254/197/254 | 255/158/246 -> 254/166/251 |
-| Purple | 239/139/255 -> 254/133/254 | 189/111/255 -> 249/114/254 |
-| Blue | 96/199/255 -> 83/214/254 | 76/158/255 -> 69/184/254 |
-| Green | 120/255/148 -> 107/254/79 | 95/253/118 -> 74/254/37 |
-| Yellow | 255/255/82 -> 254/254/0 | 255/255/66 -> 254/254/0 |
-| White | 255/255/255 -> 254/254/254 | 255/255/255 -> 254/254/254 |
-| Open slot | 255/255/255 -> 254/254/254 | - |
-| Locked slot | 153/82/239 -> 168/69/213 | - |
+| Color Adjustments saturation | +20 | **+8** |
+| White Balance temperature / tint | +10 / +2 | **+18 / +2** |
+| Exposure / contrast / hue shift | +0.15 / +12 / 0 | Unchanged |
+| SMH shadows, RGBA trackball | Disabled | **1.015 / 1 / 0.975 / 0** |
+| SMH midtones, RGBA trackball | Disabled | **1.035 / 1.005 / 0.965 / 0** |
+| SMH highlights, RGBA trackball | Disabled | **1.035 / 1.015 / 1.005 / 0** |
+| Shadow / highlight ranges | Disabled | **0–0.3 / 0.55–1** |
+| Hue vs Saturation | Default | **(0,.5), (.12,.5), (.20,.36), (.28,.39), (.38,.46), (.46,.5), (.75,.5), (1,.5)** |
+| Hue vs Hue | Default | **(0,.5), (.14,.5), (.24,.49), (.34,.485), (.44,.5), (.75,.5), (1,.5)** |
 
-**21/21 passenger pair distances retained/increased** (Euclidean sampled sRGB); minimum **56 -> 57**. Pink's material correction prevents White separation shrinking. Bus samples remain separate, minimum **52.33**; four bus-pair distances tighten under the warm grade, recorded in the JSON. Purple/Yellow are untouched.
+Curve coordinates are normalized hue and curve value; **0.5 is neutral**. All keys have zero in/out tangents and both hue curves loop. Only these two Color Curves overrides are enabled. The selective reduction removes acid yellow-green from the background without desaturating red, pink, purple or blue. The small negative green hue offset moves greens toward warm yellow-green. SMH warms shaded surfaces and highlights; enough highlight blue is retained to keep white geometry neutral.
 
-Bloom works with HDR off: disabling it on the same white fixture changes **1,731,438 pixels**, mean absolute channel difference **4.56/255**. Controlled Bloom-off and None/Neutral captures are included.
+Unchanged baseline: one key light **255/240/215**, intensity **1.15**, Euler **42/-20/0**; Gradient ambient intensity **1**, sky **.62/.59/.53**, equator **.48/.46/.42**, ground **.30/.275/.24**. All real/fake shadows remain disabled. HDR off, **2x MSAA**, render scale **1**, SRP Batcher on, additional lights disabled. Tonemapping **None**; Bloom threshold **.9**, intensity **.35**, scatter **.6**, Quarter, three iterations, high-quality filtering off; Vignette **.14/.075/.045**, intensity **.18**, smoothness **.4**. Camera post on, post AA None, dithering off, Stop NaN off, volume mask Default. No rim light, DOF, motion blur, chromatic aberration, film grain, SSAO or new renderer feature.
 
-## Cost
+## Screens and colour
 
-Frame Debugger hierarchies and UnityStats counters from the same fixed-resolution Game view frame:
+All new captures use existing **ZLightPreview**, static **Edit mode**, **1080×1920**, separate prepare/capture editor ticks. The Level_07 asset supplies the board and bus order. Complete is the existing posed overlay, not a played win. The helper preserves authored HUD numbers, so the historical badge says Level 1 although the fixture is Level_07. Captures verify lighting and material readability, not runtime animation. Before and middle columns use the archived original captures; the tuned column is newly rendered after the final NoSpecular correction.
 
-| Screen | Draw calls before -> after | SetPass before -> after | Shadow casters before -> after |
-| --- | --- | --- | --- |
-| Start | 13 -> 21 | 7 -> 15 | 0 -> 0 |
-| Mid, Level 07 | **300 -> 169 (-43.7%)** | 13 -> 21 | **139 -> 0** |
-| Complete | 79 -> 78 | 14 -> 21 | 9 -> 0 |
+**Start is pixel-identical to both earlier columns: 0 changed pixels.** Its full-screen overlay artwork intentionally bypasses scene grading. The gameplay background uses Screen Space Camera and receives the grade. Mid changes **1,819,360** pixels versus 16fd9f6 (mean absolute channel delta **27.27/255**); Complete changes **1,765,403** (mean **10.06/255**). Overlay artwork stays clean.
 
-`MainLightShadow/Shadows.DrawSRPBatcher` is removed; no after-frame has a shadow pass. Post adds one LUT draw and seven small Bloom draws; Uber replaces FinalBlit. Estimate: approximately **0.4 million extra LUT/Bloom pixels/frame**, plus Uber's grading samples, while removing 139 caster draws. Bloom sizes: **270x480 -> 135x240 -> 67x120**. No HDR buffer. Device GPU milliseconds were not measured in Edit mode.
+Grass, 5×5 median at **900/1600**: **150/215/21 → 155/236/0 → 191/231/102**. Sampled HSV saturation falls from **1.0 to .558** versus 16fd9f6. White passenger, bus and open slot all remain **254/254/254**.
 
-Last verified paired Android APKs: **28,385,859 -> 28,380,159 bytes**, **5,700 bytes smaller (-0.020%)**, both **27.07 MiB**. `Temp/ZLIGHT-Final.apk` built with **0 errors / 0 warnings**, before the final material-mode correction. No runtime textures/models added. Guarding the Editor-only solver setting with `UNITY_EDITOR` removes its existing Android CS0414 warning without changing Editor behavior.
+Controlled material substitutions use the same surface and pose, **5×5 median sRGB bytes**, top-left origin: passenger **345/858**, bus **650/438**, open slot **540/700**, locked slot **245/675**.
 
-## Final validation attempt (resume, 20 November 2026)
+| Colour | Passenger: before / 16fd9f6 / tuned | Bus: before / 16fd9f6 / tuned |
+| --- | --- | --- |
+| Red | 255,104,107 / 254,91,68 / 254,100,73 | 255,82,85 / 254,70,50 / 254,84,62 |
+| Pink | 255,199,255 / 254,197,254 / 254,202,254 | 255,158,246 / 254,166,251 / 254,171,232 |
+| Purple | 239,139,255 / 254,133,254 / 254,141,254 | 189,111,255 / 249,114,254 / 253,122,254 |
+| Blue | 96,199,255 / 83,214,254 / 114,214,254 | 76,158,255 / 69,184,254 / 99,184,254 |
+| Green | 120,255,148 / 107,254,79 / 184,254,148 | 95,253,118 / 74,254,37 / 172,254,135 |
+| Yellow | 255,255,82 / 254,254,0 / 254,254,29 | 255,255,66 / 254,254,0 / 254,254,1 |
+| White | 255,255,255 / 254,254,254 / 254,254,254 | 255,255,255 / 254,254,254 / 254,254,254 |
 
-**Live validation remains pending.** The initial editor-state request and six retries, each after at least 20 seconds, failed. Editor-state and Console requests returned `Unity session not ready ... ping not answered`; the direct status `execute_code` request returned `success: false`. The server still lists BusJamCase on Unity 2022.3.19f1, and the Unity process is running, but neither proves the current scene or compilation state. No domain reload, script edit, Play entry or setup reapplication was triggered during this resume.
+All **21** colour pairs remain distinct. Minimum sampled passenger distance is **52** (Pink/White), bus **53.72** (Pink/Purple), Euclidean sRGB. Some pair distances narrow as saturation is reduced; the previous “all distances retained/increased” claim applies only to the first pass.
 
-- Disk verification passed for all six mutable Simple Lit materials: `_SpecularHighlights = 1` (NoSpecular), `_Smoothness = 0.08`, black specular RGB and disabled specular/gloss keywords. `git diff --check` passed.
-- Current Edit mode, completed compilation, clean Game scene, zero missing scripts and zero disposable preview objects could **not** be confirmed. No preview mutation was attempted during this resume; any preview left by the earlier failed run remains unverified.
-- Start, Mid Level 7, Complete and seven colour captures could **not** be recaptured. Existing After captures, colour sheet and comparison remain the earlier evidence, before the final NoSpecular correction; no new-highlight or colour-equivalence claim is made for the last change. The comparison was not regenerated from stale inputs.
-- Final Console inspection could **not** be completed; zero package errors/warnings is not newly certified.
-- **APK rebuild deliberately skipped as requested. Asen's final Android build is pending** and must include the final NoSpecular correction. Earlier APK sizes below are historical measurements only.
-- All **13 protected files** still match the earlier SHA-256 manifest. Protected assets are excluded from the ZLIGHT commit. AsenOS remains untouched by this resume-only scope. No push.
-- Computer Use could not bring Unity forward: access was rejected with `Computer Use was not approved to use unity`.
+## Final NoSpecular validation
 
-## Earlier verification (before final NoSpecular correction)
+Live audit confirms all six affected Simple Lit materials (Red, Pink, Blue, Green, White, BusBody): **_SpecularHighlights = 1 (NoSpecular)**, smoothness **.08**, specular RGB **0/0/0**, no specular/gloss keywords. Local URP 14.0.10 `SimpleLitGUI.SpecularSource` verifies this enum mapping. Purple and Yellow retain their existing user-authored materials.
 
-- Earlier compilation was clean and Console **0**, before the final material-mode correction. **11 prefabs / 26 renderers**, **2 scenes**, **354 fixture renderers** including BoardBase: no shadow-flag failures or missing scripts. The final live revalidation attempt is documented above.
-- **336 existing Transform/RectTransform blocks** checked against main: only the two directional-light rotations change. Layout preserved.
-- Captures use static Edit-mode Start, actual Level_07 fixtures with all seven passenger colours, and a posed Complete overlay. Serialized HUD numbers remain as authored. These validate lighting, not runtime animation. Previews were removed and saved Game confirmed clean before the failed retry; current editor-memory state remains unconfirmed after the six resume retries.
-- **13 protected files checked, 0 changed**. M_Purple, M_Yellow, LevelDatabase, Level_26, ArtSource and Otobus Materials were not edited by ZLIGHT and are excluded from its commit; their pre-existing local changes are preserved. AsenOS untouched. No branch changes or push.
-- `ZLightSetup` reapplies settings; `ZLightPreview` captures on separate prepare/capture editor ticks using Unity's [2022.3 Game view rendering](https://github.com/Unity-Technologies/UnityCsReference/blob/2022.3/Editor/Mono/PlayModeView/PlayModeView.cs).
+For each of the seven colours, the same tuned fixture was captured with the previous flag **0** and saved flag **1**, preserving black specular and disabled keywords. MSAA was temporarily disabled only for these paired controls, then restored. Pink, Purple, Blue and Green are **full-frame pixel-identical**; Yellow differs by at most **1/255**, Red and White by at most **2/255**. No new highlight appears. Contact sheet and full-frame difference counts are linked above. The normal acceptance captures use the production **2x MSAA**.
 
-Computer Use rejected Unity access ("Computer Use was not approved to use unity"); completed editor work and verification used Unity MCP.
+## Editor cost estimate
+
+SMH and both hue curves are evaluated while generating the **existing LDR grading LUT** (`ColorGradingLutPass` / `LutBuilderLdr.shader` in local URP 14.0.10). They add LUT work, **no additional fullscreen post pass, light, shadow pass or renderer feature**. Quarter-resolution Bloom settings and screen pixel workload are unchanged from 16fd9f6.
+
+The serialized profile grows from **4,313 to 13,198 bytes (+8,885 bytes)**. This is an asset-on-disk measurement, **not an APK-size estimate**. No runtime texture/model assets were added. Historical first-pass Mid counts were **300 → 169 draws**, shadow casters **139 → 0**. No fresh per-frame draw/GPU timing is claimed: this helper's repeated manual renders accumulate UnityStats, and Frame Debugger did not return a fresh event frame in this session. Device GPU milliseconds and player size were not measured. **No build was started.**
+
+## Completed verification and cleanup
+
+- Unity **2022.3.19f1**, Edit mode; compilation finished; final Console **0 entries**, including warnings/errors.
+- **11 prefabs / 26 renderers**, **2 scenes**, **354 fixture renderers**: no shadow flag failures, **0 missing scripts**. Both scenes still reference the saved profile and retain HDR off / post on / MSAA on.
+- Disposable previews removed; saved **Game** scene restored, **clean**, Edit mode, **0 preview roots**. No scene or prefab was saved by the tune.
+- **13 protected files checked, 0 changed**, including pre-existing M_Purple/M_Yellow, LevelDatabase, Level_26, ArtSource and Otobus materials. Only this pass's profile and documentation/evidence are committed. No push.
+- `ZLightSetup.Apply()` still represents the first-pass preset and would reset saturation/temperature; it was deliberately not run. The saved `PP_Game.asset` is the final tuning source. Source scripts remain outside this pass's scope.
+
+Decision: Use +8 saturation, +18 temperature, warm SMH and selective hue curves to remove acid greens while keeping 3D whites neutral (20 November 2026, ZLIGHT TUNE).
