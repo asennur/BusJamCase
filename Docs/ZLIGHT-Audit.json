@@ -1,0 +1,46 @@
+{
+  "prefabs": 11,
+  "prefabRenderers": 26,
+  "scenes": 2,
+  "sceneRenderers": 0,
+  "runtimeRenderers": 354,
+  "missing": 0,
+  "failures": [],
+  "details": [
+    {
+      "path": "Assets/_BusJam/Scenes/Game.unity",
+      "lightRotation": "(42.00, 340.00, 0.00)",
+      "mode": "Trilight",
+      "canvases": [
+        {
+          "name": "Background",
+          "mode": "ScreenSpaceCamera"
+        },
+        {
+          "name": "Canvas",
+          "mode": "ScreenSpaceOverlay"
+        }
+      ]
+    },
+    {
+      "path": "Assets/_BusJam/Scenes/LevelEditor.unity",
+      "lightRotation": "(42.00, 340.00, 0.00)",
+      "mode": "Trilight",
+      "canvases": [
+        {
+          "name": "Canvas",
+          "mode": "ScreenSpaceOverlay"
+        },
+        {
+          "name": "Background",
+          "mode": "ScreenSpaceCamera"
+        }
+      ]
+    }
+  ],
+  "editMode": true,
+  "dirty": false,
+  "proceduralBases": 1,
+  "protectedFilesChecked": 13,
+  "protectedFilesChanged": 0
+}

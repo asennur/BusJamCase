@@ -1,0 +1,128 @@
+{
+  "events": 24,
+  "draws": 300,
+  "setPass": 13,
+  "shadowCasters": 139,
+  "rows": [
+    {
+      "index": 0,
+      "type": "ClearAll",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer"
+    },
+    {
+      "index": 1,
+      "type": "SRPBatch",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/MainLightShadow/Shadows.DrawSRPBatcher"
+    },
+    {
+      "index": 2,
+      "type": "ClearAll",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer"
+    },
+    {
+      "index": 3,
+      "type": "SRPBatch",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/DrawOpaqueObjects/RenderLoop.DrawSRPBatcher"
+    },
+    {
+      "index": 4,
+      "type": "SRPBatch",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/DrawOpaqueObjects/RenderLoop.DrawSRPBatcher"
+    },
+    {
+      "index": 5,
+      "type": "SRPBatch",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/DrawOpaqueObjects/RenderLoop.DrawSRPBatcher"
+    },
+    {
+      "index": 6,
+      "type": "Mesh",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/DrawTransparentObjects/RenderLoop.Draw/Canvas.RenderSubBatch"
+    },
+    {
+      "index": 7,
+      "type": "Mesh",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/DrawTransparentObjects/RenderLoop.Draw"
+    },
+    {
+      "index": 8,
+      "type": "Mesh",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/DrawTransparentObjects/RenderLoop.Draw"
+    },
+    {
+      "index": 9,
+      "type": "Mesh",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/DrawTransparentObjects/RenderLoop.Draw"
+    },
+    {
+      "index": 10,
+      "type": "Mesh",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/DrawTransparentObjects/RenderLoop.Draw"
+    },
+    {
+      "index": 11,
+      "type": "Mesh",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/DrawTransparentObjects/RenderLoop.Draw"
+    },
+    {
+      "index": 12,
+      "type": "Mesh",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/DrawTransparentObjects/RenderLoop.Draw"
+    },
+    {
+      "index": 13,
+      "type": "Mesh",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/DrawTransparentObjects/RenderLoop.Draw"
+    },
+    {
+      "index": 14,
+      "type": "ResolveRT",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/FinalBlit/RenderTexture.ResolveAA"
+    },
+    {
+      "index": 15,
+      "type": "DrawProcedural",
+      "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Main Camera/ScriptableRenderer.Execute: URP-Mobile_Renderer/FinalBlit"
+    },
+    {
+      "index": 16,
+      "type": "ClearStencil",
+      "name": "UGUI.Rendering.RenderOverlays"
+    },
+    {
+      "index": 17,
+      "type": "Mesh",
+      "name": "UGUI.Rendering.RenderOverlays/Canvas.RenderOverlays"
+    },
+    {
+      "index": 18,
+      "type": "Mesh",
+      "name": "UGUI.Rendering.RenderOverlays/Canvas.RenderOverlays"
+    },
+    {
+      "index": 19,
+      "type": "Mesh",
+      "name": "UGUI.Rendering.RenderOverlays/Canvas.RenderOverlays"
+    },
+    {
+      "index": 20,
+      "type": "Mesh",
+      "name": "UGUI.Rendering.RenderOverlays/Canvas.RenderOverlays"
+    },
+    {
+      "index": 21,
+      "type": "Mesh",
+      "name": "UGUI.Rendering.RenderOverlays/Canvas.RenderOverlays"
+    },
+    {
+      "index": 22,
+      "type": "Mesh",
+      "name": "UGUI.Rendering.RenderOverlays/Canvas.RenderOverlays"
+    },
+    {
+      "index": 23,
+      "type": "Mesh",
+      "name": "UGUI.Rendering.RenderOverlays/Canvas.RenderOverlays"
+    }
+  ]
+}

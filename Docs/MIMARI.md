@@ -15,7 +15,7 @@ Bu dosya kodun tek tasarım kaynağıdır; kod (AI destekli) buna uyar. Kararlar
 
 ## 1. Platform: dikey mobil
 
-- Render: **URP** (Universal Render Pipeline, 2022.3 için 14.x). Tek mobil ayarlı URP asset'i: HDR kapalı, MSAA 2x, gölge tek directional ve kısa mesafe, ek ışık yok, SRP Batcher açık. Materyaller `Universal Render Pipeline/Simple Lit`.
+- Render: **URP 14.x**, Unity 2022.3.19f1. One mobile pipeline asset: HDR off, MSAA 2x, all shadows off, one warm directional light, Gradient ambient fill, SRP Batcher on. Materials use `Universal Render Pipeline/Simple Lit`. A single global `PP_Game` profile provides light LDR grading, quarter-resolution low-quality Bloom and a subtle vignette. UI stays in Screen Space Overlay; the background camera canvas may be graded. Decision: no realtime or fake shadow geometry (ZLIGHT, 20 November 2026). Exact values and cost are in `ZLIGHT-Report.md`.
 
 - Player Settings: Default Orientation **Portrait**, yalnız portrait izinli.
 - Game view referansı **1080×1920**. `Application.targetFrameRate = 60` (GameManager Awake).

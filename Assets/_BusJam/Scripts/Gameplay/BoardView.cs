@@ -150,6 +150,7 @@ namespace BusJam.Gameplay
                 var renderer = plate.GetComponent<MeshRenderer>();
                 renderer.sharedMaterial = baseMaterial;
                 renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                renderer.receiveShadows = false;
             }
 
             var vertices = new List<Vector3>();

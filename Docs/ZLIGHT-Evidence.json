@@ -1,0 +1,651 @@
+{
+  "method": "5x5 median sRGB patches; identical camera, pose and surface, seven material substitutions in Edit mode",
+  "coordinates": {
+    "passenger": [
+      345,
+      858
+    ],
+    "bus": [
+      650,
+      438
+    ],
+    "open slot": [
+      540,
+      700
+    ],
+    "locked slot": [
+      245,
+      675
+    ]
+  },
+  "samples": {
+    "Before": {
+      "Red": {
+        "passenger": [
+          255,
+          104,
+          107
+        ],
+        "bus": [
+          255,
+          82,
+          85
+        ],
+        "open slot": [
+          255,
+          255,
+          255
+        ],
+        "locked slot": [
+          153,
+          82,
+          239
+        ]
+      },
+      "Pink": {
+        "passenger": [
+          255,
+          199,
+          255
+        ],
+        "bus": [
+          255,
+          158,
+          246
+        ],
+        "open slot": [
+          255,
+          255,
+          255
+        ],
+        "locked slot": [
+          153,
+          82,
+          239
+        ]
+      },
+      "Purple": {
+        "passenger": [
+          239,
+          139,
+          255
+        ],
+        "bus": [
+          189,
+          111,
+          255
+        ],
+        "open slot": [
+          255,
+          255,
+          255
+        ],
+        "locked slot": [
+          153,
+          82,
+          239
+        ]
+      },
+      "Blue": {
+        "passenger": [
+          96,
+          199,
+          255
+        ],
+        "bus": [
+          76,
+          158,
+          255
+        ],
+        "open slot": [
+          255,
+          255,
+          255
+        ],
+        "locked slot": [
+          153,
+          82,
+          239
+        ]
+      },
+      "Green": {
+        "passenger": [
+          120,
+          255,
+          148
+        ],
+        "bus": [
+          95,
+          253,
+          118
+        ],
+        "open slot": [
+          255,
+          255,
+          255
+        ],
+        "locked slot": [
+          153,
+          82,
+          239
+        ]
+      },
+      "Yellow": {
+        "passenger": [
+          255,
+          255,
+          82
+        ],
+        "bus": [
+          255,
+          255,
+          66
+        ],
+        "open slot": [
+          255,
+          255,
+          255
+        ],
+        "locked slot": [
+          153,
+          82,
+          239
+        ]
+      },
+      "White": {
+        "passenger": [
+          255,
+          255,
+          255
+        ],
+        "bus": [
+          255,
+          255,
+          255
+        ],
+        "open slot": [
+          255,
+          255,
+          255
+        ],
+        "locked slot": [
+          153,
+          82,
+          239
+        ]
+      }
+    },
+    "After": {
+      "Red": {
+        "passenger": [
+          254,
+          91,
+          68
+        ],
+        "bus": [
+          254,
+          70,
+          50
+        ],
+        "open slot": [
+          254,
+          254,
+          254
+        ],
+        "locked slot": [
+          168,
+          69,
+          213
+        ]
+      },
+      "Pink": {
+        "passenger": [
+          254,
+          197,
+          254
+        ],
+        "bus": [
+          254,
+          166,
+          251
+        ],
+        "open slot": [
+          254,
+          254,
+          254
+        ],
+        "locked slot": [
+          168,
+          69,
+          213
+        ]
+      },
+      "Purple": {
+        "passenger": [
+          254,
+          133,
+          254
+        ],
+        "bus": [
+          249,
+          114,
+          254
+        ],
+        "open slot": [
+          254,
+          254,
+          254
+        ],
+        "locked slot": [
+          168,
+          69,
+          213
+        ]
+      },
+      "Blue": {
+        "passenger": [
+          83,
+          214,
+          254
+        ],
+        "bus": [
+          69,
+          184,
+          254
+        ],
+        "open slot": [
+          254,
+          254,
+          254
+        ],
+        "locked slot": [
+          168,
+          69,
+          213
+        ]
+      },
+      "Green": {
+        "passenger": [
+          107,
+          254,
+          79
+        ],
+        "bus": [
+          74,
+          254,
+          37
+        ],
+        "open slot": [
+          254,
+          254,
+          254
+        ],
+        "locked slot": [
+          168,
+          69,
+          213
+        ]
+      },
+      "Yellow": {
+        "passenger": [
+          254,
+          254,
+          0
+        ],
+        "bus": [
+          254,
+          254,
+          0
+        ],
+        "open slot": [
+          254,
+          254,
+          254
+        ],
+        "locked slot": [
+          168,
+          69,
+          213
+        ]
+      },
+      "White": {
+        "passenger": [
+          254,
+          254,
+          254
+        ],
+        "bus": [
+          254,
+          254,
+          254
+        ],
+        "open slot": [
+          254,
+          254,
+          254
+        ],
+        "locked slot": [
+          168,
+          69,
+          213
+        ]
+      }
+    }
+  },
+  "pairs": [
+    {
+      "pair": "Red/Pink",
+      "passengerBefore": 175.866427,
+      "passengerAfter": 214.084096,
+      "busBefore": 178.036513,
+      "busAfter": 222.748737
+    },
+    {
+      "pair": "Red/Purple",
+      "passengerBefore": 152.921549,
+      "passengerAfter": 190.682983,
+      "busBefore": 184.65373,
+      "busAfter": 208.751048
+    },
+    {
+      "pair": "Red/Blue",
+      "passengerBefore": 237.086482,
+      "passengerAfter": 281.008897,
+      "busBefore": 258.296341,
+      "busAfter": 298.055364
+    },
+    {
+      "pair": "Red/Green",
+      "passengerBefore": 206.65672,
+      "passengerAfter": 219.770335,
+      "busBefore": 236.495243,
+      "busAfter": 257.730479
+    },
+    {
+      "pair": "Red/Yellow",
+      "passengerBefore": 153.055545,
+      "passengerAfter": 176.615401,
+      "busBefore": 174.040225,
+      "busAfter": 190.672494
+    },
+    {
+      "pair": "Red/White",
+      "passengerBefore": 211.435569,
+      "passengerAfter": 247.315588,
+      "busBefore": 242.546903,
+      "busAfter": 274.721677
+    },
+    {
+      "pair": "Pink/Purple",
+      "passengerBefore": 62.096699,
+      "passengerAfter": 64.0,
+      "busBefore": 81.523003,
+      "busAfter": 52.325902
+    },
+    {
+      "pair": "Pink/Blue",
+      "passengerBefore": 159.0,
+      "passengerAfter": 171.842952,
+      "busBefore": 179.226114,
+      "busAfter": 185.897821
+    },
+    {
+      "pair": "Pink/Green",
+      "passengerBefore": 181.135309,
+      "passengerAfter": 235.548297,
+      "busBefore": 225.851721,
+      "busAfter": 293.155249
+    },
+    {
+      "pair": "Pink/Yellow",
+      "passengerBefore": 181.83784,
+      "passengerAfter": 260.317114,
+      "busBefore": 204.472492,
+      "busAfter": 265.979323
+    },
+    {
+      "pair": "Pink/White",
+      "passengerBefore": 56.0,
+      "passengerAfter": 57.0,
+      "busBefore": 97.416631,
+      "busAfter": 88.051122
+    },
+    {
+      "pair": "Purple/Blue",
+      "passengerBefore": 155.0774,
+      "passengerAfter": 189.214164,
+      "busBefore": 122.38464,
+      "busAfter": 193.132079
+    },
+    {
+      "pair": "Purple/Green",
+      "passengerBefore": 197.651208,
+      "passengerAfter": 258.602011,
+      "busBefore": 218.561204,
+      "busAfter": 311.951919
+    },
+    {
+      "pair": "Purple/Yellow",
+      "passengerBefore": 208.904284,
+      "passengerAfter": 281.348538,
+      "busBefore": 246.60292,
+      "busAfter": 290.070681
+    },
+    {
+      "pair": "Purple/White",
+      "passengerBefore": 117.098249,
+      "passengerAfter": 121.0,
+      "busBefore": 158.404545,
+      "busAfter": 140.089257
+    },
+    {
+      "pair": "Blue/Green",
+      "passengerBefore": 123.130013,
+      "passengerAfter": 181.110464,
+      "busBefore": 167.794517,
+      "busAfter": 228.06578
+    },
+    {
+      "pair": "Blue/Yellow",
+      "passengerBefore": 241.549167,
+      "passengerAfter": 308.799288,
+      "busBefore": 277.796688,
+      "busAfter": 321.933223
+    },
+    {
+      "pair": "Blue/White",
+      "passengerBefore": 168.573426,
+      "passengerAfter": 175.616058,
+      "busBefore": 203.592731,
+      "busAfter": 197.800404
+    },
+    {
+      "pair": "Green/Yellow",
+      "passengerBefore": 150.269757,
+      "passengerAfter": 166.883193,
+      "busBefore": 168.249814,
+      "busAfter": 183.763435
+    },
+    {
+      "pair": "Green/White",
+      "passengerBefore": 172.261429,
+      "passengerAfter": 228.547588,
+      "busBefore": 210.648997,
+      "busAfter": 281.937936
+    },
+    {
+      "pair": "Yellow/White",
+      "passengerBefore": 173.0,
+      "passengerAfter": 254.0,
+      "busBefore": 189.0,
+      "busAfter": 254.0
+    }
+  ],
+  "passengerPairChecks": 21,
+  "passengerPairRegressions": 0,
+  "startUIChangedPixels": 0,
+  "bloomLDRChangedPixels": 1731438,
+  "bloomLDRMeanChannelDelta": 4.559441229423868,
+  "noneWhiteSample": [
+    254,
+    254,
+    254
+  ],
+  "neutralWhiteSample": [
+    234,
+    226,
+    218
+  ],
+  "frames": {
+    "Before": {
+      "Start": {
+        "events": 17,
+        "draws": 13,
+        "setPass": 7,
+        "shadowCasters": 0,
+        "shadowPass": false
+      },
+      "Mid": {
+        "events": 24,
+        "draws": 300,
+        "setPass": 13,
+        "shadowCasters": 139,
+        "shadowPass": true
+      },
+      "Complete": {
+        "events": 67,
+        "draws": 79,
+        "setPass": 14,
+        "shadowCasters": 9,
+        "shadowPass": true
+      }
+    },
+    "After": {
+      "Start": {
+        "events": 24,
+        "draws": 21,
+        "setPass": 15,
+        "shadowCasters": 0,
+        "shadowPass": false
+      },
+      "Mid": {
+        "events": 31,
+        "draws": 169,
+        "setPass": 21,
+        "shadowCasters": 0,
+        "shadowPass": false
+      },
+      "Complete": {
+        "events": 73,
+        "draws": 78,
+        "setPass": 21,
+        "shadowCasters": 0,
+        "shadowPass": false
+      }
+    }
+  },
+  "android": {
+    "baselineBytes": 28385859,
+    "finalBytes": 28380159,
+    "deltaBytes": -5700,
+    "finalSHA256": "b032044a18f1aba249875f348858c51d1ebf1d07f4c62de00866792062ad7454"
+  },
+  "layout": [
+    {
+      "asset": "Assets/_BusJam/Scenes/Game.unity",
+      "existingTransforms": 170,
+      "changedTransformIds": [
+        "180518809"
+      ],
+      "onlyChange": "directional light rotation"
+    },
+    {
+      "asset": "Assets/_BusJam/Scenes/LevelEditor.unity",
+      "existingTransforms": 107,
+      "changedTransformIds": [
+        "491243583"
+      ],
+      "onlyChange": "directional light rotation"
+    },
+    {
+      "asset": "Assets/_BusJam/Prefabs/Bus.prefab",
+      "existingTransforms": 6,
+      "changedTransformIds": [],
+      "onlyChange": "none"
+    },
+    {
+      "asset": "Assets/_BusJam/Prefabs/EditorVoidMarker.prefab",
+      "existingTransforms": 2,
+      "changedTransformIds": [],
+      "onlyChange": "none"
+    },
+    {
+      "asset": "Assets/_BusJam/Prefabs/LockIcon.prefab",
+      "existingTransforms": 1,
+      "changedTransformIds": [],
+      "onlyChange": "none"
+    },
+    {
+      "asset": "Assets/_BusJam/Prefabs/Obstacle.prefab",
+      "existingTransforms": 2,
+      "changedTransformIds": [],
+      "onlyChange": "none"
+    },
+    {
+      "asset": "Assets/_BusJam/Prefabs/Passenger.prefab",
+      "existingTransforms": 31,
+      "changedTransformIds": [],
+      "onlyChange": "none"
+    },
+    {
+      "asset": "Assets/_BusJam/Prefabs/RimInner.prefab",
+      "existingTransforms": 2,
+      "changedTransformIds": [],
+      "onlyChange": "none"
+    },
+    {
+      "asset": "Assets/_BusJam/Prefabs/RimOuter.prefab",
+      "existingTransforms": 2,
+      "changedTransformIds": [],
+      "onlyChange": "none"
+    },
+    {
+      "asset": "Assets/_BusJam/Prefabs/RimStraight.prefab",
+      "existingTransforms": 2,
+      "changedTransformIds": [],
+      "onlyChange": "none"
+    },
+    {
+      "asset": "Assets/_BusJam/Prefabs/SlotTile.prefab",
+      "existingTransforms": 4,
+      "changedTransformIds": [],
+      "onlyChange": "none"
+    },
+    {
+      "asset": "Assets/_BusJam/Prefabs/Tile.prefab",
+      "existingTransforms": 2,
+      "changedTransformIds": [],
+      "onlyChange": "none"
+    },
+    {
+      "asset": "Assets/_BusJam/Prefabs/Tunnel.prefab",
+      "existingTransforms": 5,
+      "changedTransformIds": [],
+      "onlyChange": "none"
+    }
+  ],
+  "status": "Final NoSpecular live validation pending after initial failure and six spaced MCP retries; captures and measurements precede the correction; final APK intentionally deferred to Asen.",
+  "resumeValidation": {
+    "unityVersionOnDisk": "2022.3.19f1",
+    "mcpRetries": 6,
+    "minimumRetryDelaySeconds": 20,
+    "liveSceneConfirmed": false,
+    "recaptured": false,
+    "consoleConfirmed": false,
+    "sixMaterialDiskChecksPassed": true,
+    "protectedFilesChecked": 13,
+    "protectedFilesChanged": 0,
+    "apkRebuilt": false,
+    "apkStatus": "Pending for Asen final build"
+  }
+}

@@ -38,8 +38,10 @@ namespace BusJam.LevelEditor
         [SerializeField] private TMP_Text status;
         [SerializeField] private TMP_Text solverResult;
 
+#if UNITY_EDITOR
         [Header("Solver")]
         [SerializeField, Min(1)] private int maxSolutionsShown = 10;
+#endif
 
         public event Action Changed;
         public event Action<Vector2Int> TunnelSelected;
