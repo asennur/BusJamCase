@@ -45,8 +45,13 @@ namespace BusJam.Gameplay
         [SerializeField, Min(0.01f)] private float halfWave = 0.14f;
         [Tooltip("Local rotation correction when parented to a seat bone.")]
         [SerializeField] private Vector3 seatRotation;
+        [Tooltip("Seated size relative to the grid size (buses are scaled up, so seated passengers match them).")]
+        [SerializeField, Min(0.1f)] private float seatedScale = 1.3f;
+        [Tooltip("VisualRoot local height while seated; the grid lift (0.1) would make passengers float above the seat.")]
+        [SerializeField] private float seatedVisualHeight = 0f;
 
         private Vector3 bodyRestPosition;
+        private Vector3 visualRestPosition;
         private Tween strideTween;
         private Tween armTween;
         private Tween runTween;
@@ -73,6 +78,7 @@ namespace BusJam.Gameplay
         private void Awake()
         {
             bodyRestPosition = body.transform.localPosition;
+            if (visualRoot != null) visualRestPosition = visualRoot.localPosition;
             angryRestPosition = angryIcon.localPosition;
             angryRestScale = angryIcon.localScale;
         }
@@ -126,7 +132,11 @@ namespace BusJam.Gameplay
             CloakOpen = cloak != Cloak.StartsClosed;
             isReachable = false;
             State = PassengerState.Idle;
-            if (visualRoot != null) visualRoot.localScale = Vector3.one * standingVisualScale;
+            if (visualRoot != null)
+            {
+                visualRoot.localScale = Vector3.one * standingVisualScale;
+                visualRoot.localPosition = visualRestPosition;
+            }
             Play(IdleHash);
             body.sharedMaterial = CloakOpen ? material : cloakMaterial;
             body.enabled = true;
@@ -262,7 +272,8 @@ namespace BusJam.Gameplay
             transform.SetParent(seatPoint, false);
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.Euler(seatRotation);
-            transform.localScale = LocalScaleFor();
+            transform.localScale = LocalScaleFor(seatedScale);
+            if (visualRoot != null) visualRoot.localPosition = new Vector3(visualRestPosition.x, seatedVisualHeight, visualRestPosition.z);
             Play(SitHash);
         }
 
@@ -287,13 +298,13 @@ namespace BusJam.Gameplay
                 {
                     body.enabled = false;
                     SetSeated(seatPoint);
-                    transform.localScale *= 0.05f;
+                    transform.localScale = LocalScaleFor(0.05f * seatedScale);
                 })
                 .AppendInterval(0.02f)
                 .AppendCallback(() => body.enabled = true)
                 .Append(DOVirtual.Float(0.05f, 1f, 0.2f, scale =>
                 {
-                    transform.localScale = LocalScaleFor(scale);
+                    transform.localScale = LocalScaleFor(scale * seatedScale);
                 }).SetEase(Ease.OutBack))
                 .OnComplete(onSeated);
         }

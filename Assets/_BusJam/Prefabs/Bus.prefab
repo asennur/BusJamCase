@@ -94,8 +94,8 @@ MonoBehaviour:
   - {fileID: 695435885354931495}
   - {fileID: 4864378940365407415}
   wheelRadius: 0.24
-  motionPitch: 3
-  idleShakeHeight: 0.0012
+  motionPitch: 4
+  idleShakeHeight: 0.001
   idleShakeRoll: 0.04
   idleShakeFrequency: 8
 --- !u!1001 &2168939349037388473
