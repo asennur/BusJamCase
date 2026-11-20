@@ -1,1 +1,0 @@
-260 Edit-mode assertions passed; 7x9 maximum and synthetic 9x12/inset framing; both scenes; all ten resolutions.
