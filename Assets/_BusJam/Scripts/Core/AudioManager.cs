@@ -1,7 +1,6 @@
 using System;
 using BusJam.Gameplay;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace BusJam.Core
 {
@@ -19,7 +18,7 @@ namespace BusJam.Core
     /// <summary>
     /// Plays short sound effects through one AudioSource. Game events (start, win, lose, bus leaving) are heard by
     /// listening to GameManager and BusStation; gameplay code calls AudioManager.Play for the passenger tap;
-    /// every UI button in the scene gets the click sound automatically.
+    /// UI Toolkit controllers request button sounds through Play.
     /// </summary>
     public class AudioManager : MonoBehaviour
     {
@@ -66,12 +65,6 @@ namespace BusJam.Core
             // Index the inspector list by enum value once, so Play is a direct array lookup.
             bySound = new Entry[Enum.GetValues(typeof(Sfx)).Length];
             foreach (var entry in sounds) bySound[(int)entry.sound] = entry;
-        }
-
-        private void Start()
-        {
-            foreach (var button in FindObjectsOfType<Button>(true))
-                button.onClick.AddListener(() => Play(Sfx.Button));
         }
 
         private void OnEnable()

@@ -187,6 +187,7 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .editor-button.yellow { -unity-slice-bottom: 340; }
 .editor-level { flex-grow: 1; flex-basis: 0; min-width: 170px; margin: 5px; height: 72px; }
 .editor-field { flex-direction: row; align-items: center; width: 210px; min-width: 0; margin: 5px; height: 72px; }
+.portrait .editor-field { flex-shrink: 1; }
 .editor-field > .unity-base-field__label { width: auto; min-width: 0; margin-right: 10px; font-size: 28px; }
 .editor-time { width: 250px; }
 .editor-root .unity-base-field__input { min-width: 0; background-color: rgb(24, 58, 102); color: white; border-color: rgb(102, 157, 211); border-width: 2px; border-radius: 8px; padding: 5px 10px; font-size: 30px; }
