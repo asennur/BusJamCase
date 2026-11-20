@@ -19,7 +19,7 @@ namespace BusJam.Gameplay
         [SerializeField] private Transform doorPoint;
         [SerializeField] private float queueSpacing = 2.2f;
         [SerializeField] private float exitOffsetX = 6f;
-        [SerializeField] private float moveDuration = 0.6f;
+        [SerializeField] private float moveDuration = 0.3f;
         [Tooltip("Kapıda + kuyrukta aynı anda sahnede duran otobüs sayısı")]
         [SerializeField] private int visibleQueueCount = 3;
 

@@ -1276,7 +1276,7 @@ MonoBehaviour:
   cloakDuration: 0.18
   angryDuration: 0.6
   strideHeight: 0.085
-  halfStride: 0.105
+  halfStride: 0.075
   tapSquash: 0.16
   tapDuration: 0.18
   waveArm: {fileID: 0}

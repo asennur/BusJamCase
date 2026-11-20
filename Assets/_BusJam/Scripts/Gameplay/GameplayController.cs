@@ -19,7 +19,7 @@ namespace BusJam.Gameplay
         [SerializeField] private BoardView boardView;
         [SerializeField] private BusStation busStation;
         [SerializeField] private WaitingArea waitingArea;
-        [SerializeField] private float runSpeed = 4.8f;
+        [SerializeField] private float runSpeed = 6.72f;
 
         private Board board;
         private bool[] reachable;

@@ -4507,7 +4507,7 @@ MonoBehaviour:
   doorPoint: {fileID: 1665781727}
   queueSpacing: 4.8
   exitOffsetX: 6
-  moveDuration: 0.6
+  moveDuration: 0.3
   visibleQueueCount: 3
   arrivalEase: 9
   departureEase: 5
@@ -10940,7 +10940,7 @@ MonoBehaviour:
   slotSpacing: 1.003
   overflowBaseDistance: 0.9
   overflowSpacing: 0.5
-  runSpeed: 4.8
+  runSpeed: 6.72
 --- !u!4 &1945338040
 Transform:
   m_ObjectHideFlags: 0

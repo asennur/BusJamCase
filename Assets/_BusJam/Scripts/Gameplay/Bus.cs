@@ -22,10 +22,10 @@ namespace BusJam.Gameplay
         [SerializeField] private Transform doorEntry;
         [SerializeField] private GameObject[] seatIndicators;
         [SerializeField] private Animator animator;
-        [SerializeField, Min(0f)] private float crossFade = 0.1f;
-        [SerializeField, Min(0f)] private float brakeDuration = 0.4f;
+        [SerializeField, Min(0f)] private float crossFade = 0.05f;
+        [SerializeField, Min(0f)] private float brakeDuration = 0.3f;
         [Tooltip("Door-close duration to wait before departure.")]
-        [SerializeField, Min(0f)] private float doorCloseDuration = 0.3f;
+        [SerializeField, Min(0f)] private float doorCloseDuration = 0.16666667f;
         [SerializeField] private Transform model;
         [SerializeField, Min(0f)] private float idleShakeHeight = 0.0012f;
         [SerializeField, Min(0f)] private float idleShakeRoll = 0.04f;

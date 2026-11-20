@@ -1416,7 +1416,7 @@ MonoBehaviour:
   boardView: {fileID: 90774742}
   busStation: {fileID: 1155942856}
   waitingArea: {fileID: 752435683}
-  runSpeed: 4.8
+  runSpeed: 6.72
 --- !u!114 &134005836
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5308,7 +5308,7 @@ MonoBehaviour:
   slotSpacing: 1.003
   overflowBaseDistance: 0.9
   overflowSpacing: 0.5
-  runSpeed: 4.8
+  runSpeed: 6.72
 --- !u!1 &764204832
 GameObject:
   m_ObjectHideFlags: 0
@@ -7820,7 +7820,7 @@ MonoBehaviour:
   doorPoint: {fileID: 577869125}
   queueSpacing: 4.8
   exitOffsetX: 6
-  moveDuration: 0.6
+  moveDuration: 0.3
   visibleQueueCount: 3
   arrivalEase: 9
   departureEase: 5

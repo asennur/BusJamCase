@@ -20,7 +20,7 @@ namespace BusJam.Gameplay
         [SerializeField] private float slotSpacing = 1.003f;
         [SerializeField] private float overflowBaseDistance = 0.9f;
         [SerializeField] private float overflowSpacing = 0.5f;
-        [SerializeField] private float runSpeed = 4.8f;
+        [SerializeField] private float runSpeed = 6.72f;
 
         private readonly Passenger[] slots = new Passenger[GameRules.VisibleSlotCount];
         private readonly bool[] unlocked = new bool[GameRules.VisibleSlotCount];

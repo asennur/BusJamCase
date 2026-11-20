@@ -37,7 +37,7 @@ namespace BusJam.Gameplay
         [SerializeField] private float angryDuration = 0.6f;
 
         [SerializeField, Min(0f)] private float strideHeight = 0.085f;
-        [SerializeField, Min(0.01f)] private float halfStride = 0.105f;
+        [SerializeField, Min(0.01f)] private float halfStride = 0.075f;
         [SerializeField, Range(0f, 0.5f)] private float tapSquash = 0.16f;
         [SerializeField, Min(0.01f)] private float tapDuration = 0.18f;
         [SerializeField] private Transform waveArm;
