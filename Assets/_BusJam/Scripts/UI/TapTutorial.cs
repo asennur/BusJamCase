@@ -3,25 +3,20 @@ using BusJam.Gameplay;
 using BusJam.Level;
 using BusJam.Save;
 using DG.Tweening;
-using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace BusJam.UI
 {
     /// <summary>Guides introductory taps without changing normal move or failure rules.</summary>
-    public sealed class TapTutorial : MonoBehaviour
+    public sealed partial class TapTutorial : MonoBehaviour
     {
         [SerializeField] private GameManager gameManager;
         [SerializeField] private GameplayController gameplay;
         [SerializeField] private BusStation busStation;
         [SerializeField] private Camera worldCamera;
-        [SerializeField] private RectTransform overlay;
-        [SerializeField] private RectTransform handAnchor;
-        [SerializeField] private RectTransform hand;
-        [SerializeField] private GameObject tip;
-        [SerializeField] private TMP_Text hint;
+        [SerializeField] private UIDocument document;
         private Passenger target;
-        private Tween tapping;
         private int introduction;
         private int steps;
         private bool guided;
@@ -37,17 +32,12 @@ namespace BusJam.UI
 
         private void Awake()
         {
-            // One reusable sequence combines the gentle hop with the tap squash.
-            tapping = DOTween.Sequence()
-                .Append(hand.DOAnchorPosY(hand.rect.height * .125f, .3f).SetEase(Ease.OutQuad))
-                .Append(hand.DOAnchorPosY(0, .3f).SetEase(Ease.InOutSine))
-                .Join(hand.DOScale(.9f, .15f).SetEase(Ease.InOutSine))
-                .Insert(.45f, hand.DOScale(1f, .15f).SetEase(Ease.InOutSine))
-                .SetLoops(-1).SetUpdate(true).SetAutoKill(false).Pause();
+            CacheHand();
             Hide();
         }
         private void OnEnable()
         {
+            CacheHand();
             gameManager.PlayingStarted += Show;
             gameManager.StateChanged += OnState;
             gameplay.TapAccepted += Accepted;
@@ -63,7 +53,7 @@ namespace BusJam.UI
             busStation.BusArrived -= OnBusArrived;
             Hide();
         }
-        private void OnDestroy() => tapping?.Kill();
+        private void OnDestroy() { tapping?.Kill(); handTravel?.Kill(); }
         private void OnState(GameState state)
         {
             if (state != GameState.Playing) Hide();
@@ -103,7 +93,7 @@ namespace BusJam.UI
             if (guided) gameplay.TapFilter = AllowsTap;
             hint.text = level == 6 ? "Free tied passengers by moving their neighbours."
                 : level == 8 ? "Cloaked passengers can only move when their colour shows." : "";
-            tip.SetActive(level != 1);
+            ShowTip(level != 1);
             PointAt(target);
         }
 
@@ -131,7 +121,7 @@ namespace BusJam.UI
             firstBus = bus;
             hint.text = "Tap the passenger at the tunnel; the next one steps out behind.";
             RefreshTunnelTarget();
-            if (introduction != 0) tip.SetActive(true);
+            if (introduction != 0) ShowTip(true);
         }
 
         private void RefreshTunnelTarget()
@@ -160,13 +150,11 @@ namespace BusJam.UI
             target = passenger;
             if (target == null)
             {
-                tapping.Pause();
-                handAnchor.gameObject.SetActive(false);
+                HideHand();
                 return;
             }
-            handAnchor.gameObject.SetActive(true);
-            tapping.Restart();
             PositionHand();
+            TravelToTarget();
         }
 
         // Both neighbours must be legal at the start; never lock an incompatible level.
@@ -271,9 +259,8 @@ namespace BusJam.UI
             firstBus = null;
             tunnelLessonActive = false;
             target = null;
-            tapping?.Pause();
-            handAnchor.gameObject.SetActive(false);
-            tip.SetActive(false);
+            HideHand();
+            ShowTip(false);
         }
         private void LateUpdate()
         {
@@ -283,8 +270,8 @@ namespace BusJam.UI
         private void PositionHand()
         {
             Vector3 screen = worldCamera.WorldToScreenPoint(target.transform.position + Vector3.up * 1.6f);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(overlay, screen, null, out Vector2 local);
-            handAnchor.anchoredPosition = local + new Vector2(0, 85);
+            desiredPosition = overlay.WorldToLocal(RuntimePanelUtils.ScreenToPanel(overlay.panel, new Vector2(screen.x, Screen.height - screen.y)));
+            if (handVisible && !travelling && (desiredPosition - handPosition).sqrMagnitude > 4) TravelToTarget();
         }
     }
 }

@@ -35,6 +35,65 @@
             <ui:VisualElement name="ready-overlay" class="fill ready-overlay hidden" picking-mode="Ignore">
                 <ui:Label name="ready-prompt" text="Tap to start" class="ready-prompt" picking-mode="Ignore" />
             </ui:VisualElement>
+            <ui:VisualElement name="tutorial-overlay" class="fill tutorial-overlay" picking-mode="Ignore">
+                <ui:VisualElement name="tutorial-tip" class="tutorial-tip hidden" picking-mode="Ignore">
+                    <ui:Label name="tutorial-hint" class="tutorial-hint" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="tutorial-pointer" class="tutorial-pointer hidden" picking-mode="Ignore">
+                    <ui:VisualElement name="tutorial-ring" class="tutorial-ring" picking-mode="Ignore" />
+                    <ui:VisualElement name="tutorial-burst" class="fill" picking-mode="Ignore" />
+                    <ui:VisualElement name="tutorial-hand" class="tutorial-hand" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="complete-overlay" class="fill result-overlay hidden">
+                <ui:VisualElement class="top-bar result-bar" picking-mode="Ignore">
+                    <ui:VisualElement name="result-coin-plate" class="counter coins-plate" picking-mode="Ignore">
+                        <ui:VisualElement class="coin-icon" picking-mode="Ignore" />
+                        <ui:Label name="result-coins" text="0" class="counter-text" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="complete-body" class="result-body" picking-mode="Ignore">
+                    <ui:VisualElement name="complete-panel" class="result-content" picking-mode="Ignore">
+                        <ui:VisualElement name="complete-heading" class="result-heading" picking-mode="Ignore">
+                            <ui:VisualElement name="complete-rays" class="fill result-rays" picking-mode="Ignore" />
+                            <ui:Label text="LEVEL COMPLETED!" class="result-title" picking-mode="Ignore" />
+                            <ui:VisualElement name="complete-sparkles" class="fill" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="reward-content" picking-mode="Ignore">
+                            <ui:VisualElement name="reward-flash" class="fill reward-flash" picking-mode="Ignore" />
+                            <ui:VisualElement name="reward-pile" class="reward-pile" picking-mode="Ignore" />
+                            <ui:Label name="reward-label" text="+25" class="reward-label" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Button name="continue-button" text="Continue" class="art-button green" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="celebration-effects" class="fill" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="fail-overlay" class="fill modal-overlay hidden">
+                <ui:VisualElement name="fail-panel" class="modal fail-modal">
+                    <ui:VisualElement class="fail-heading">
+                        <ui:Button name="fail-close" class="close-button" tooltip="Close" />
+                        <ui:Label text="LEVEL FAILED" class="result-title fail-title" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Label name="fail-level" text="Level 1" class="fail-level" picking-mode="Ignore" />
+                    <ui:VisualElement class="life-loss" picking-mode="Ignore">
+                        <ui:VisualElement name="fail-icon" class="fail-icon broken-heart" picking-mode="Ignore" />
+                        <ui:Label name="life-cost" text="-1" class="life-cost" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Label name="fail-reason" text="No space left!" class="question fail-reason" picking-mode="Ignore" />
+                    <ui:Button name="retry-button" text="Try Again" class="art-button green" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="no-lives-overlay" class="fill modal-overlay hidden" picking-mode="Ignore">
+                <ui:VisualElement class="modal no-lives-modal" picking-mode="Ignore">
+                    <ui:Label text="No lives" class="modal-title" picking-mode="Ignore" />
+                    <ui:VisualElement class="heart-icon" picking-mode="Ignore">
+                        <ui:Label name="no-lives-count" text="0" class="lives-count" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Label name="no-lives-countdown" text="Next life in 20:00" class="question" picking-mode="Ignore" />
+                    <ui:Label text="Lives refill automatically." class="no-lives-hint" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
             <ui:VisualElement name="settings-overlay" class="fill modal-overlay hidden">
                 <ui:VisualElement class="modal settings-modal">
                     <ui:VisualElement class="modal-heading">

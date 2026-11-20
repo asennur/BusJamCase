@@ -9,9 +9,9 @@ using UnityEngine.UIElements;
 
 namespace BusJam.UI
 {
-    /// <summary>Owns the migrated screens; legacy result screens and tutorial keep their Canvas.</summary>
+    /// <summary>Owns the runtime UI Toolkit screens and their event bindings.</summary>
     [ExecuteAlways, RequireComponent(typeof(UIDocument))]
-    public sealed class ToolkitGameUI : MonoBehaviour
+    public sealed partial class ToolkitGameUI : MonoBehaviour
     {
         [SerializeField] private UIDocument document;
         [SerializeField] private GameManager gameManager;
@@ -37,7 +37,9 @@ namespace BusJam.UI
         {
             if (document == null || gameManager == null || livesSystem == null || levelTimer == null || layoutMode == null) return;
             CacheElements();
+            BindResults(true);
             root.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+            root.RegisterCallback<ClickEvent>(OnButtonSound, TrickleDown.TrickleDown);
             layoutMode.Changed += ApplyLayout;
             BindButtons(true);
             if (Application.isPlaying)
@@ -47,6 +49,7 @@ namespace BusJam.UI
                 levelTimer.TimeChanged += ShowTime;
                 livesSystem.Changed += ShowLives;
                 SaveSystem.CoinsChanged += ShowCoins;
+                gameManager.PlayBlockedNoLives += ShowNoLives;
                 subscribed = true;
                 BuildTweens();
                 livesSystem.Refresh();
@@ -80,6 +83,7 @@ namespace BusJam.UI
             levelNumber = root.Q<Label>("level-number"); timerText = root.Q<Label>("timer-text");
             livesCount = root.Q<Label>("lives-count"); lifeCountdown = root.Q<Label>("life-countdown"); coinCount = root.Q<Label>("coin-count");
             readyPrompt = root.Q<Label>("ready-prompt"); confirmText = root.Q<Label>("confirm-text"); soundToggle = root.Q<Toggle>("sound-toggle");
+            CacheResults();
         }
 
         private void BindButtons(bool bind)
@@ -108,12 +112,16 @@ namespace BusJam.UI
         {
             if (root == null) return;
             root.UnregisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+            root.UnregisterCallback<ClickEvent>(OnButtonSound, TrickleDown.TrickleDown);
+            BindResults(false);
+            StopResults();
             if (layoutMode != null) layoutMode.Changed -= ApplyLayout;
             BindButtons(false);
             if (subscribed)
             {
                 gameManager.StateChanged -= DisplayState; gameManager.LevelLoaded -= ShowLevel;
                 levelTimer.TimeChanged -= ShowTime; livesSystem.Changed -= ShowLives; SaveSystem.CoinsChanged -= ShowCoins;
+                gameManager.PlayBlockedNoLives -= ShowNoLives;
                 subscribed = false;
             }
             CloseSettings(); ClosePause();
@@ -136,18 +144,19 @@ namespace BusJam.UI
         private float GetReadyPulse() => 1f;
         private float GetTimerScale() => 1f;
         private float GetCoinScale() => 1f;
-        private void SetStartScale(float value) => startButton.style.scale = new Scale(Vector3.one * value);
+        private void SetStartScale(float value) => ScaleElement(startButton, value);
         private void SetReadyPulse(float value)
         {
             readyPrompt.style.opacity = value;
-            readyPrompt.style.scale = new Scale(Vector3.one * (1f + (1f - value) * (.04f / .35f)));
+            ScaleElement(readyPrompt, 1f + (1f - value) * (.04f / .35f));
         }
-        private void SetTimerScale(float value) => timerText.style.scale = new Scale(Vector3.one * value);
-        private void SetCoinScale(float value) => coinCount.style.scale = new Scale(Vector3.one * value);
+        private void SetTimerScale(float value) => ScaleElement(timerText, value);
+        private void SetCoinScale(float value) => ScaleElement(coinCount, value);
         private void KillTweens()
         {
             startPulse?.Kill(); readyPulse?.Kill(); urgentPulse?.Kill(); coinPulse?.Kill();
             startPulse = readyPulse = urgentPulse = coinPulse = null;
+            KillResultTweens();
         }
 
         private static void Show(VisualElement element, bool visible) => element.EnableInClassList("hidden", !visible);
@@ -155,6 +164,7 @@ namespace BusJam.UI
         // Also usable by Edit mode review without changing GameManager state or saved progress.
         public void DisplayState(GameState state)
         {
+            if (shownState == GameState.Complete && state != GameState.Complete) FinishCelebration();
             shownState = state;
             CloseSettings(); ClosePause();
             bool isStart = state == GameState.Start;
@@ -168,6 +178,7 @@ namespace BusJam.UI
             if (isStart) startPulse?.Restart();
             if (isReady) readyPulse?.Restart();
             if (state != GameState.Playing) urgentPulse?.Rewind();
+            DisplayResults(state);
         }
 
         private void ShowLevel(int number, LevelData level)
@@ -202,6 +213,7 @@ namespace BusJam.UI
 
         private void ShowLives(int count, int seconds)
         {
+            if (count > 0) HideNoLives();
             if (count != lastLives)
             {
                 textBuffer.Clear().Append(count); livesCount.text = textBuffer.ToString();
@@ -209,10 +221,12 @@ namespace BusJam.UI
             if (count != lastLives || seconds != lastLifeSeconds)
                 lifeCountdown.text = count >= livesSystem.MaxLives ? "FULL" : Clock(seconds, true);
             lastLives = count; lastLifeSeconds = seconds;
+            ShowNoLivesTime(count, seconds);
         }
 
         private void ShowCoins(int count)
         {
+            ShowResultCoins(count);
             if (count == lastCoins) return;
             textBuffer.Clear().Append(count); coinCount.text = textBuffer.ToString();
             coinCount.style.fontSize = Mathf.Min(48f, 250f / textBuffer.Length);
@@ -236,6 +250,11 @@ namespace BusJam.UI
         }
 
         private void PrepareLevel() { if (Application.isPlaying) gameManager.PrepareLevel(); }
+        private void OnButtonSound(ClickEvent evt)
+        {
+            for (VisualElement element = evt.target as VisualElement; element != null && element != root; element = element.parent)
+                if (element is Button) { if (Application.isPlaying) AudioManager.Play(Sfx.Button); return; }
+        }
         private void OpenSettings() { if (shownState != GameState.Start) return; CancelReset(); Show(settings, true); }
         private void CloseSettings() => Show(settings, false);
         private void AskReset() { Show(resetButton, false); Show(resetConfirmation, true); }

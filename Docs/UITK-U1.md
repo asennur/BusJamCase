@@ -1,5 +1,7 @@
 # UI Toolkit U1
 
+This records the U1 checkpoint. [U2](UITK-U2.md) completes the result/tutorial migration and removes the legacy Canvas handoff described below.
+
 The Game scene uses one runtime UIDocument for Start, HUD, Ready and settings. The existing Canvas remains responsible for Complete, Fail, NoLives, reward coins and the tutorial. LevelEditor is unchanged.
 
 | uGUI object / script | UXML element / controller |
