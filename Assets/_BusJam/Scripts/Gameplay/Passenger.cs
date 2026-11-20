@@ -57,6 +57,7 @@ namespace BusJam.Gameplay
         private Material colorMaterial;
         private Tween cloakTween;
         private bool isReachable;
+        private Vector3 standingWorldScale;
 
         public PassengerColor Color { get; private set; }
         public Vector2Int Cell { get; private set; }
@@ -92,8 +93,9 @@ namespace BusJam.Gameplay
         public void ShowTap()
         {
             revealTween?.Kill();
-            transform.localScale = new Vector3(1f + tapSquash, 1f - tapSquash, 1f + tapSquash);
-            revealTween = transform.DOScale(Vector3.one, tapDuration).SetEase(Ease.OutQuad);
+            Vector3 restScale = LocalScaleFor();
+            transform.localScale = Vector3.Scale(restScale, new Vector3(1f + tapSquash, 1f - tapSquash, 1f + tapSquash));
+            revealTween = transform.DOScale(restScale, tapDuration).SetEase(Ease.OutQuad);
         }
 
         public void Wave()
@@ -136,6 +138,7 @@ namespace BusJam.Gameplay
             revealTween?.Kill();
             transform.localRotation = Quaternion.identity;
             transform.localScale = Vector3.one;
+            standingWorldScale = transform.lossyScale;
             PendingSlotIndex = -1;
             SetRopes(0);
             ResetCloakVisual();
@@ -202,8 +205,8 @@ namespace BusJam.Gameplay
 
             SetRopes(RopesLeft - 1);
             revealTween?.Kill();
-            transform.localScale = Vector3.one;
-            revealTween = transform.DOPunchScale(Vector3.one * 0.12f, 0.2f, 1, 0.5f);
+            transform.localScale = LocalScaleFor();
+            revealTween = transform.DOPunchScale(LocalScaleFor(0.12f), 0.2f, 1, 0.5f);
         }
 
         /// <summary>Permanently reveals a hidden passenger's color and removes the question mark.</summary>
@@ -217,7 +220,8 @@ namespace BusJam.Gameplay
             hiddenMark.SetActive(false);
 
             revealTween?.Kill();
-            revealTween = transform.DOPunchScale(Vector3.one * 0.25f, 0.3f, 1, 0.5f);
+            transform.localScale = LocalScaleFor();
+            revealTween = transform.DOPunchScale(LocalScaleFor(0.25f), 0.3f, 1, 0.5f);
         }
 
         /// <summary>Shows the outline only when the passenger is reachable and unlocked.</summary>
@@ -230,11 +234,11 @@ namespace BusJam.Gameplay
         }
 
         /// <summary>Waits in a slot until WaitingArea sends the passenger to a matching bus.</summary>
-        public void SetInSlot(Quaternion facing, float scale)
+        public void SetInSlot(Quaternion facing)
         {
             State = PassengerState.InSlot;
             transform.rotation = facing;
-            transform.localScale = Vector3.one * scale;
+            transform.localScale = LocalScaleFor();
             Play(WaitingHash);
         }
 
@@ -243,6 +247,7 @@ namespace BusJam.Gameplay
         {
             State = PassengerState.Idle;
             transform.rotation = facing;
+            transform.localScale = LocalScaleFor();
             Play(WaitingHash);
         }
 
@@ -255,13 +260,19 @@ namespace BusJam.Gameplay
             State = PassengerState.Seated;
             if (visualRoot != null) visualRoot.localScale = Vector3.one * standingVisualScale;
             transform.SetParent(seatPoint, false);
-            // Seat bones inherit the bus model scale; preserve the grid's world size.
-            Vector3 seatScale = seatPoint.lossyScale;
-            transform.localScale = new Vector3(1f / Mathf.Abs(seatScale.x),
-                1f / Mathf.Abs(seatScale.y), 1f / Mathf.Abs(seatScale.z));
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.Euler(seatRotation);
+            transform.localScale = LocalScaleFor();
             Play(SitHash);
+        }
+
+        // Keep the size established on the grid, including under scaled seat bones.
+        private Vector3 LocalScaleFor(float factor = 1f)
+        {
+            Vector3 parentScale = transform.parent != null ? transform.parent.lossyScale : Vector3.one;
+            return new Vector3(standingWorldScale.x * factor / Mathf.Max(Mathf.Abs(parentScale.x), 0.0001f),
+                standingWorldScale.y * factor / Mathf.Max(Mathf.Abs(parentScale.y), 0.0001f),
+                standingWorldScale.z * factor / Mathf.Max(Mathf.Abs(parentScale.z), 0.0001f));
         }
 
         /// <summary>Shrinks through the door, then grows to full seated size before reporting arrival.</summary>
@@ -271,7 +282,7 @@ namespace BusJam.Gameplay
             Vector3 inside = entry.position + entry.forward * 0.18f;
             runTween = DOTween.Sequence()
                 .Append(transform.DOMove(inside, 0.15f).SetEase(Ease.InQuad))
-                .Join(transform.DOScale(0.05f, 0.15f).SetEase(Ease.InQuad))
+                .Join(transform.DOScale(LocalScaleFor(0.05f), 0.15f).SetEase(Ease.InQuad))
                 .AppendCallback(() =>
                 {
                     body.enabled = false;
@@ -282,9 +293,7 @@ namespace BusJam.Gameplay
                 .AppendCallback(() => body.enabled = true)
                 .Append(DOVirtual.Float(0.05f, 1f, 0.2f, scale =>
                 {
-                    Vector3 parentScale = seatPoint.lossyScale;
-                    transform.localScale = new Vector3(scale / Mathf.Abs(parentScale.x),
-                        scale / Mathf.Abs(parentScale.y), scale / Mathf.Abs(parentScale.z));
+                    transform.localScale = LocalScaleFor(scale);
                 }).SetEase(Ease.OutBack))
                 .OnComplete(onSeated);
         }
@@ -294,7 +303,7 @@ namespace BusJam.Gameplay
         {
             State = PassengerState.Running;
             revealTween?.Kill();
-            transform.localScale = Vector3.one;
+            transform.localScale = LocalScaleFor();
             SetReachable(false);
             Play(RunHash);
 

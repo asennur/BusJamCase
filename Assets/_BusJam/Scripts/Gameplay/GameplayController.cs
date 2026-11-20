@@ -198,7 +198,7 @@ namespace BusJam.Gameplay
                 worldPathBuffer.Add(slotPos);
                 passenger.RunTo(worldPathBuffer, runSpeed, () =>
                 {
-                    passenger.SetInSlot(waitingArea.WaitingRotation, waitingArea.PassengerSlotScale);
+                    passenger.SetInSlot(waitingArea.WaitingRotation);
                     Bus atDoor = busStation.ActiveBus;
                     if (atDoor != null && atDoor.IsAtDoor && atDoor.Color == passenger.Color)
                         BoardWaitingPassengers(atDoor);
@@ -349,7 +349,7 @@ namespace BusJam.Gameplay
             worldPathBuffer.Add(waitingArea.SlotPosition(slotIndex));
             passenger.RunTo(worldPathBuffer, runSpeed, () =>
             {
-                passenger.SetInSlot(waitingArea.WaitingRotation, waitingArea.PassengerSlotScale);
+                passenger.SetInSlot(waitingArea.WaitingRotation);
                 Bus atDoor = busStation.ActiveBus;
                 if (atDoor != null && atDoor.IsAtDoor && atDoor.Color == passenger.Color)
                     BoardWaitingPassengers(atDoor);

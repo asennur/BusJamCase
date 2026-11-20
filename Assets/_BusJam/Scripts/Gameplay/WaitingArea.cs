@@ -31,7 +31,6 @@ namespace BusJam.Gameplay
         /// <summary>Bir slot otobüse biniş yüzünden boşalınca slotIndex ile atılır (GameplayController taşma kuyruğunu bu slota atar).</summary>
         public event Action<int> SlotOpened;
         public Quaternion WaitingRotation => transform.rotation;
-        public float PassengerSlotScale => slotTilePrefab.transform.localScale.x;
 
         public bool HasFreeSlot
         {
@@ -55,7 +54,7 @@ namespace BusJam.Gameplay
 
                 if (i >= tiles.Count)
                 {
-                    SlotTile tile = Instantiate(slotTilePrefab, SlotPosition(i), Quaternion.identity, transform);
+                    SlotTile tile = Instantiate(slotTilePrefab, transform);
                     tiles.Add(tile);
                     lockIcons.Add(lockIconPrefab != null ? Instantiate(lockIconPrefab, tile.transform, false) : null);
                 }
