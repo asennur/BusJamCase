@@ -173,3 +173,77 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .landscape .result-heading { height: 270px; }
 .landscape .reward-content { height: 320px; margin-bottom: 20px; }
 .landscape .tutorial-overlay { padding-bottom: 60px; }
+/* Runtime level editor: the open workspace passes pointer input through to the board. */
+.editor-root { font-size: 30px; -unity-text-outline-width: 1px; text-shadow: 0 2px 0 rgba(0, 0, 0, .5); }
+.editor-safe { flex-grow: 1; min-height: 0; }
+.editor-surface { background-color: rgba(10, 32, 71, .94); border-color: rgb(55, 96, 152); border-width: 2px; border-radius: 16px; }
+.editor-top { padding: 12px; flex-shrink: 0; }
+.editor-row { flex-direction: row; align-items: center; flex-shrink: 0; min-width: 0; }
+.editor-top > .editor-row { height: 94px; }
+.editor-button { min-width: 120px; height: 80px; flex-shrink: 0; font-size: 30px; margin: 5px; padding: 5px 18px; -unity-slice-left: 425; -unity-slice-right: 370; -unity-slice-top: 300; -unity-slice-bottom: 350; -unity-slice-scale: .12px; }
+.editor-button:hover { -unity-background-image-tint-color: rgb(225, 240, 255); }
+.editor-button:active { scale: .96 .96; }
+.editor-button.red { -unity-slice-bottom: 350; }
+.editor-button.yellow { -unity-slice-bottom: 340; }
+.editor-level { flex-grow: 1; flex-basis: 0; min-width: 170px; margin: 5px; height: 72px; }
+.editor-field { flex-direction: row; align-items: center; width: 210px; min-width: 0; margin: 5px; height: 72px; }
+.editor-field > .unity-base-field__label { width: auto; min-width: 0; margin-right: 10px; font-size: 28px; }
+.editor-time { width: 250px; }
+.editor-root .unity-base-field__input { min-width: 0; background-color: rgb(24, 58, 102); color: white; border-color: rgb(102, 157, 211); border-width: 2px; border-radius: 8px; padding: 5px 10px; font-size: 30px; }
+.editor-root .unity-text-field__input { -unity-text-align: middle-center; }
+.editor-root .unity-base-popup-field__text { font-size: 30px; }
+.editor-root .unity-base-popup-field__arrow { -unity-background-image-tint-color: white; }
+.editor-buses { padding: 8px 18px; flex-shrink: 0; }
+.editor-caption { font-size: 30px; padding: 2px; margin: 0; white-space: normal; }
+.editor-small { font-size: 24px; margin: 0; padding: 0; white-space: normal; }
+.editor-add-row { justify-content: flex-start; }
+.editor-color-button { width: 76px; height: 64px; flex-shrink: 0; border-width: 3px; border-color: rgba(255, 255, 255, .7); border-radius: 12px; margin: 5px; font-size: 34px; -unity-text-outline-width: 2px; }
+.editor-color-button:hover { border-color: rgb(255, 228, 90); }
+.editor-color-button:active { scale: .94 .94; }
+.editor-color-button:disabled { opacity: .3; }
+.editor-chip-scroll { height: 96px; flex-shrink: 0; }
+.editor-chip-scroll > .unity-scroll-view__content-viewport { flex-grow: 1; }
+.editor-workspace { flex-grow: 1; min-height: 100px; flex-direction: row; padding-top: 12px; padding-bottom: 12px; }
+.editor-palette { width: 200px; max-width: 25%; flex-shrink: 0; padding: 6px; }
+.editor-palette-scroll { flex-grow: 1; min-height: 0; }
+.editor-board-space { flex-grow: 1; }
+.editor-palette-item { align-items: center; border-width: 3px; border-color: transparent; border-radius: 12px; margin: 4px; padding: 8px 2px; height: 175px; flex-shrink: 0; }
+.editor-palette-item > Label { margin: 0; padding: 0; }
+.editor-palette-item:hover { background-color: rgba(150, 200, 255, .15); }
+.editor-palette-item.selected { border-color: rgb(255, 230, 70); background-color: rgba(255, 225, 80, .15); }
+.editor-palette-item.exhausted { opacity: .45; }
+.editor-palette-item.overfilled { color: rgb(255, 115, 100); }
+.editor-passenger-icon { width: 80px; height: 85px; background-image: url("../Art/UI/ui_passenger_icon.png"); -unity-background-scale-mode: scale-to-fit; flex-shrink: 0; }
+.editor-footer { flex-shrink: 0; padding: 8px 18px; }
+.editor-tip { flex-grow: 1; flex-basis: 0; min-width: 0; margin-left: 20px; }
+.editor-result-scroll { height: 90px; flex-shrink: 0; }
+.editor-result { font-size: 27px; white-space: normal; -unity-text-align: upper-left; margin: 0; padding: 0; }
+.editor-status { font-size: 24px; white-space: normal; -unity-text-align: upper-left; margin: 5px 0; padding: 0; }
+.editor-overlay { align-items: center; justify-content: center; }
+.editor-modal { width: 840px; max-width: 92%; max-height: 92%; padding: 46px; }
+.editor-modal .unity-scroll-view__content-container { align-items: stretch; }
+.editor-modal-title { font-size: 34px; white-space: normal; flex-grow: 1; flex-basis: 0; min-width: 0; }
+.editor-modal .close-button { width: 74px; height: 74px; }
+.editor-wide { align-self: center; min-width: 300px; margin-top: 24px; }
+.editor-toggle { height: 100px; align-items: center; flex-direction: row; margin: 15px 0; }
+.editor-toggle > .unity-base-field__label { min-width: 0; width: auto; flex-grow: 1; font-size: 34px; }
+.editor-toggle .unity-toggle__checkmark { width: 54px; height: 54px; }
+.editor-cloak { flex-direction: column; height: 160px; margin-top: 18px; }
+.editor-cloak > .unity-base-field__label { font-size: 32px; width: auto; }
+.editor-cloak > .unity-base-field__input { min-height: 72px; }
+.editor-ghost { position: absolute; left: 0; top: 0; width: 88px; height: 120px; opacity: .85; background-image: url("../Art/UI/ui_passenger_icon.png"); -unity-background-scale-mode: scale-to-fit; }
+.square .editor-top, .landscape .editor-top { flex-direction: row; }
+.landscape .editor-top > .editor-row { flex-grow: 1; flex-basis: 0; }
+.square .editor-field, .landscape .editor-field { flex-grow: 1; flex-basis: 0; }
+.square .editor-top { flex-direction: column; }
+.landscape .editor-buses { flex-direction: row; align-items: center; }
+.landscape .editor-buses > .editor-caption { width: 480px; }
+.landscape .editor-buses > .editor-chip-scroll { flex-grow: 1; flex-basis: 0; }
+.square .editor-palette, .landscape .editor-palette { width: 230px; }
+.landscape .editor-result-scroll { height: 70px; }
+.editor-root .unity-scroll-view__content-viewport { min-width: 0; }
+.unity-base-dropdown__container-outer { background-color: rgb(10, 32, 71); border-color: rgb(102, 157, 211); border-width: 2px; border-radius: 8px; }
+.unity-base-dropdown__item { color: white; min-height: 58px; }
+.unity-base-dropdown__item:hover { background-color: rgb(41, 82, 184); }
+.unity-base-dropdown__item:checked { background-color: rgb(41, 82, 184); color: rgb(255, 228, 90); }
+.unity-base-dropdown__container-inner { background-color: rgb(10, 32, 71); }

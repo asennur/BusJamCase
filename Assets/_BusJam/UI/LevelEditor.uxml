@@ -1,0 +1,64 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="Theme.uss" />
+    <ui:VisualElement name="editor-root" class="ui-root editor-root portrait" picking-mode="Ignore">
+        <ui:VisualElement name="editor-safe" class="editor-safe" picking-mode="Ignore">
+            <ui:VisualElement class="editor-top editor-surface">
+                <ui:VisualElement class="editor-row" picking-mode="Ignore">
+                    <ui:DropdownField name="level-list" class="editor-level" />
+                    <ui:Button name="load" text="Load" class="editor-button yellow" />
+                    <ui:Button name="new" text="New" class="editor-button yellow" />
+                    <ui:Button name="save" text="Save" class="editor-button green" />
+                    <ui:Button name="test" text="Test Play" class="editor-button green" />
+                </ui:VisualElement>
+                <ui:VisualElement class="editor-row" picking-mode="Ignore">
+                    <ui:TextField name="width" label="Width" value="5" class="editor-field" />
+                    <ui:TextField name="height" label="Height" value="6" class="editor-field" />
+                    <ui:Button name="apply" text="Apply" class="editor-button yellow" />
+                    <ui:TextField name="seconds" label="Time (s)" value="60" class="editor-field editor-time" />
+                    <ui:Button name="auto-grid" text="Auto Grid" class="editor-button yellow" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="editor-buses editor-surface">
+                <ui:Label name="bus-summary" text="Buses: add at least one" class="editor-caption" picking-mode="Ignore" />
+                <ui:VisualElement name="bus-add" class="editor-row editor-add-row" picking-mode="Ignore" />
+                <ui:ScrollView name="bus-scroll" mode="Horizontal" class="editor-chip-scroll" />
+            </ui:VisualElement>
+            <ui:VisualElement class="editor-workspace" picking-mode="Ignore">
+                <ui:VisualElement class="editor-palette editor-surface">
+                    <ui:Label text="Passengers" class="editor-caption" picking-mode="Ignore" />
+                    <ui:Label text="Placed / needed" class="editor-small" picking-mode="Ignore" />
+                    <ui:ScrollView name="palette" mode="Vertical" class="editor-palette-scroll" />
+                </ui:VisualElement>
+                <ui:VisualElement class="editor-board-space" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="editor-footer editor-surface">
+                <ui:VisualElement class="editor-row" picking-mode="Ignore">
+                    <ui:Button name="solve" text="Solve" class="editor-button green" />
+                    <ui:Button name="auto-fill" text="Auto Fill" class="editor-button yellow" />
+                    <ui:Label text="Click a bus or queue chip to remove it" class="editor-small editor-tip" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:ScrollView class="editor-result-scroll"><ui:Label name="solver-result" class="editor-result" picking-mode="Ignore" /></ui:ScrollView>
+                <ui:Label name="status" text="Pick a level to edit." class="editor-status" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="passenger-overlay" class="fill editor-overlay hidden" picking-mode="Ignore">
+                <ui:ScrollView class="modal editor-modal" name="passenger-modal">
+                    <ui:VisualElement class="editor-row" picking-mode="Ignore"><ui:Label name="passenger-title" class="editor-modal-title" picking-mode="Ignore" /><ui:Button name="passenger-close" class="close-button" /></ui:VisualElement>
+                    <ui:Toggle name="hidden-passenger" label="Hidden (?): OFF" class="editor-toggle" />
+                    <ui:VisualElement class="editor-row" picking-mode="Ignore"><ui:Button name="ropes-minus" text="−" class="editor-button yellow" /><ui:Label name="ropes" text="Ropes: 0" class="editor-modal-title" picking-mode="Ignore" /><ui:Button name="ropes-plus" text="+" class="editor-button yellow" /></ui:VisualElement>
+                    <ui:DropdownField name="cloak" label="Cloak" class="editor-cloak" />
+                    <ui:Button name="delete-passenger" text="Delete passenger" class="editor-button red editor-wide" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <ui:VisualElement name="tunnel-overlay" class="fill editor-overlay hidden" picking-mode="Ignore">
+                <ui:ScrollView class="modal editor-modal" name="tunnel-modal">
+                    <ui:VisualElement class="editor-row" picking-mode="Ignore"><ui:Label name="tunnel-title" class="editor-modal-title" picking-mode="Ignore" /><ui:Button name="tunnel-close" class="close-button" /></ui:VisualElement>
+                    <ui:Button name="rotate-tunnel" text="Rotate (R)" class="editor-button yellow editor-wide" />
+                    <ui:Label text="Add passengers to the tunnel queue" class="editor-caption" picking-mode="Ignore" />
+                    <ui:VisualElement name="tunnel-add" class="editor-row editor-add-row" picking-mode="Ignore" />
+                    <ui:ScrollView name="tunnel-scroll" mode="Horizontal" class="editor-chip-scroll" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="passenger-ghost" class="editor-ghost hidden" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

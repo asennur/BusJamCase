@@ -5,7 +5,7 @@ using BusJam.Core;
 using BusJam.Gameplay;
 using BusJam.Level;
 using BusJam.Save;
-using TMPro;
+using UnityEngine.UIElements;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -16,7 +16,8 @@ namespace BusJam.LevelEditor
     /// and only if the draft validates. Board input, palette, bus order bar and popups call into this class and
     /// redraw on <see cref="Changed"/>. Slots are not edited: they come from the level number (GameRules).
     /// </summary>
-    public class LevelEditorPanel : MonoBehaviour
+    [ExecuteAlways, RequireComponent(typeof(UIDocument))]
+    public partial class LevelEditorPanel : MonoBehaviour
     {
         public static readonly PassengerColor[] Colors = (PassengerColor[])Enum.GetValues(typeof(PassengerColor));
 
@@ -32,11 +33,9 @@ namespace BusJam.LevelEditor
         [SerializeField] private GameObject voidMarkerPrefab;
         [SerializeField] private string gameSceneName = "Game";
 
-        [Header("Top bar")]
-        [SerializeField] private TMP_Dropdown levelList;
-        [SerializeField] private TMP_InputField width, height, seconds;
-        [SerializeField] private TMP_Text status;
-        [SerializeField] private TMP_Text solverResult;
+        private DropdownField levelList;
+        private TextField width, height, seconds;
+        private Label status, solverResult;
 
 #if UNITY_EDITOR
         [Header("Solver")]
@@ -61,10 +60,7 @@ namespace BusJam.LevelEditor
 
         private void Start()
         {
-            // Picking a level in the list opens it right away (no separate Load button).
-            levelList.onValueChanged.AddListener(_ => LoadSelected());
-            HideLoadButtons();
-            StyleLevelList();
+            if (!Application.isPlaying) return;
             RefreshLevelList();
             if (database.Count > 0) LoadSelected();
             else NewLevel();
@@ -72,62 +68,10 @@ namespace BusJam.LevelEditor
 
         private void OnDestroy()
         {
-            if (draft != null) Destroy(draft);
-        }
-
-        // ---------- level list / open ----------
-
-        // The old Load button is redundant now that selection loads; hide any button still wired to LoadSelected.
-        private void HideLoadButtons()
-        {
-            foreach (var button in FindObjectsOfType<UnityEngine.UI.Button>(true))
-                for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
-                    if (button.onClick.GetPersistentMethodName(i) == nameof(LoadSelected)
-                        && button.onClick.GetPersistentTarget(i) == this)
-                        button.gameObject.SetActive(false);
-        }
-
-        // The dropdown list was white on white: give the list a dark panel and readable rows.
-        private void StyleLevelList()
-        {
-            if (levelList.template == null) return;
-            // The viewport used a stencil Mask whose graphic was transparent, which hid the rows and their TMP
-            // labels. A RectMask2D clips by rectangle, needs no graphic and works with TextMeshPro.
-            foreach (var mask in levelList.template.GetComponentsInChildren<UnityEngine.UI.Mask>(true))
+            if (draft != null)
             {
-                var go = mask.gameObject;
-                var graphic = mask.graphic;
-                DestroyImmediate(mask);
-                if (graphic != null) graphic.enabled = false;
-                if (go.GetComponent<UnityEngine.UI.RectMask2D>() == null) go.AddComponent<UnityEngine.UI.RectMask2D>();
-            }
-            var panel = levelList.template.GetComponent<UnityEngine.UI.Image>();
-            if (panel != null) panel.color = new Color(0.04f, 0.13f, 0.33f, 0.97f);
-            foreach (var toggle in levelList.template.GetComponentsInChildren<UnityEngine.UI.Toggle>(true))
-            {
-                if (toggle.targetGraphic != null) toggle.targetGraphic.color = new Color(0.16f, 0.32f, 0.72f, 0.85f);
-                var colors = toggle.colors;
-                colors.normalColor = Color.white;
-                colors.highlightedColor = new Color(0.75f, 0.9f, 1f);
-                colors.selectedColor = new Color(0.75f, 0.9f, 1f);
-                toggle.colors = colors;
-                if (toggle.graphic != null) toggle.graphic.color = new Color(1f, 0.85f, 0.25f);
-            }
-            if (levelList.itemText != null)
-            {
-                // The scene's item row was 20 px tall with 29 pt text, so TMP truncated every label to nothing.
-                var label = levelList.itemText;
-                label.color = Color.white;
-                label.fontSize = 30f;
-                label.enableAutoSizing = false;
-                label.enableWordWrapping = false;
-                label.overflowMode = TMPro.TextOverflowModes.Ellipsis;
-                label.alignment = TMPro.TextAlignmentOptions.MidlineLeft;
-                var item = (RectTransform)label.transform.parent;
-                item.sizeDelta = new Vector2(item.sizeDelta.x, 64f);
-                if (item.parent is RectTransform content) content.sizeDelta = new Vector2(content.sizeDelta.x, 64f);
-                var template = levelList.template;
-                template.sizeDelta = new Vector2(template.sizeDelta.x, 64f * 8f);
+                if (Application.isPlaying) Destroy(draft);
+                else DestroyImmediate(draft);
             }
         }
 
@@ -135,8 +79,8 @@ namespace BusJam.LevelEditor
         {
             var names = new List<string>(database.Count);
             for (int i = 0; i < database.Count; i++) names.Add($"Level {i + 1}  ({database.Get(i).name})");
-            levelList.ClearOptions();
-            levelList.AddOptions(names);
+            levelList.choices = names;
+            if (names.Count > 0) levelList.SetValueWithoutNotify(names[Mathf.Clamp(sourceIndex, 0, names.Count - 1)]);
         }
 
         public void NewLevel()
@@ -149,19 +93,23 @@ namespace BusJam.LevelEditor
 
         public void LoadSelected()
         {
-            if (database.Count > 0) Open(database.Get(levelList.value), levelList.value, false);
+            if (database.Count > 0) Open(database.Get(levelList.index), levelList.index, false);
         }
 
         private void Open(LevelData asset, int index, bool isNew)
         {
-            if (draft != null) Destroy(draft);
+            if (draft != null)
+            {
+                if (Application.isPlaying) Destroy(draft);
+                else DestroyImmediate(draft);
+            }
             source = isNew ? null : asset;
             sourceIndex = isNew ? -1 : index;
             SelectedColor = null;
             draft = isNew ? asset : Instantiate(asset);
-            width.SetTextWithoutNotify(draft.width.ToString());
-            height.SetTextWithoutNotify(draft.height.ToString());
-            seconds.SetTextWithoutNotify(draft.timeLimit.ToString("0", CultureInfo.InvariantCulture));
+            width.SetValueWithoutNotify(draft.width.ToString());
+            height.SetValueWithoutNotify(draft.height.ToString());
+            seconds.SetValueWithoutNotify(draft.timeLimit.ToString("0", CultureInfo.InvariantCulture));
             SetStatus(isNew ? "New level. Set the size, paint the grid, add buses, then drag passengers in." : $"Loaded Level {LevelNumber}.");
             if (solverResult != null) solverResult.text = "";
             Rebuild(true);
@@ -171,7 +119,7 @@ namespace BusJam.LevelEditor
 
         public void ApplySize()
         {
-            if (!int.TryParse(width.text, out int w) || !int.TryParse(height.text, out int h)
+            if (!int.TryParse(width.value, out int w) || !int.TryParse(height.value, out int h)
                 || w < 1 || h < 1 || w > GameRules.MaxWidth || h > GameRules.MaxHeight)
             {
                 SetStatus($"Size must be 1-{GameRules.MaxWidth} × 1-{GameRules.MaxHeight}.");
@@ -185,14 +133,14 @@ namespace BusJam.LevelEditor
 
         public void ApplyTime()
         {
-            if (float.TryParse(seconds.text, NumberStyles.Float, CultureInfo.InvariantCulture, out float value) && value >= 1f)
+            if (float.TryParse(seconds.value, NumberStyles.Float, CultureInfo.InvariantCulture, out float value) && value >= 1f)
             {
                 draft.timeLimit = Mathf.Round(value);
                 SetStatus($"Time limit {draft.timeLimit:0} s.");
             }
             else
             {
-                seconds.SetTextWithoutNotify(draft.timeLimit.ToString("0", CultureInfo.InvariantCulture));
+                seconds.SetValueWithoutNotify(draft.timeLimit.ToString("0", CultureInfo.InvariantCulture));
                 SetStatus("Time must be at least 1 second.");
             }
         }
@@ -427,7 +375,7 @@ namespace BusJam.LevelEditor
         /// <summary>Generates the grid shape (holes, obstacles, a tunnel) for the size in the inputs. Clears passengers; keeps buses and time.</summary>
         public void AutoGrid()
         {
-            if (int.TryParse(width.text, out int w) && int.TryParse(height.text, out int h)
+            if (int.TryParse(width.value, out int w) && int.TryParse(height.value, out int h)
                 && w >= 2 && h >= 2 && w <= GameRules.MaxWidth && h <= GameRules.MaxHeight
                 && (w != draft.width || h != draft.height))
                 draft.Resize(w, h);
@@ -466,7 +414,7 @@ namespace BusJam.LevelEditor
                 sourceIndex = database.Count - 1;
                 UnityEditor.EditorUtility.SetDirty(database);
                 RefreshLevelList();
-                levelList.SetValueWithoutNotify(sourceIndex);
+                levelList.SetValueWithoutNotify(levelList.choices[sourceIndex]);
             }
             else
             {
