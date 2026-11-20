@@ -38,6 +38,7 @@ namespace BusJam.Gameplay
         public Bus NextBus => queue.Count > 1 ? queue[1] : null;
 
         public event Action<Bus> BusArrived;
+        public event Action<Bus> BusFilled;
         public event Action<Bus> BusDeparted;
         /// <summary>A full bus starts driving away (after its door closed); used for the departure sound.</summary>
         public event Action<Bus> BusDeparting;
@@ -87,7 +88,10 @@ namespace BusJam.Gameplay
         public void NotifySeatArrived(Bus bus, int seatIndex, Passenger passenger)
         {
             if (bus.SeatArrived(seatIndex, passenger))
+            {
+                BusFilled?.Invoke(bus);
                 DepartActiveBus();
+            }
         }
 
         /// <summary>Yolcuları boşaltılmış otobüsü havuza geri verir (BusDeparted sonrası GameplayController çağırır).</summary>

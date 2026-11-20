@@ -43,6 +43,7 @@ namespace BusJam.Gameplay
 
         public event Action LevelCompleted;
         public event Action<Passenger> TapAccepted;
+        public event Func<Passenger, bool> TutorialAllowsTap;
         public event Action<FailReason> LevelFailed;
 
         private void OnEnable()
@@ -140,6 +141,8 @@ namespace BusJam.Gameplay
             if (gameManager.State != GameState.Playing || gameManager.IsPaused || passenger.State != PassengerState.Idle)
                 return;
 
+            if (TutorialAllowsTap != null && !TutorialAllowsTap(passenger)) return;
+
             // Taşma kuyruğunda bekleyen yolcu eski hücresini yeniden boşaltamaz.
             if (!board.InBounds(passenger.Cell) || board.GetOccupant(passenger.Cell) != passenger)
                 return;
@@ -227,16 +230,27 @@ namespace BusJam.Gameplay
         }
 
         /// <summary>Returns the first passenger that satisfies the current tap rules.</summary>
-        public Passenger FirstTappablePassenger()
+        public Passenger FirstTappablePassenger(PassengerColor? color = null)
         {
             if (board == null || (!waitingArea.HasFreeSlot && !SlotWillOpen())) return null;
             for (int i = 0; i < board.CellCount; i++)
             {
                 Passenger p = board.GetOccupant(i);
-                if (p != null && p.State == PassengerState.Idle && reachable[i] && p.RopesLeft == 0
+                if (p != null && (!color.HasValue || p.Color == color.Value)
+                    && p.State == PassengerState.Idle && reachable[i] && p.RopesLeft == 0
                     && (!p.IsCloaked || p.CloakOpen)) return p;
             }
             return null;
+        }
+
+        /// <summary>Checks normal move rules without applying the tutorial input filter.</summary>
+        public bool CanTapPassenger(Passenger passenger)
+        {
+            return passenger != null && board != null && board.InBounds(passenger.Cell)
+                && board.GetOccupant(passenger.Cell) == passenger
+                && passenger.State == PassengerState.Idle && reachable[board.ToIndex(passenger.Cell)]
+                && passenger.RopesLeft == 0 && (!passenger.IsCloaked || passenger.CloakOpen)
+                && (waitingArea.HasFreeSlot || SlotWillOpen());
         }
 
         private void ToggleGridCloaks()
