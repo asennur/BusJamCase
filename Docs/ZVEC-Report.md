@@ -175,3 +175,65 @@ Visual review: contours and shading are clean at native size and 2×, without tr
 Pinned `BusJamCase@c4dcbf17c52e6f1b`, Unity **2022.3.19f1**, Edit mode only. Final compilation clean and Console **0 entries**. No scene save, Play, vault access or push; all pre-existing protected changes remain excluded.
 
 Implementation: `da8b75a`.
+
+## ZSVG-R — Source lighting restoration
+
+21 November 2026, baseline `c2c63e9`, `main`; pinned `BusJamCase@c4dcbf17c52e6f1b`, Unity **2022.3.19f1**, Edit mode only. **Strict PNG-richness parity is not fully met.** The rebuilt contours restore missing volume, bevels, rim/bounce lights, glints and shadows, but painted colour ramps still show contour bands/facets and fine grain differs, most visibly at 2×. These are limitations, not accepted equal-polish results.
+
+`Tools/RedrawSvgArt.py` samples PNG palettes and fits five-stop local ramps to spline regions, with twelve translucent source-alpha contours for soft shadows. `Tools/RedrawSvgEffects.py` rebuilds monochrome alpha effects and the 17-stop radial glow. No embedded raster, SVG filters or SVG text. The richer existing logo/coin-pile body regions are preserved from `c2c63e9`; their discarded soft shadows are reconstructed. Both logo files now use the PNG glyph proportions. The replacement is source-guided contour reconstruction, not a claim of a fully hand-painted vector recreation.
+
+`VectorArt` now installs one non-pickable SVG decoration per surface. Five source-derived panel SVGs replace its USS bevel/gloss layers and procedural 1×64 lookup cache; nine-slicing preserves control layouts. Normal/hover/pressed button art shares the source features. ZAA remains the rendering path; its importer only adds the required raster sizes for new panel assets.
+
+| Asset | Paths | Checklist restored | Result |
+| --- | ---: | --- | --- |
+| `btn_settings` | 223 | Cyan disk, bevelled gear/hub, rim light and cast shadow | Limited: paint bands/grain |
+| `button_green_hover` | 470 | Green paint/gloss, gold rim, inner shade/bounce, hover | Limited: paint bands/grain |
+| `button_green_normal` | 470 | Green paint/gloss, gold rim, inner shade/bounce, normal | Limited: paint bands/grain |
+| `button_green_pressed` | 470 | Green paint/gloss, gold rim, inner shade/bounce, pressed | Limited: paint bands/grain |
+| `button_red_hover` | 390 | Red paint/gloss, gold rim, inner shade/bounce, hover | Limited: paint bands/grain |
+| `button_red_normal` | 390 | Red paint/gloss, gold rim, inner shade/bounce, normal | Limited: paint bands/grain |
+| `button_red_pressed` | 390 | Red paint/gloss, gold rim, inner shade/bounce, pressed | Limited: paint bands/grain |
+| `button_yellow_hover` | 442 | Yellow paint/gloss, gold rim, inner shade/bounce, hover | Limited: paint bands/grain |
+| `button_yellow_normal` | 442 | Yellow paint/gloss, gold rim, inner shade/bounce, normal | Limited: paint bands/grain |
+| `button_yellow_pressed` | 442 | Yellow paint/gloss, gold rim, inner shade/bounce, pressed | Limited: paint bands/grain |
+| `coin_pile` | 898 | Gold reflections, emblem bevels, overlap/ground shadows | Limited: paint bands/grain |
+| `fx_confetti_disc` | 1 | Derived white disc tint mask; no PNG exists | No PNG; derived mask |
+| `fx_confetti_heart` | 1 | Derived white heart tint mask; no PNG exists | No PNG; derived mask |
+| `fx_confetti_rect` | 13 | Source white paper silhouette and alpha edge | No missing feature observed |
+| `fx_confetti_star` | 16 | White paper, grey outline and source alpha edge | No missing feature observed |
+| `fx_sparkle` | 48 | Thin four-tail core and source halo/falloff | Features match; alpha approximation |
+| `fx_tap_hand` | 210 | Cuff/finger volume, web shadows, knuckles and glints | Limited: paint bands/grain |
+| `glow_rays` | 47 | Broad source spokes, core and 48-layer alpha falloff | Features match; alpha approximation |
+| `glow_soft` | 0 | 17-stop source-sampled radial alpha | No missing feature observed |
+| `icon_clock` | 388 | Gold case/crown, inset dial, shaded red hands/caps | Limited: paint bands/grain |
+| `icon_close` | 285 | Red body/bounce, ivory X bevel, glints and shadow | Limited: paint bands/grain |
+| `icon_coin` | 522 | Gold rim/bounce, inset shadow, raised bus/windows/wheels | Limited: paint bands/grain |
+| `icon_heart` | 205 | Lobe gloss, burgundy depth, reflected tip and shadow | Limited: paint bands/grain |
+| `icon_heart_broken` | 329 | Split contours, cut bevels, gloss and separate shadows | Limited: paint bands/grain |
+| `logo` | 936 | Sticker rim, letter/bus/leaf/flower bevels, restored shadow | Limited: paint bands/grain |
+| `logo_constructed` | 936 | PNG-contour glyphs, full logo details and restored shadow | Limited: paint bands/grain |
+| `panel_tip` | 178 | Purple body, curved gloss, rim/glints and shadow | Limited: paint bands/grain |
+| `result_rays` | 47 | Purple derivative of source spokes/core/falloff | Features match; alpha approximation |
+| `ribbon_purple` | 630 | Curved gloss, bevelled tails, rolled folds and shadow | Limited: paint bands/grain |
+| `surface_badge` | 313 | Purple bevel, pale face/glints and lower rim/shadow | Limited: paint bands/grain |
+| `surface_blue` | 323 | Circular blue volume/gloss, cyan rim and dark depth | Limited: paint bands/grain |
+| `surface_header` | 256 | Blue rim, navy body, curved gloss and lower bounce | Limited: paint bands/grain |
+| `surface_modal` | 270 | Lavender frame, blue paint/gloss, inner shadow/bounce | Limited: paint bands/grain |
+| `surface_white` | 149 | Pale paint/bevel, bean/dot, lower light and shadow | Limited: paint bands/grain |
+| `title_complete` | 1515 | PNG glyphs, gold bevel/gloss, purple depth and stars | Limited: paint bands/grain |
+| `title_failed` | 1263 | PNG glyphs, icy bevel/gloss, navy depth and shadow | Limited: paint bands/grain |
+| `ui_passenger_icon` | 13 | Source head/torso/neck proportions and white mask | No missing feature observed |
+
+**Every “Limited” row falls short of strict PNG parity**, including the buttons and panel surfaces; the remaining issue is smooth painted shading/texture, not an omitted emblem, rim or shadow. Logo/coin-pile facets remain at 2×. Heart/disc confetti have no original PNG; the reference column explicitly shows the original tint mask. `result_rays` is compared with a clearly tinted `glow_rays.png`. Flattened PNG highlights expose their composite colour, not the original paint-layer opacity; the reconstruction preserves sampled composites and records actual SVG stop/alpha values.
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/svgr/`. `Asset-Checklists.md` and `asset-checklists.json` record per-asset light/shadow/colour features, source-pixel RGBA/coordinates, every gradient direction/stop, path counts and limitations. `inspection-4x-*`, `inspection-surfaces-4x-*` and source 4× files preserve enlarged inspections; the USS panel inspection crops use the archived native old-VectorArt render.
+
+- `sheets/`: **222** PNG/reference | old SVG/VectorArt | new SVG sheets, at representative production logical art sizes, **580×1250, 1080×1920, 2560×1080**, plus genuine **1160×2500, 2160×3840, 5120×2160** targets for 2×. `assets.json` records the review boxes; full production captures show actual layout contexts.
+- `native/`: **666** final native Game View OnGUI/RenderView target readbacks. Every record asserts `PanelSettings.targetTexture == null` and Play false. The normal screen path samples the ZAA-imported, trilinear mipmapped textures. Raw PNGs remain untouched; only sheet crops are vertically flipped to correct Unity’s Edit-mode overlay readback orientation. No offscreen-only fixture is used for acceptance evidence.
+- `production/`: **54** native captures of Start, HUD, Settings, Complete, Fail, NoLives, Tutorial, Pause and Confirm at the same three sizes and their genuine 2× targets. Edit-mode fixtures show artwork and placeholder state data; they are not gameplay or device acceptance tests.
+
+All **37** SVGs import with full mip chains and trilinear filtering; all meshes stay below 65,536 vertices. Largest: Complete title **62,340**, Failed title **60,118** vertices. `import-metrics.json` records every asset. One hundred repeated decoration passes retained **227→227** elements, preserved all **16** control bounds, and left all **25** decorations non-pickable (`idempotency.json`).
+
+Final verification: compilation clean and Console empty; all **54 protected/source byte hashes** unchanged, including Game.unity, both spriteatlases and the listed protected materials/data. Temporary review assets/harness objects removed; harness source remains outside the repo. Game.unity was never saved or committed. No Play, vault access or push. See `verification.json` and `final-unity-check.json`.
+
+Implementation: `3aa40dd`, `6aae827`, `c077796`, `a681af0`, `963d202`, `bd19928`. Local commits only; no push.
