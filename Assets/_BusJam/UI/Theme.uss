@@ -271,9 +271,9 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .start-button:hover .raster-button-art.vector-green { background-image: url("Vector/button_start_hover.svg"); }
 .start-button:active .raster-button-art.vector-green { background-image: url("Vector/button_start_pressed.svg"); }
 .raster-panel-art { -unity-background-scale-mode: stretch-to-fill; }
-.raster-panel-art.vector-white { left: 6px; right: 7px; top: 9px; bottom: 10px; background-image: url("Vector/surface_white.svg"); }
-.raster-panel-art.vector-header { left: 5px; right: 5px; top: 13px; bottom: 13px; background-image: url("Vector/surface_header.svg"); }
-.raster-panel-art.vector-modal { left: 18px; right: 20px; top: 16px; bottom: 25px; background-image: url("Vector/surface_modal.svg"); }
+.raster-panel-art.vector-white { left: 6px; right: 7px; top: 9px; bottom: 10px; }
+.raster-panel-art.vector-header { left: 5px; right: 5px; top: 13px; bottom: 13px; }
+.raster-panel-art.vector-modal { left: 18px; right: 20px; top: 16px; bottom: 25px; }
 .raster-panel-art.vector-badge { left: 0; right: 0; top: 0; bottom: 0; background-image: url("Vector/hud_level_badge.svg"); -unity-background-scale-mode: scale-to-fit; }
 .counter > .raster-panel-art.vector-white, .timer-counter > .raster-panel-art.vector-header {
     left: 42px; right: 0; top: 12px; bottom: 8px;
@@ -281,7 +281,7 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
     -unity-slice-left: 85; -unity-slice-right: 85;
     -unity-slice-top: 88; -unity-slice-bottom: 88; -unity-slice-scale: .35px;
 }
-.raster-panel-art.vector-blue { left: 2px; right: 3px; top: 2px; bottom: 3px; background-image: url("Vector/surface_blue.svg"); }
+.raster-panel-art.vector-blue { left: 2px; right: 3px; top: 2px; bottom: 3px; }
 .confirm-modal > .vector-white { left: 16px; right: 18px; top: 23px; bottom: 25px; }
 .vector-check-stroke { position: absolute; left: 34%; top: 24%; width: 26%; height: 45%; border-width: 0; border-right-width: 7px; border-bottom-width: 7px; border-color: #FEFEFE; rotate: 40deg; display: none; }
 .sound-toggle:checked .vector-check { display: flex; }
@@ -292,3 +292,57 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .portrait .result-heading { position: absolute; top: -85px; width: 64%; height: 440px; translate: 0 0; flex-shrink: 0; }
 .portrait .reward-content { position: absolute; top: 36%; width: 54%; max-width: 90%; height: 450px; margin-bottom: 0; }
 .portrait .continue-wrap { position: absolute; bottom: 19%; }
+
+/* ZUIR-3: shared blue popup family; all live captions and native controls remain. */
+.settings-modal, .pause-modal, .confirm-modal, .no-lives-modal {
+    width: 510px; padding: 0; min-height: 0; justify-content: flex-start;
+}
+.settings-modal { height: 520px; }
+.pause-modal { height: 730px; }
+.confirm-modal { width: 540px; height: 480px; }
+.settings-modal > .raster-panel-art, .pause-modal > .raster-panel-art,
+.confirm-modal > .raster-panel-art, .no-lives-modal > .raster-panel-art {
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-image: url("Vector/surface_result_modal.svg");
+    -unity-slice-left: 220; -unity-slice-right: 220;
+    -unity-slice-top: 220; -unity-slice-bottom: 220; -unity-slice-scale: .24px;
+}
+.modal-heading {
+    position: absolute; left: 22px; right: 22px; top: 20px;
+    width: auto; height: 126px; padding: 0; justify-content: center;
+}
+.modal-heading > .raster-panel-art.vector-header, .no-lives-modal > .modal-title {
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-image: url("Vector/surface_result_header.svg");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 260; -unity-slice-right: 260;
+    -unity-slice-top: 250; -unity-slice-bottom: 70; -unity-slice-scale: .25px;
+}
+.modal-title { font-size: 49px; padding: 0; margin: 0; color: #fff9df; -unity-text-outline-color: #090d16; -unity-text-outline-width: 2.7px; text-shadow: 0 3px 0 #07101e; }
+.modal-heading > .close-button { position: absolute; top: -38px; right: -40px; }
+.settings-modal > .art-button { position: absolute; top: 260px; }
+.settings-modal > .art-button > .vector-caption { font-size: 33px; }
+.pause-modal > .art-button { position: absolute; }
+#restart-button { top: 382px; }
+#menu-button { top: 550px; }
+.pause-modal > .art-button > .vector-caption { font-size: 40px; }
+.confirmation { position: absolute; left: 35px; right: 35px; top: 180px; width: auto; }
+.confirmation > .question, .confirm-modal > .question {
+    background-image: url("Vector/surface_result_inner.svg"); -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 250; -unity-slice-right: 250; -unity-slice-top: 250; -unity-slice-bottom: 250; -unity-slice-scale: .16px;
+    font-size: 35px; color: white; -unity-text-outline-color: #191919; -unity-text-outline-width: 2px; text-shadow: 0 2px 0 #242424;
+}
+.confirmation > .question { width: 100%; height: 140px; margin: 0 0 30px 0; padding: 25px; }
+.confirm-modal > .question { position: absolute; left: 34px; right: 34px; top: 42px; height: 230px; margin: 0; padding: 35px; }
+.confirm-modal > .button-row { position: absolute; left: 35px; right: 35px; top: 310px; width: auto; }
+.button-row .art-button { height: 124px; min-height: 110px; font-size: 40px; }
+.button-row .vector-caption { font-size: 40px; }
+.sound-toggle { position: absolute; left: 35px; right: 35px; top: 190px; width: auto; height: 150px; padding: 0 25px; margin: 0; }
+.sound-toggle > .raster-panel-art.vector-white {
+    left: 0; right: 0; top: 0; bottom: 0; background-image: url("Vector/surface_result_inner.svg");
+    -unity-slice-left: 250; -unity-slice-right: 250; -unity-slice-top: 250; -unity-slice-bottom: 250; -unity-slice-scale: .16px;
+}
+.sound-toggle > .unity-toggle__label { font-size: 36px; color: white; -unity-text-outline-color: #191919; -unity-text-outline-width: 2px; text-shadow: 0 2px 0 #242424; }
+.sound-toggle .unity-toggle__checkmark > .raster-panel-art.vector-blue { left: 0; right: 0; top: 0; bottom: 0; background-image: url("Vector/toggle_round_off.svg"); -unity-background-scale-mode: scale-to-fit; }
+.sound-toggle:checked .unity-toggle__checkmark > .raster-panel-art.vector-blue { background-image: url("Vector/toggle_round_on.svg"); }
+.sound-toggle .vector-check-stroke { left: 37%; top: 27%; width: 24%; height: 39%; border-right-width: 6px; border-bottom-width: 6px; border-color: #fff9df; }
