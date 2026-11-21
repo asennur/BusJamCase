@@ -10,6 +10,7 @@ public sealed class ResultTimelineEditor : Editor
     {
         var timeline = (ResultTimeline)target;
         EditorGUILayout.HelpBox("Start controls appearance order. Collection starts on Continue; Retry starts on Retry. Reordering this list does not change Start times.", MessageType.Info);
+        EditorGUILayout.HelpBox("Expand Celebration to tune the bus. CelebrationBus Enabled controls visibility; its Start and Duration are derived from Celebration.", MessageType.Info);
         DrawDefaultInspector();
         if (!string.IsNullOrEmpty(timeline.ValidationMessage)) EditorGUILayout.HelpBox(timeline.ValidationMessage, MessageType.Warning);
         foreach (ResultTrack track in System.Enum.GetValues(typeof(ResultTrack))) EditorGUILayout.LabelField(track + " length", timeline.Length(track).ToString("0.###") + " s");
@@ -35,7 +36,7 @@ public sealed class ResultStepDrawer : PropertyDrawer
             foreach (string field in Fields)
             {
                 position.y += EditorGUIUtility.singleLineHeight+2;
-                using (new EditorGUI.DisabledScope(field=="overshoot" && property.FindPropertyRelative("ease").enumValueIndex!=(int)ResultEase.OutBack
+                using (new EditorGUI.DisabledScope(id == ResultStepId.CelebrationBus && field != "enabled" && field != "id" || field=="overshoot" && property.FindPropertyRelative("ease").enumValueIndex!=(int)ResultEase.OutBack
                     || field=="stagger" && id!=ResultStepId.Confetti && id!=ResultStepId.CoinFlight))
                     EditorGUI.PropertyField(position,property.FindPropertyRelative(field));
             }

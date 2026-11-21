@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c9624905ba1d364faa7ba053ebf359f, type: 3}
   m_Name: ResultTimeline
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   steps:
   - id: 0
     enabled: 1
@@ -30,7 +30,7 @@ MonoBehaviour:
   - id: 2
     enabled: 1
     start: 1.05
-    duration: 1.05
+    duration: 2.4
     ease: 0
     overshoot: 1.70158
     stagger: 0
@@ -160,3 +160,68 @@ MonoBehaviour:
     ease: 0
     overshoot: 1.70158
     stagger: 0
+  celebration:
+    startTime: 1.05
+    enterDuration: 0.55
+    enterSide: 1
+    stopPosition: {x: 0.5, y: 0.2}
+    holdDuration: 1.2
+    exitDuration: 0.65
+    exitDirection: 0
+    cameraYaw: 0
+    cameraPitch: 10
+    cameraDistance: 18
+    cameraFov: 35
+    busScale: 1
+    riderHopHeight: 0.25
+    riderHopFrequency: 1.666667
+    riderHopStagger: 0.2
+    enterEase:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 3
+        outSlope: 3
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    exitEase:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 3
+        outSlope: 3
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    busBounceAmplitude: 0.04

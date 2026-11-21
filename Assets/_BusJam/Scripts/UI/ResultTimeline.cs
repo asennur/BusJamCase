@@ -6,6 +6,47 @@ namespace BusJam.UI
 {
     public enum ResultTrack { Complete, Collection, Fail, Retry }
     public enum ResultEase { Linear, InQuad, OutQuad, OutCubic, OutBack }
+    public enum CelebrationEnterSide { Left, Right }
+    public enum CelebrationExitDirection { Down, Left, Right }
+
+    /// <summary>Screen-space bus choreography shared by runtime and the Edit-mode preview.</summary>
+    [Serializable]
+    public sealed class CelebrationChoreography
+    {
+        [Tooltip("Seconds after Complete before the bus enters."), Min(0)] public float startTime = 1.05f;
+        [Tooltip("Seconds spent slowing from the entry edge to the stop."), Min(0)] public float enterDuration = .55f;
+        [Tooltip("Screen edge from which the bus enters.")] public CelebrationEnterSide enterSide = CelebrationEnterSide.Right;
+        [Tooltip("Bus origin on screen: (0,0) is bottom left, (1,1) is top right.")] public Vector2 stopPosition = new Vector2(.5f, .2f);
+        [Tooltip("Seconds the bus stays stopped while its three riders celebrate."), Min(0)] public float holdDuration = 1.2f;
+        [Tooltip("Seconds spent accelerating from the stop to fully offscreen."), Min(0)] public float exitDuration = .65f;
+        [Tooltip("Screen direction in which the bus leaves after the hold.")] public CelebrationExitDirection exitDirection = CelebrationExitDirection.Down;
+        [Tooltip("Camera orbit around the bus in degrees; zero shows its side."), Range(-180, 180)] public float cameraYaw;
+        [Tooltip("Camera downward viewing angle in degrees; positive values reveal the open deck."), Range(-15, 60)] public float cameraPitch = 10;
+        [Tooltip("Camera distance from the stage in world units."), Range(8, 40)] public float cameraDistance = 18;
+        [Tooltip("Vertical camera field of view in degrees."), Range(20, 60)] public float cameraFov = 35;
+        [Tooltip("Bus and rider size multiplier. One fits the side profile inside each preview aspect."), Range(.2f, 2)] public float busScale = 1;
+        [Tooltip("Hop height as a fraction of standing rider height, capped at 0.4."), Range(0, .4f)] public float riderHopHeight = .25f;
+        [Tooltip("Rider hop cycles per second during the stopped hold."), Range(0, 5)] public float riderHopFrequency = 1.666667f;
+        [Tooltip("Delay in seconds between neighbouring riders starting their hop cycle."), Min(0)] public float riderHopStagger = .2f;
+        [Tooltip("Entry progress curve. Default slows smoothly to a complete stop.")] public AnimationCurve enterEase = new AnimationCurve(new Keyframe(0, 0, 3, 3), new Keyframe(1, 1, 0, 0));
+        [Tooltip("Exit progress curve. Default accelerates smoothly from rest.")] public AnimationCurve exitEase = new AnimationCurve(new Keyframe(0, 0, 0, 0), new Keyframe(1, 1, 3, 3));
+        [Tooltip("Suspension bounce in unscaled bus units while moving; the hold stays stationary."), Range(0, .2f)] public float busBounceAmplitude = .04f;
+        public float Duration => enterDuration + holdDuration + exitDuration;
+        public float End => startTime + Duration;
+
+        public void Validate()
+        {
+            startTime = Clean(startTime); enterDuration = Clean(enterDuration); holdDuration = Clean(holdDuration); exitDuration = Clean(exitDuration);
+            stopPosition = new Vector2(Mathf.Clamp01(Clean(stopPosition.x)), Mathf.Clamp01(Clean(stopPosition.y)));
+            cameraYaw = Mathf.Clamp(Signed(cameraYaw), -180, 180); cameraPitch = Mathf.Clamp(Signed(cameraPitch), -15, 60);
+            cameraDistance = Mathf.Clamp(Clean(cameraDistance), 8, 40); cameraFov = Mathf.Clamp(Clean(cameraFov), 20, 60);
+            busScale = Mathf.Clamp(Clean(busScale), .2f, 2); riderHopHeight = Mathf.Clamp(Clean(riderHopHeight), 0, .4f);
+            riderHopFrequency = Mathf.Clamp(Clean(riderHopFrequency), 0, 5); riderHopStagger = Clean(riderHopStagger);
+            busBounceAmplitude = Mathf.Clamp(Clean(busBounceAmplitude), 0, .2f);
+        }
+        private static float Signed(float value) => float.IsNaN(value) || float.IsInfinity(value) ? 0 : value;
+        private static float Clean(float value) => Mathf.Max(0, Signed(value));
+    }
     public enum ResultStepId
     {
         Confetti, Overlay, CelebrationBus, Title, Rays, CoinPile, CoinCount, ContinueButton,
@@ -48,6 +89,9 @@ namespace BusJam.UI
     public sealed class ResultTimeline : ScriptableObject
     {
         [SerializeField] private List<ResultStep> steps = Defaults();
+        [SerializeField, Tooltip("Side-view enter, stop, celebrate and exit controls. Changes are visible when scrubbing the preview.")]
+        private CelebrationChoreography celebration = new CelebrationChoreography();
+        public CelebrationChoreography Celebration => celebration;
         [NonSerialized] private ResultStep[] lookup;
         [NonSerialized] private readonly float[] lengths = new float[4];
         public IReadOnlyList<ResultStep> Steps => steps;
@@ -58,6 +102,8 @@ namespace BusJam.UI
         public ResultStep Get(ResultStepId id)
         {
             var step = lookup[(int)id];
+            if (id == ResultStepId.CelebrationBus)
+            { step.start = celebration.startTime; step.duration = celebration.Duration; }
             if (Track(id) == ResultTrack.Fail && id != ResultStepId.BoardHold)
             {
                 var hold = lookup[(int)ResultStepId.BoardHold];
@@ -78,6 +124,8 @@ namespace BusJam.UI
         private void OnValidate() => Rebuild();
         public void Rebuild()
         {
+            if (celebration == null) celebration = new CelebrationChoreography();
+            celebration.Validate();
             const int count = (int)ResultStepId.RetryFade + 1;
             if (lookup == null) lookup = new ResultStep[count];
             Array.Clear(lookup, 0, count); Array.Clear(lengths, 0, lengths.Length);
@@ -88,6 +136,8 @@ namespace BusJam.UI
                 int key = (int)step.id;
                 if (key < 0 || key >= count) continue;
                 for (int j = 0; j < i; j++) if (steps[j].id == step.id) ValidationMessage = "Duplicate step names: the last entry wins. Use one entry per name.";
+                if (step.id == ResultStepId.CelebrationBus)
+                { step.start = celebration.startTime; step.duration = celebration.Duration; step.ease = ResultEase.Linear; step.stagger = 0; }
                 step.start = Finite(step.start); step.duration = Finite(step.duration);
                 step.overshoot = Finite(step.overshoot); step.stagger = Finite(step.stagger);
                 steps[i] = step; lookup[key] = step;
@@ -110,7 +160,7 @@ namespace BusJam.UI
         private static List<ResultStep> Defaults() => new List<ResultStep>
         {
             S(ResultStepId.Confetti, .3f, .75f, stagger: .009f),
-            S(ResultStepId.Overlay, 1.05f, .2f), S(ResultStepId.CelebrationBus, 1.05f, 1.05f),
+            S(ResultStepId.Overlay, 1.05f, .2f), S(ResultStepId.CelebrationBus, 1.05f, 2.4f),
             S(ResultStepId.Title, 1.75f, .3f, ResultEase.OutBack), S(ResultStepId.Rays, 1.75f, .3f),
             S(ResultStepId.CoinPile, 2.5f, .3f, ResultEase.OutBack), S(ResultStepId.CoinCount, 2.5f, .9f, ResultEase.OutQuad),
             S(ResultStepId.ContinueButton, 2.6f, .3f, ResultEase.OutBack),

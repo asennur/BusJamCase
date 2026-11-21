@@ -13,8 +13,6 @@ namespace BusJam.UI
         public AnimationClip drive, exhaust, idle, wave;
         [Tooltip("Existing shared materials, in PassengerColor order.")]
         public Material[] colors;
-        [Range(-15, 35)] public float cameraPitch = -7;
-        [Range(20, 60)] public float fieldOfView = 35;
         public Color keyColor = new Color(1f, .94f, .86f);
         public float keyIntensity = .75f;
     }

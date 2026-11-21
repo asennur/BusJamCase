@@ -46,7 +46,7 @@ namespace BusJam.UI
         {
             if (celebrationBus != null) return;
             var assets = Resources.Load<CelebrationSettings>("CelebrationSettings");
-            celebrationBus = new CompleteCelebration(assets, celebrationImage, gameObject.scene, Application.isPlaying ? Camera.main : null);
+            celebrationBus = new CompleteCelebration(assets, celebrationImage, gameObject.scene, Application.isPlaying ? Camera.main : null, resultTimeline);
             celebrationBus.Resize(Screen.width, Screen.height);
         }
 
@@ -172,8 +172,7 @@ namespace BusJam.UI
         {
             celebrationTime = time;
             var busStep = Step(ResultStepId.CelebrationBus);
-            if (busStep.Visible(time) && busStep.Phase(time) < 1)
-                celebrationBus?.Sample(CompleteCelebration.StartTime + busStep.Evaluate(time) * CompleteCelebration.Duration);
+            if (busStep.enabled) celebrationBus?.Sample(time);
             else celebrationBus?.Hide();
             complete.style.backgroundColor = new Color(.10f, .015f, .18f, .88f * Step(ResultStepId.Overlay).Evaluate(time));
             resultCoinPlate.style.opacity = Step(ResultStepId.CoinPlate).Evaluate(time);
