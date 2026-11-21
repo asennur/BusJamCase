@@ -161,3 +161,17 @@ After 60 native animation warm-up frames, **120 visible-hand/celebration repaint
 Unity **2022.3.19f1**, pinned `BusJamCase@c4dcbf17c52e6f1b`; compilation clean, final Console **0**. All **89 protected/source-file byte hashes** match, including Game.unity, both spriteatlases and their metadata. Game.unity was neither saved nor committed. Temporary harness removed; no Play, vault access or push.
 
 Implementation: `aaf1850`.
+
+## ZLOGO — Constructed Start logo
+
+21 November 2026, starting at `571603e` on `main`. `Theme.uss` now uses `logo_constructed.svg`; the source PNG and ZVEC-4 `logo.svg` are retained. `Tools/GenerateLogoArt.py` follows ZWIN's fontTools outline/layer method: Fredoka Bold supplies U/S/M, and Lilita One supplies B/J/A for its two B counters, capped J and closed A counter. Real outlines receive mild rounding, inflation, individual rotation and offsets. Authored paths construct the yellow bus, inset gradient windows/highlights, headlights/wheels, green foliage/pink flowers and dashed blue road. A connected white sticker rim surrounds purple backing, extrusion copies, vertical face gradients, narrow bevel ramps and translucent gloss. No tracing, raster embedding, SVG text or filters.
+
+**215 paths; 40,020 imported vertices; 38,662 triangles**, versus the trace's 31,896 triangles. The extra bevel layers increase imported geometry by 21.2%; tessellation remains import-time only. The canvas remains 1760×887 and production logo/button bounds are unchanged.
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/logo/`. `Start-*-logo-comparison.png` and `Start-*-full-comparison.png` compare **PNG / ZVEC-4 / constructed** at 1080×1920 and 2560×1080, plus genuine **2160×3840 and 5120×2160** render targets for 2× review. All three variants have 11 native UI Toolkit captures (33 total); `Start-nine-resolutions.png` covers the required nine sizes. The constructed captures use the production USS reference without an inline asset override. `verification.json` confirms nonblank dimensions, all **55 matching control-bound records** and **21 unchanged protected/source hashes**, including Game.unity, both spriteatlases and metadata. The isolated capture fixture is archived as `LogoScreenReview.cs` in the evidence folder and removed from Assets.
+
+Visual review: contours and shading are clean at native size and 2×, without traced speckle or coloured transparency halos. **The PNG still has softer, richer painted bevels and different glyph proportions; strict equal-polish parity is not fully met.** This is a constructed reinterpretation, with the comparison evidence exposing that remaining quality gap rather than claiming a pixel match.
+
+Pinned `BusJamCase@c4dcbf17c52e6f1b`, Unity **2022.3.19f1**, Edit mode only. Final compilation clean and Console **0 entries**. No scene save, Play, vault access or push; all pre-existing protected changes remain excluded.
+
+Implementation: `da8b75a`.

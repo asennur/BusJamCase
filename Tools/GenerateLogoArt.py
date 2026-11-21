@@ -227,7 +227,7 @@ def main():
     if not meta.exists():
         template=(OUT.parent/'logo.svg.meta').read_text()
         template=template.replace('f2696ae00a6dcc0439c3b15dff088fa3',uuid.uuid4().hex)
-        meta.write_text('\n'.join(line.rstrip() for line in template.splitlines())+'\n',encoding='utf-8')
+        meta.write_text(template,encoding='utf-8')
     EVIDENCE.mkdir(exist_ok=True)
     metrics={'font':'Fredoka-Bold.ttf for U/S/M; LilitaOne-Regular.ttf for B/J/A','canvas':[1760,887],'paths':svg.count('<path '),'method':'Smoothed real glyph outlines and authored shapes; no tracing or raster embedding.'}
     (EVIDENCE/'construction.json').write_text(json.dumps(metrics,indent=2))
