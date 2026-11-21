@@ -218,3 +218,38 @@ Background sample saturation falls **43-44%**. Sampled passenger pixels are iden
 The saved-scene audit retains every original serialized block. Only Background's component list changes, plus one new binding block; an automatically serialized unrelated UI timeline reference was removed from the diff. Asen's light block remains identical to the initial working snapshot (**0.75**). Its existing 0.5-to-0.75 hunk is excluded from the commit. All **35 protected file hashes** match the initial snapshot, including Global Volume Profile.asset, ResultTimeline, ArtSource, sprite atlases, M_Purple, M_Yellow, LevelDatabase and Level_26. No protected asset is staged.
 
 Final verification after removing the temporary fixture: compilation finished, editor not compiling/updating, Edit mode, scene clean, exactly one style binding, no review objects/type, style globals restored to defaults, light 0.75. **Console: 0 errors, 0 warnings, 0 logs.** The live MCP editor ping succeeded after final compilation. All 1,252 original scene blocks are retained; saved-scene native captures also pass the populated-view check. See final-editor.json, final-console.json, shader-audit.json and saved-audit.json in the evidence folder.
+
+# ZBGTONE-2 - Darker, calmer background
+
+21 November 2026. Supersedes ZBGTONE's pale haze direction above. Baseline: `fd1009a`, main, Unity **2022.3.19f1**, pinned `BusJamCase@c4dcbf17c52e6f1b`. The initial live editor ping succeeded. **Edit mode only; never Play.** No vault writes or push.
+
+The Inspector location remains **Assets/_BusJam/Settings/BackgroundStyle.asset**, referenced by **Background > BackgroundStyleBinding**. Defaults: **Darken 0.28**, **Desaturation 0.25**, **Contrast Reduction 0.05**. English tooltips describe each control. Lift and Haze are removed. Desaturation mixes toward Rec.709 luminance; contrast reduction gently compresses highlights by dividing by `1 + luminance * contrastReduction`, preserving black without additive lift. Finally, Darken multiplies working-space RGB by **0.72**. This is a shader brightness multiplier, not a promise of a 28% reduction in final post-processed screenshot luminance. Zeroing all controls restores the unmuted shader output.
+
+The same three background shaders remain the only consumers. No scene, gameplay material, geometry, UI, menu, camera, light, volume, texture or render-pass changes. No Update loop or new allocation. The purple floor stays visibly purple; the board and passengers now stand out against a deeper floor. The supplied t0030/t0060 frames guide this relationship; their detailed artwork, lighting and layout remain different.
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/bgtone2/`. Fresh **before**, **after** and **unmuted** native GameView final-target readbacks cover **580x1250, 1080x1920, 2560x1080**. Raw PNGs are untouched; `-view.png` derivatives correct GPU readback orientation. `comparison-native-<size>.png` presents native-sized columns: **current ZBGTONE / corrected / t0030 reference crop / t0060 reference crop**. Smaller `comparison-reference-*` sheets aid inspection. Reference images are centre cover-cropped with their aspect preserved; the landscape reference is a crop of the supplied portrait frame, not an invented landscape view. Reference files were read only.
+
+The external `ZBgToneReview.cs` records the temporary populated Edit-mode fixture, removed from Assets after capture. It builds **Level_05** through BoardView.Build, freezes three existing bus prefabs at authored queue positions and displays **Level 5 / 1:15** in the normal HUD. No PlayerPrefs writes or runtime gameplay test. The fixture is cleaned up and the Start presentation restored.
+
+Measurements reuse the previous fixed native-pixel regions, excluding animated water and object edges. Luminance is mean linear-sRGB Rec.709; saturation is mean encoded-sRGB HSV. Pixel-weighted aggregates describe these samples, not whole-image segmentation. See `regions.json`, annotated region images, `measure.py`, `compare.py`, `measurements.tsv` and `calibration.md`.
+
+| Size | Region | Luminance ZBGTONE / corrected | Saturation ZBGTONE / corrected |
+| --- | --- | --- | --- |
+| 580x1250 | Background | 0.3276 / 0.1342 | 0.1765 / 0.2873 |
+| 580x1250 | Gameplay | 0.2139 / 0.2139 | 0.6546 / 0.6546 |
+| 1080x1920 | Background | 0.3417 / 0.1435 | 0.1694 / 0.2765 |
+| 1080x1920 | Gameplay | 0.2208 / 0.2208 | 0.6752 / 0.6752 |
+| 2560x1080 | Background | 0.3101 / 0.1252 | 0.2321 / 0.3890 |
+| 2560x1080 | Gameplay | 0.2183 / 0.2183 | 0.6575 / 0.6575 |
+
+Sampled background luminance falls **58-60% relative to the pale ZBGTONE result**, and **52-53% relative to the unmuted output**. Saturation is higher than the pale haze but **6-7% lower than unmuted output** (0.3098 to 0.2873, 0.2979 to 0.2765, 0.4148 to 0.3890). This preserves colour identity while removing the light wash. The 1080x1920 floor sample falls from **0.2698 to 0.0960** luminance. Sampled gameplay final-output channel deltas are at most **1/255, 0/255, 2/255** respectively; passenger samples are identical. Existing final post-processing can cause tiny differences without gameplay material changes.
+
+| Size | Draw calls before / after | Triangles before / after | Batches before / after | SetPass before / after |
+| --- | --- | --- | --- | --- |
+| 580x1250 | 126 / 126 | 162904 / 162904 | 126 / 126 | 14 / 14 |
+| 1080x1920 | 128 / 128 | 163080 / 163080 | 128 / 128 | 14 / 14 |
+| 2560x1080 | 157 / 157 | 188378 / 188378 | 157 / 157 | 10 / 10 |
+
+All three shader diagnostic lists are empty. Draw calls, triangles, batches and SetPass are unchanged from ZBGTONE at every size; these are populated Edit-mode GameView totals, not device profiling. **37 protected file hashes match**, including the entire Game.unity working file, Asen's light 0.75 and existing Global Volume Profile changes, MenuVolumeProfile, ResultTimeline, materials, level data, sprite atlases and ArtSource. Game.unity is neither saved nor staged by this package.
+
+Final post-cleanup live audit: compilation finished, editor not updating, Edit mode, scene clean, one style binding, defaults applied, no temporary fixture objects or compiled fixture type, light **0.75**. **Console: 0 errors, 0 warnings, 0 logs.** See `final-audit.json`, `final-editor.json` and `final-console.json`. Only BackgroundStyle.cs, BackgroundTone.hlsl, BackgroundStyle.asset and this report belong to the commit.

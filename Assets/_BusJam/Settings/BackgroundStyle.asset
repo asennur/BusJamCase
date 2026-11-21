@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ffab009a3168d841b0e46bc0e04eff8, type: 3}
   m_Name: BackgroundStyle
   m_EditorClassIdentifier: 
-  desaturation: 0.3
-  lift: 0.2
+  desaturation: 0.25
+  darken: 0.28
   contrastReduction: 0.05
-  haze: {r: 0.9, g: 0.85, b: 0.91, a: 1}
