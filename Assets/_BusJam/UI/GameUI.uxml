@@ -11,7 +11,7 @@
                         <ui:Label name="life-countdown" text="FULL" class="counter-text" picking-mode="Ignore" />
                     </ui:VisualElement>
                     <ui:VisualElement class="counter coins-plate" picking-mode="Ignore">
-                        <ui:VisualElement class="coin-icon" picking-mode="Ignore" />
+                        <ui:VisualElement class="coin-icon" picking-mode="Ignore"><ui:VisualElement class="coin-plus" picking-mode="Ignore" /></ui:VisualElement>
                         <ui:Label name="coin-count" text="0" class="counter-text" picking-mode="Ignore" />
                     </ui:VisualElement>
                     <ui:Button name="start-settings" class="gear" tooltip="Settings" />
@@ -49,7 +49,7 @@
                 <ui:Image name="celebration-bus" class="fill" picking-mode="Ignore" />
                 <ui:VisualElement class="top-bar result-bar" picking-mode="Ignore">
                     <ui:VisualElement name="result-coin-plate" class="counter coins-plate" picking-mode="Ignore">
-                        <ui:VisualElement class="coin-icon" picking-mode="Ignore" />
+                        <ui:VisualElement class="coin-icon" picking-mode="Ignore"><ui:VisualElement class="coin-plus" picking-mode="Ignore" /></ui:VisualElement>
                         <ui:Label name="result-coins" text="0" class="counter-text" picking-mode="Ignore" />
                     </ui:VisualElement>
                 </ui:VisualElement>
