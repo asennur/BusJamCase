@@ -1,1 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><title>fx confetti disc</title><defs></defs><circle cx="32" cy="32" r="27" fill="#fff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><title>fx confetti disc white tint mask</title><defs><linearGradient id="paper" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffffff"/><stop offset=".5" stop-color="#ffffff"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs><path d="M32 5 A27 27 0 1 1 31.99 5Z" fill="url(#paper)"/></svg>
