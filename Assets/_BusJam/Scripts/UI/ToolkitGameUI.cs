@@ -179,13 +179,14 @@ namespace BusJam.UI
         // Also usable by Edit mode review without changing GameManager state or saved progress.
         public void DisplayState(GameState state)
         {
-            if (shownState == GameState.Complete && state != GameState.Complete) FinishCelebration();
+            if (shownState == GameState.Complete && state != GameState.Complete) CreditReward();
             shownState = state;
             CloseSettings(); ClosePause();
             bool isStart = state == GameState.Start;
             bool isReady = state == GameState.Ready;
             Show(background, isStart); Show(start, isStart);
-            Show(hud, isReady || state == GameState.Playing);
+            Show(hud, isReady || state == GameState.Playing || state == GameState.Complete || state == GameState.Fail);
+            hud.EnableInClassList("fail-hud", state == GameState.Fail);
             Show(ready, isReady); Show(readyDim, isReady);
             Show(pauseSettings, true);
             pauseSettings.style.visibility = state == GameState.Playing ? Visibility.Visible : Visibility.Hidden;
@@ -229,6 +230,8 @@ namespace BusJam.UI
         private void ShowLives(int count, int seconds)
         {
             if (count > 0) HideNoLives();
+            if (lastLives >= 0 && count < lastLives)
+            { lifeBeforeLossText = livesCount.text; lifeBeforeLossTime = lifeCountdown.text; }
             if (count != lastLives)
             {
                 textBuffer.Clear().Append(count); livesCount.text = textBuffer.ToString();

@@ -56,24 +56,37 @@
                     <ui:VisualElement name="complete-panel" class="result-content" picking-mode="Ignore">
                         <ui:VisualElement name="complete-heading" class="result-heading" picking-mode="Ignore">
                             <ui:VisualElement name="complete-rays" class="fill result-rays" picking-mode="Ignore" usage-hints="DynamicTransform" />
-                            <ui:Label text="LEVEL COMPLETED!" class="result-title" picking-mode="Ignore" />
+                            <ui:VisualElement name="complete-title-group" class="fill" picking-mode="Ignore" usage-hints="DynamicTransform">
+                                <ui:VisualElement class="complete-ribbon" picking-mode="Ignore" />
+                                <ui:VisualElement name="complete-title" class="complete-title" picking-mode="Ignore" tooltip="Level Completed!" />
+                            </ui:VisualElement>
                             <ui:VisualElement name="complete-sparkles" class="fill" picking-mode="Ignore" />
                         </ui:VisualElement>
-                        <ui:VisualElement class="reward-content" picking-mode="Ignore">
+                        <ui:VisualElement name="reward-content" class="reward-content" picking-mode="Ignore">
                             <ui:VisualElement name="reward-flash" class="fill reward-flash" picking-mode="Ignore" />
                             <ui:VisualElement name="reward-pile" class="reward-pile" picking-mode="Ignore" />
+                            <ui:VisualElement name="pile-glints" class="fill" picking-mode="Ignore" />
                             <ui:Label name="reward-label" text="+25" class="reward-label" picking-mode="Ignore" />
                         </ui:VisualElement>
-                        <art:VectorButton name="continue-button" text="Continue" class="art-button green" />
+                        <ui:VisualElement name="continue-wrap" class="continue-wrap" picking-mode="Ignore">
+                            <ui:VisualElement name="continue-glow" class="fill continue-glow" picking-mode="Ignore" />
+                            <art:VectorButton name="continue-button" text="Continue" class="art-button green" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="celebration-effects" class="fill" picking-mode="Ignore" />
             </ui:VisualElement>
             <ui:VisualElement name="fail-overlay" class="fill modal-overlay hidden">
+                <ui:VisualElement class="top-bar fail-bar" picking-mode="Ignore">
+                    <ui:VisualElement class="counter lives-plate" picking-mode="Ignore">
+                        <ui:VisualElement name="fail-hud-heart" class="heart-icon" picking-mode="Ignore"><ui:Label name="fail-lives-count" text="5" class="lives-count" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:Label name="fail-countdown" text="FULL" class="counter-text" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
                 <ui:VisualElement name="fail-panel" class="modal fail-modal">
                     <ui:VisualElement class="fail-heading">
                         <ui:Button name="fail-close" class="close-button" tooltip="Close" />
-                        <ui:Label text="LEVEL FAILED" class="result-title fail-title" picking-mode="Ignore" />
+                        <ui:VisualElement name="fail-title" class="fail-title" picking-mode="Ignore" tooltip="Level Failed!" />
                     </ui:VisualElement>
                     <ui:Label name="fail-level" text="Level 1" class="fail-level" picking-mode="Ignore" />
                     <ui:VisualElement class="life-loss" picking-mode="Ignore">
@@ -83,6 +96,7 @@
                     <ui:Label name="fail-reason" text="No space left!" class="question fail-reason" picking-mode="Ignore" />
                     <art:VectorButton name="retry-button" text="Try Again" class="art-button green" />
                 </ui:VisualElement>
+                <ui:VisualElement name="fail-effects" class="fill" picking-mode="Ignore" />
             </ui:VisualElement>
             <ui:VisualElement name="no-lives-overlay" class="fill modal-overlay hidden" picking-mode="Ignore">
                 <ui:VisualElement class="modal no-lives-modal" picking-mode="Ignore">

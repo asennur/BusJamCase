@@ -10,6 +10,7 @@
 }
 .fill { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
 .hidden { display: none; }
+.art-comparison { -unity-background-scale-mode: scale-to-fit; }
 .safe-area { flex-grow: 1; }
 .start-screen { justify-content: flex-start; }
 .menu-background {
@@ -99,27 +100,37 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .landscape .logo { width: 55%; height: 800px; max-width: 1400px; }
 .landscape .start-button { width: 32%; max-width: 700px; }
 .square .top-bar, .landscape .top-bar { padding-top: 20px; }
-/* Result screens share the source art and sharp TextCore title treatment. */
+/* Result art is constructed from glyph paths and stays sharp at every viewport. */
 .result-overlay { background-color: rgba(26, 11, 46, 0.65); }
 .result-bar { justify-content: flex-end; flex-shrink: 0; }
 .result-body { flex-grow: 1; min-height: 0; align-items: center; justify-content: center; padding-bottom: 150px; }
-.result-content { width: 960px; max-width: 85%; max-height: 92%; align-items: center; justify-content: space-around; }
-.result-heading { width: 100%; height: 340px; flex-shrink: 1; min-height: 190px; justify-content: center; align-items: center; }
-.result-title { max-width: 100%; margin: 0; padding: 10px 8px; white-space: normal; -unity-font-definition: url("Fonts/LilitaOne.asset"); font-size: 108px; color: rgb(255, 221, 116); -unity-text-outline-width: 5px; -unity-text-outline-color: rgb(99, 40, 74); text-shadow: 0 8px 0 rgba(44, 16, 54, 0.8); }
-.result-rays { background-image: url("Vector/glow_rays.svg"); -unity-background-scale-mode: scale-to-fit; scale: 1.5 1.5; }
-.reward-content { width: 440px; max-width: 90%; height: 410px; min-height: 240px; flex-shrink: 1; align-items: center; justify-content: center; margin-bottom: 35px; }
+.result-content { width: 960px; max-width: 85%; height: 1270px; max-height: 96%; align-items: center; justify-content: space-between; }
+.result-heading { width: 100%; height: 440px; flex-shrink: 1; min-height: 190px; justify-content: center; align-items: center; }
+.portrait .result-heading { width: 74%; translate: 0 -245px; }
+.complete-title { position: absolute; left: 10%; right: 10%; top: 0; bottom: 10%; background-image: url("Vector/title_complete.svg"); -unity-background-scale-mode: scale-to-fit; }
+.complete-ribbon { position: absolute; left: 0; right: 0; top: 30%; bottom: 0; background-image: url("Vector/ribbon_purple.svg"); -unity-background-scale-mode: scale-to-fit; }
+.result-rays { background-image: url("Vector/result_rays.svg"); -unity-background-scale-mode: scale-to-fit; }
+.reward-content { width: 580px; max-width: 90%; height: 470px; min-height: 240px; flex-shrink: 1; align-items: center; justify-content: center; margin-bottom: 35px; }
 .reward-pile { width: 100%; height: 72%; background-image: url("Vector/coin_pile.svg"); -unity-background-scale-mode: scale-to-fit; }
 .reward-label { font-size: 100px; color: rgb(255, 230, 135); margin: 0; padding: 0; }
 .reward-flash { background-image: url("Vector/glow_soft.svg"); -unity-background-scale-mode: scale-to-fit; }
 .pooled-effect { position: absolute; left: 0; top: 0; -unity-background-scale-mode: scale-to-fit; }
 .confetti-piece { width: 36px; height: 54px; background-image: url("Vector/fx_confetti_rect.svg"); }
 .confetti-star { width: 54px; height: 54px; background-image: url("Vector/fx_confetti_star.svg"); }
+.confetti-heart { width: 48px; height: 48px; background-image: url("Vector/fx_confetti_heart.svg"); }
+.confetti-disc { width: 28px; height: 28px; background-image: url("Vector/fx_confetti_disc.svg"); }
 .flying-coin { width: 68px; height: 68px; background-image: url("Vector/icon_coin.svg"); }
 .result-sparkle { width: 72px; height: 72px; background-image: url("Vector/fx_sparkle.svg"); }
+.continue-wrap { width: 600px; max-width: 100%; height: 170px; min-height: 110px; flex-shrink: 0; }
+.continue-wrap > .art-button { width: 100%; height: 100%; }
+.continue-glow { background-image: url("Vector/glow_soft.svg"); -unity-background-scale-mode: stretch-to-fill; -unity-background-image-tint-color: #ffe143; scale: 1.4 2.3; }
+.life-float { width: 66px; height: 66px; background-image: url("Vector/icon_heart.svg"); }
+.fail-bar { position: absolute; left: 0; right: 0; top: 0; }
+.fail-hud .level-badge { visibility: hidden; }
 .fail-modal { width: 940px; height: 1120px; }
 .fail-heading { width: 100%; align-items: center; }
 .fail-heading > .close-button { align-self: flex-end; }
-.fail-title { font-size: 104px; }
+.fail-title { width: 100%; height: 300px; min-height: 150px; flex-shrink: 1; background-image: url("Vector/title_failed.svg"); -unity-background-scale-mode: scale-to-fit; }
 .fail-level { font-size: 52px; margin: 0; padding: 0; }
 .life-loss { flex-direction: row; align-items: center; justify-content: center; height: 240px; flex-shrink: 1; }
 .fail-icon { width: 210px; height: 230px; -unity-background-scale-mode: scale-to-fit; }
