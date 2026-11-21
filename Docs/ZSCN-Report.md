@@ -43,3 +43,57 @@ Removed internal `__preview__` clips accidentally exposed by Unity's asset enume
 - Allocation/growth checks are deterministic Edit-mode checks of production samplers. They are not device profiling or Play-mode gameplay verification.
 
 Protected hashes are unchanged (`protected-before.json` / `protected-after.json`): ResultTimeline, Game.unity, M_Purple, M_Yellow, LevelDatabase and Level_26. Game.unity was never saved; Asen's on-disk directional light intensity remains **0.75**. Sprite atlases, ArtSource and the AsenOS vault were not modified.
+
+# ZSCN-2 — Modular game background
+
+21 November 2026. Unity **2022.3.19f1**, pinned `BusJamCase@c4dcbf17c52e6f1b`, main. **Edit mode only**, including native Game View captures and UnityStats; no Play, push, Blender source save or AsenOS write.
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/scn/zscn-2/`. Start with `comparison-all-sizes.png`, the four `comparison-*.png` sheets, `budget.tsv`, `validation.txt` and `scene-preservation.txt`. Raw native captures are `before-*.png` and `after-final-*.png`; only derived comparison crops correct vertical readback.
+
+## Run 1 — Baseline and headless extraction
+
+The active image was `World Background/Road Sidewalk and Grass`, a horizontal quad at **(0, -0.30, 0.72)**, scale **(45, 45, 1.26)**, using M_GameBG / URP Unlit. The separate 30-section curb row spans X **-21.75 to +21.75** at Z **8.58**. Board Z **3.72**, waiting area Z **6.64**, DoorPoint Z **10.14**, the camera, gameplay bindings and UI are preserved.
+
+Reopened EnvironmentKit.blend headlessly with Blender 5.1 and extracted **46 Onizleme_Yerlesim mesh instances**, mesh identities, matrices, positions, rotations, scales, bounds and the preview camera. No source file was saved. The exact FBX axis conversion is **(-X, Z, -Y)**: 406 Blender Env_Tree_A vertices match 2,237 seam-split imported vertices within **2.27079549e-7 units**, with matching bounds (`coordinate-validation.txt`).
+
+The preview frame differs from Unity's authored camera. One parent adjustment maps it to the old quad: Y rotation **180 degrees**, uniform scale **45 / 17.0544 = 2.638615**, translation **(0, -0.3, 55)**. All 46 relative transforms remain unchanged. Pond is on the left, planter on the right, with the approved trees, bushes, flowers, rocks and tufts along the grass band.
+
+## Run 2 — Geometry, materials and initial comparison
+
+Added `Background/Environment` and a ten-triangle ground mesh containing separate floor, sidewalk, road, upper curb and grass bands. Boundaries map directly from GameBG source rows **516 / 406 / 292 / 278** to world Z **4.703254 / 8.650622 / 12.741531 / 13.243923**. Projected boundary differences against the original quad are **under 0.005 pixels** at all four capture sizes. Ground extends to X **+/-160**, Z **+/-140**; all four ground-frustum corners are inside it at every requested aspect. The existing lower curb remains and extends to X **+/-82.5** with the same sections.
+
+`BusJam/Modular Ground` provides world-locked hashed light/dark purple tiles, rounded tile corners, grout and a small bevel highlight; lilac sidewalk; purple road; rounded white dashes; yellow road edges; white upper curb; green grass. Analytic derivatives antialias the pattern at native resolution. All bands share one instanced material and one draw. The warm global grading remains in place.
+
+Added two main floor flower bushes, a small left companion bush, four rocks and ten tufts using source-image pixel anchors; the extracted collection contains only grass-band props. Added **24 seeded side variants** (`20261121`), distributed on both sides outside the central composition. `BackgroundScenery` uses the Inspector-bound layout event to enable them only in Landscape; portrait and square disable them. No scenery Update loop, per-frame spawning, collider or shadow geometry is added.
+
+Static prop renderers are baked into four shared meshes: approved layout, floor details, wide left and wide right. Source transforms/meshes remain under their named objects, with their redundant renderers disabled. Water keeps its separate renderer and existing cheap EnvWater scrolling-UV shader. The curb extension is also combined. All rendering scenery is marked batching-static; all its shared materials enable instancing. A dedicated curb material copies the existing appearance, leaving the original asset untouched. EnvPalette remains Point/Clamp/no mipmaps/sRGB, EnvWater Repeat/Trilinear/mipmaps/sRGB; neither texture nor its previous palette validation changed.
+
+The first captures exposed a dark floor and square dash ends; the final pass adjusted colours, rounded corners and dash phase. A repeat-build lookup initially failed because GameObject.Find excludes the already-disabled legacy quad; the rebuild now resolves it through its active parent. The provisional `after-*` captures lack the curb extension and are superseded by `after-final-*`. Validation also caught disabled instancing on the inherited curb material; the dedicated instanced copy fixes it.
+
+## Run 3 — Final native captures and measured budget
+
+All four sizes use the normal GameView final RenderTexture, with native dimensions verified before readback. UI is temporarily hidden to compare the background directly; the scene's gameplay objects are not spawned in Edit mode. These are **background-scene totals**, not a populated gameplay/device profile. UnityStats was read after 35 settled editor repaints per size. SetPass calls are **4 before / 5 after** throughout.
+
+| Native size | Draw calls before → after | Delta | Triangles before → after | Batches before → after |
+| --- | --- | --- | --- | --- |
+| 580x1250 | 15 → 19 | +4 | 1,060 → 23,678 | 15 → 19 |
+| 1080x1920 | 17 → 21 | +4 | 1,236 → 23,854 | 17 → 21 |
+| 2560x1080 | 33 → 39 | +6 | 2,644 → 32,588 | 33 → 39 |
+| 1080x1080 | 27 → 31 | +4 | 2,116 → 24,734 | 27 → 31 |
+
+The requested measured **+10 draw-call / <50k triangle budget passes** at every size. New background meshes contain **29,946 triangles**, including inactive side extensions and the extended curb. The old quad is disabled; GameBG.png and M_GameBG remain on disk.
+
+## Run 4 — Saved scene and protection audit
+
+**110 Edit-mode checks pass after reloading the saved Game scene**: all extracted local transforms, inactive legacy quad, exact light intensity, material instancing, static flags, no scenery shadows/colliders, palette/water imports, landscape-only activation, frustum coverage, projected bands, triangle bound and missing-script audit. Final Console: **0 errors, 0 warnings, 0 logs**. Compilation briefly emitted MCP reconnect warnings; no FBX reimport or new source-model warning was introduced in this package.
+
+All **124 original serialized scene blocks remain**. Camera, Light and original MonoBehaviour blocks compare identical to the initial on-disk snapshot. The 33 intentional existing-block changes are 30 curb prefab overrides (static flags/material), curb-root static flag, legacy-quad inactive flag and the scene root list. Viewport fitting caused a small temporary camera drift; its exact original on-disk pose was restored before saving. An automatically serialized existing UI timeline default was excluded from the final scene diff.
+
+**35 protected file hashes are unchanged**, covering ArtSource files, sprite atlases, ResultTimeline.asset, M_Purple, M_Yellow, LevelDatabase, Level_26 and GameBG.png. Asen's directional-light intensity stays exactly **0.75 on disk**; its pre-existing 0.5 → 0.75 change is excluded from the staged scene and remains uncommitted. No protected asset is staged. No vault write or push.
+
+## Remaining differences and limits
+
+- The approved low-poly meshes have faceted foliage, different flower silhouettes and taller planter sides than the painted image. Their lit palette differs from the baked illustration; painted highlights, soft shadows, sidewalk flecks and water ripples are not reproduced pixel-for-pixel. Pond/planter silhouettes therefore differ even with their composition preserved.
+- Tile colours use deterministic per-cell hashes and subtle bevel shading; they reproduce the tile style and dimensions, not each original tile's painted colour. Yellow lines and band boundaries align geometrically; minor painterly edge variation is replaced by clean lines.
+- Only the grass band's seeded additions are aspect-gated. The two authored floor clusters remain world-locked and naturally crop out of narrow portrait views, as in the old quad.
+- The budget above includes the scenery and existing curb in the saved Edit-mode scene. It does not establish a <50k-triangle limit for a runtime level populated with passengers/buses or for Complete celebration. Play and device profiling were excluded by the task.

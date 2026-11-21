@@ -175,3 +175,5 @@ Decision: Ready is an explicit state, and coins use a single update with a pop/p
 - Küçük, anlamlı commit; Türkçe mesaj.
 
 Decision: ZRES overrides the fixed-camera and portrait-only rules: preserve the exact 1080x1920 camera pose, fit larger levels and changed safe viewports along its view axis at FOV 40, offset the projection toward the free area on wider aspects, and use world-locked ground artwork with tiled extensions. Enable auto-rotation, resizable windows and native-size UI art/atlases; existing UI layout stays unchanged in this scope (20 November 2026). Evidence: `ZRES-World-Report.md`.
+
+Decision: ZSCN-2 replaces the Game background image quad with world-locked procedural tile/road bands and the approved EnvironmentKit layout; retain the inactive image, use combined static scenery meshes and event-driven landscape-only side variants (21 November 2026). Camera, gameplay anchors, lighting and grading stay authored; evidence and Edit-mode background budgets are in `ZSCN-Report.md`.
