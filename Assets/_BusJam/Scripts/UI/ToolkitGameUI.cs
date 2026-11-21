@@ -255,7 +255,7 @@ namespace BusJam.UI
             ShowResultCoins(count);
             if (count == lastCoins) return;
             textBuffer.Clear().Append(count); coinCount.text = textBuffer.ToString();
-            coinCount.style.fontSize = Mathf.Min(48f, 250f / textBuffer.Length);
+            coinCount.style.fontSize = 1.3f * Mathf.Min(48f, 250f / textBuffer.Length);
             if (lastCoins >= 0) { coinPulse?.Rewind(); coinPulse?.Restart(); }
             lastCoins = count;
         }

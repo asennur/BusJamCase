@@ -25,15 +25,15 @@
     height: 202px;
     flex-shrink: 0;
 }
-.start-bar { position: absolute; left: 0; right: 0; top: 0; justify-content: flex-start; padding-left: 0; padding-right: 3.5%; padding-top: 0; height: 98px; align-items: flex-start; }
-.start-bar > .lives-plate { margin-left: 29%; }
+.start-bar { position: absolute; left: 0; right: 0; top: 0; justify-content: flex-start; padding-left: 0; padding-right: 3.5%; padding-top: 0; height: 127.4px; align-items: flex-start; }
+.start-bar > .lives-plate { margin-left: 22%; }
 .start-bar > .gear { margin-left: auto; }
-.start-bar > .counter { width: 234px; height: 98px; }
-.start-bar .heart-icon, .start-bar .coin-icon { width: 98px; height: 98px; }
-.start-bar .counter-text { font-size: 40px; }
-.start-bar .lives-count { font-size: 43px; }
-.start-bar .coin-plus { width: 40px; height: 41px; }
-.start-bar > .gear { width: 90px; height: 92px; }
+.start-bar > .counter { width: 304.2px; height: 127.4px; margin-right: 18.2px; padding-right: 13px; }
+.start-bar .heart-icon, .start-bar .coin-icon { width: 127.4px; height: 127.4px; }
+.start-bar .counter-text { font-size: 52px; }
+.start-bar .lives-count { font-size: 55.9px; }
+.start-bar .coin-plus { width: 52px; height: 53.3px; right: -1.3px; }
+.start-bar > .gear { width: 117px; height: 119.6px; }
 .counter {
     flex-direction: row;
     align-items: center;
@@ -60,8 +60,8 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
     width: 338px; max-width: 100%; height: 146px; min-height: 110px;
     flex-shrink: 0; font-size: 46px;
 }
-.start-button { position: absolute; left: 50%; translate: -50% 0; bottom: 19%; width: 365px; height: 176px; font-size: 76px; }
-.start-button.art-button > .vector-caption { font-size: 68px; }
+.start-button { position: absolute; left: 50%; translate: -50% 0; bottom: 19%; width: 474.5px; height: 228.8px; font-size: 98.8px; }
+.start-button.art-button > .vector-caption { font-size: 88.4px; padding-bottom: 15.6px; }
 .start-button:active { translate: -50% 5px; }
 .level-badge {
     width: 106px; height: 110px; flex-shrink: 0; justify-content: center;
@@ -108,7 +108,7 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .sound-toggle .unity-toggle__checkmark { width: 96px; height: 96px; border-width: 0; background-color: transparent; background-image: none; }
 
 .square .start-button { bottom: 18.5%; }
-.landscape .start-button { bottom: 8%; width: 440px; height: 180px; }
+.landscape .start-button { bottom: 8%; width: 572px; height: 234px; }
 .square .top-bar, .landscape .top-bar { padding-top: 20px; }
 .square .start-bar > .lives-plate, .landscape .start-bar > .lives-plate { margin-left: 0; }
 .square .start-bar, .landscape .start-bar { justify-content: flex-end; }
@@ -282,6 +282,10 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
     -unity-slice-left: 85; -unity-slice-right: 85;
     -unity-slice-top: 88; -unity-slice-bottom: 88; -unity-slice-scale: .35px;
 }
+.start-bar .counter > .raster-panel-art.vector-white {
+    left: 54.6px; top: 15.6px; bottom: 10.4px; -unity-slice-scale: .455px;
+}
+.start-button > .raster-button-art { -unity-slice-scale: .286px; }
 .raster-panel-art.vector-blue { left: 2px; right: 3px; top: 2px; bottom: 3px; }
 .confirm-modal > .vector-white { left: 16px; right: 18px; top: 23px; bottom: 25px; }
 .vector-check-stroke { position: absolute; left: 34%; top: 24%; width: 26%; height: 45%; border-width: 0; border-right-width: 7px; border-bottom-width: 7px; border-color: #FEFEFE; rotate: 40deg; display: none; }
