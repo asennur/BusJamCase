@@ -2199,6 +2199,7 @@ MonoBehaviour:
   passengerMask:
     serializedVersion: 2
     m_Bits: 256
+  uiDocument: {fileID: 1861426746}
 --- !u!114 &134005834
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11863,6 +11864,13 @@ MonoBehaviour:
     width: 1
     height: 0.825
   referenceHudBottomPixels: 310
+  busRoofLocal: {x: 0, y: 1.93, z: 5.03}
+  busRoofTop: 205
+  gridAboveBar: 12
+  referenceColumns: 7
+  referenceRows: 8
+  sideMargin: 0.12
+  slotRowLocal: 1.95
 --- !u!114 &737060414
 MonoBehaviour:
   m_ObjectHideFlags: 0

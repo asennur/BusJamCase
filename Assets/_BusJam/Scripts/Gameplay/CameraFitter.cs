@@ -4,7 +4,9 @@ using UnityEngine;
 
 namespace BusJam.Gameplay
 {
-    /// <summary>Fits world bounds along the authored view axis; reference composition and FOV stay fixed.</summary>
+    /// <summary>Frames the world along the authored view axis with a fixed FOV. In the game (GameManager bound) it follows
+    /// the reference phone screenshots: bus roof under the HUD, grid bottom above the booster bar, height-scaled, so
+    /// tablets only see more side ground; grids beyond the reference size or narrow screens pull the camera back.</summary>
     [ExecuteAlways, RequireComponent(typeof(Camera))]
     public sealed class CameraFitter : MonoBehaviour
     {
@@ -18,6 +20,15 @@ namespace BusJam.Gameplay
         [SerializeField, Range(0, .1f)] private float padding = .015f;
         [SerializeField] private Rect freeViewport = new Rect(0, .045f, 1, .825f);
         [SerializeField, Min(0)] private float referenceHudBottomPixels = 310;
+        [Header("Reference layout (reference pixels, ScreenLayout)")]
+        [SerializeField] private Vector3 busRoofLocal = new Vector3(0, 1.93f, 5.03f);
+        [SerializeField] private float busRoofTop = 205f;
+        [SerializeField] private float gridAboveBar = 12f;
+        [SerializeField, Min(1)] private int referenceColumns = 7;
+        [SerializeField, Min(1)] private int referenceRows = 8;
+        [SerializeField, Min(0)] private float sideMargin = .12f;
+        [SerializeField] private float slotRowLocal = 1.95f;
+        private int columns, rows;
         private Bounds levelBounds;
         private bool hasLevel;
         public event System.Action Fitted;
@@ -45,6 +56,7 @@ namespace BusJam.Gameplay
         public void SetLevel(LevelData level)
         {
             levelBounds = playBounds; hasLevel = level != null && board != null;
+            columns = hasLevel ? level.width : 0; rows = hasLevel ? level.height : 0;
             if (hasLevel)
             {
                 float half = (level.width - 1) * board.CellSize * .5f;
@@ -64,6 +76,7 @@ namespace BusJam.Gameplay
         public void Fit()
         {
             if (targetCamera == null || targetCamera.orthographic) return;
+            if (gameManager != null && board != null) { FitReference(); return; }
             Bounds bounds = CurrentBounds;
             if (worldReferences != null)
                 for (int i = 0; i < worldReferences.Length; i++)
@@ -97,6 +110,73 @@ namespace BusJam.Gameplay
             projection.m12 = 1 - 2 * centerY;
             targetCamera.projectionMatrix = projection;
             Fitted?.Invoke();
+        }
+    
+        /// <summary>Solves dolly distance and vertical lens shift so the bus roof and grid bottom land on the reference
+        /// screen heights; then pulls back if the grid or slots are wider than the safe width.</summary>
+        private void FitReference()
+        {
+            float aspect = targetCamera.aspect;
+            Rect safe = layout != null ? layout.SafeViewport : new Rect(0, 0, 1, 1);
+            float unit = ScreenLayout.Unit(aspect);
+            float hudShift = ScreenLayout.HudTopFraction(safe, aspect) - ScreenLayout.HudTop * unit;
+            float top = 1f - busRoofTop * unit - hudShift;
+            float bottom = ScreenLayout.BarTopFraction(safe, aspect) + gridAboveBar * unit;
+            float cell = board.CellSize;
+            int depth = Mathf.Max(rows, referenceRows);
+            Vector3 roof = board.transform.TransformPoint(busRoofLocal);
+            Vector3 gridBottom = board.transform.TransformPoint(new Vector3(0, 0, (.5f - depth) * cell));
+            float tanY = Mathf.Tan(targetCamera.fieldOfView * Mathf.Deg2Rad * .5f);
+            float span = 2f * (top - bottom);
+            // The projected roof-to-grid span shrinks monotonically with distance.
+            float near = -10f, far = 500f;
+            for (int i = 0; i < 40; i++)
+            {
+                float mid = (near + far) * .5f;
+                if (Ndc(roof, mid, tanY) - Ndc(gridBottom, mid, tanY) > span) near = mid; else far = mid;
+            }
+            float distance = far;
+            // Width uses the real grid; an empty reference row band may run off the side.
+            float half = Mathf.Max(columns, referenceColumns) * cell * .5f + sideMargin;
+            int realDepth = rows > 0 ? rows : referenceRows;
+            float limit = tanY * aspect * (safe.width - 2f * padding);
+            if (Width(half, realDepth, cell, distance) > limit)
+            {
+                near = distance; far = 500f;
+                for (int i = 0; i < 40; i++)
+                {
+                    float mid = (near + far) * .5f;
+                    if (Width(half, realDepth, cell, mid) > limit) near = mid; else far = mid;
+                }
+                distance = far;
+            }
+            transform.position = referencePosition - transform.forward * distance;
+            var projection = Matrix4x4.Perspective(targetCamera.fieldOfView, aspect, targetCamera.nearClipPlane, targetCamera.farClipPlane);
+            projection.m02 = 1f - (safe.xMin + safe.xMax);
+            projection.m12 = Ndc(roof, distance, tanY) - (2f * top - 1f);
+            targetCamera.projectionMatrix = projection;
+            Fitted?.Invoke();
+        }
+
+        // Vertical NDC (no lens shift) of a world point for a camera dollied back by distance.
+        private float Ndc(Vector3 world, float distance, float tanY)
+        {
+            Vector3 p = Quaternion.Inverse(transform.rotation) * (world - referencePosition + transform.forward * distance);
+            return p.y / (p.z * tanY);
+        }
+
+        // Widest |x|/depth over grid top, grid bottom and slot row; compared against tanX * usable NDC half-width.
+        private float Width(float half, int depth, float cell, float distance)
+        {
+            float widest = 0;
+            Quaternion inverse = Quaternion.Inverse(transform.rotation);
+            for (int i = 0; i < 3; i++)
+            {
+                float z = i == 0 ? .5f * cell : i == 1 ? (.5f - depth) * cell : slotRowLocal;
+                Vector3 p = inverse * (board.transform.TransformPoint(new Vector3(half, 0, z)) - referencePosition + transform.forward * distance);
+                widest = Mathf.Max(widest, p.x / p.z);
+            }
+            return widest;
         }
     }
 }
