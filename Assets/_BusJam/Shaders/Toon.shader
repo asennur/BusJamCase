@@ -84,9 +84,11 @@ Shader "BusJam/Toon"
                 half lit = smoothstep(_RampThreshold - _RampSmooth, _RampThreshold + _RampSmooth, ndl);
                 half3 color = _BaseColor.rgb * (lerp(_ShadeColor.rgb, 1.0h, lit) * light.color + input.ambient);
 
-                // Sert kenarlı Blinn noktası; yalnız aydınlık tarafta.
+                // Sert kenarlı Blinn noktası; yalnız aydınlık tarafta. Tam yukarı bakan düz yüzeyler
+                // (otobüs tabanı gibi) maskelenir, yoksa tüm yüz beyaza boyanır.
                 half ndh = saturate(dot(n, normalize(light.direction + v)));
                 half spec = smoothstep(1.0h - _SpecSize, 1.0h - _SpecSize * 0.7h, ndh * ndh) * lit;
+                spec *= saturate((0.995h - n.y) * 60.0h);
                 color += _SpecColor.rgb * light.color * (spec * _SpecStrength);
 
                 // Silüet kenarında, üste bakan yüzeylerde açık bant.

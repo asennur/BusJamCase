@@ -77,7 +77,7 @@ Material:
     - _Shininess: 0
     - _Smoothness: 0.5
     - _SmoothnessSource: 0
-    - _SpecSize: 0.1
+    - _SpecSize: 0.06
     - _SpecSource: 0
     - _SpecStrength: 0.7
     - _SpecularHighlights: 1
