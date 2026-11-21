@@ -47,7 +47,7 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .gear:hover, .close-button:hover { -unity-background-image-tint-color: rgb(230, 240, 255); }
 .gear:active, .close-button:active { scale: 0.95 0.95; }
 .start-body { flex-grow: 1; align-items: center; justify-content: space-around; padding-bottom: 140px; }
-.logo { width: 100%; max-width: 1000px; height: 550px; flex-shrink: 1; background-image: url("Vector/logo.svg"); -unity-background-scale-mode: scale-to-fit; }
+.logo { width: 100%; max-width: 1000px; height: 550px; flex-shrink: 1; background-image: url("Vector/logo_constructed.svg"); -unity-background-scale-mode: scale-to-fit; }
 .art-button {
     width: 600px; max-width: 100%; height: 170px; min-height: 110px;
     flex-shrink: 0; font-size: 64px;
