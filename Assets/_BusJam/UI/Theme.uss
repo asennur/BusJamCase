@@ -46,6 +46,7 @@
 .lives-count { font-size: 33px; padding: 0; margin: 0; -unity-text-outline-color: #161217; -unity-text-outline-width: 1.8px; text-shadow: 0 2px 0 #42151d; }
 .coin-icon { background-image: url("Vector/icon_coin.svg"); }
 .coin-plus { position: absolute; right: -1px; bottom: 0; width: 34px; height: 35px; background-image: url("Vector/hud_coin_plus.svg"); -unity-background-scale-mode: scale-to-fit; }
+.coin-number-wrap { flex-grow: 1; flex-basis: 0; min-width: 0; height: 100%; scale: .67 .67; justify-content: center; }
 Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; color: white; -unity-font-style: normal; }
 .gear { width: 78px; height: 80px; flex-shrink: 0; background-image: url("Vector/btn_settings.svg"); -unity-background-scale-mode: scale-to-fit; }
 .gear:hover { background-image: url("Vector/btn_settings_hover.svg"); }
