@@ -149,7 +149,9 @@ namespace BusJam.UI
             ReleaseTarget(); width = newWidth; height = newHeight;
             target = new RenderTexture(width, height, 16, RenderTextureFormat.ARGB32)
             { name = "Celebration Screen Target", hideFlags = HideFlags.HideAndDontSave, antiAliasing = 2 };
-            target.Create(); camera.targetTexture = target; camera.aspect = (float)width / height; image.image = target;
+            // GPU memory is created only while the bus is visible (see Sample/Hide).
+            if (camera.enabled) target.Create();
+            camera.targetTexture = target; camera.aspect = (float)width / height; image.image = target;
         }
 
         private void Frame()
@@ -190,7 +192,10 @@ namespace BusJam.UI
             if (elapsed < 0 || elapsed >= motion.Duration) { Hide(); return; }
             Frame();
             if (!camera.enabled)
-            { cast.SetActive(true); camera.enabled = key.enabled = true; image.style.display = DisplayStyle.Flex; }
+            {
+                if (target != null && !target.IsCreated()) { target.Create(); image.MarkDirtyRepaint(); }
+                cast.SetActive(true); camera.enabled = key.enabled = true; image.style.display = DisplayStyle.Flex;
+            }
             Vector3 origin = stage.transform.position;
             Vector2 stop = ScreenPoint(motion.stopPosition);
             Vector2 point = stop;
@@ -258,6 +263,8 @@ namespace BusJam.UI
         {
             if (camera.enabled) { camera.enabled = key.enabled = false; cast.SetActive(false); }
             image.style.display = DisplayStyle.None;
+            // Keep the object (and its identity) but free the full-screen MSAA surfaces between wins.
+            if (target != null && target.IsCreated()) target.Release();
         }
 
         private void ReleaseTarget()
