@@ -346,3 +346,18 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .sound-toggle .unity-toggle__checkmark > .raster-panel-art.vector-blue { left: 0; right: 0; top: 0; bottom: 0; background-image: url("Vector/toggle_round_off.svg"); -unity-background-scale-mode: scale-to-fit; }
 .sound-toggle:checked .unity-toggle__checkmark > .raster-panel-art.vector-blue { background-image: url("Vector/toggle_round_on.svg"); }
 .sound-toggle .vector-check-stroke { left: 37%; top: 27%; width: 24%; height: 39%; border-right-width: 6px; border-bottom-width: 6px; border-color: #fff9df; }
+.no-lives-modal { height: 800px; }
+.no-lives-modal > .raster-panel-art {
+    background-image: url("Vector/surface_lives_modal.svg");
+    -unity-slice-left: 0; -unity-slice-right: 0; -unity-slice-top: 0; -unity-slice-bottom: 0;
+}
+.no-lives-modal > .modal-title { position: absolute; left: 22px; right: 22px; top: 20px; bottom: auto; height: 126px; flex-grow: 0; }
+.no-lives-modal > .heart-icon { position: absolute; top: 215px; width: 240px; height: 240px; }
+.no-lives-modal .lives-count { font-size: 88px; -unity-text-outline-width: 4px; text-shadow: 0 4px 0 #42151d; }
+#no-lives-countdown {
+    position: absolute; top: 515px; width: 370px; height: 106px; margin: 0; padding: 14px; font-size: 28px;
+    background-image: url("Vector/hud_counter.svg"); -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 85; -unity-slice-right: 85; -unity-slice-top: 88; -unity-slice-bottom: 88; -unity-slice-scale: .35px;
+    -unity-text-outline-color: #10121c; -unity-text-outline-width: 1.6px; text-shadow: 0 2px 0 #081423;
+}
+.no-lives-hint { position: absolute; top: 654px; left: 55px; right: 55px; font-size: 27px; margin: 0; padding: 0; }

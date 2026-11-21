@@ -32,7 +32,7 @@ public sealed class AntialiasedSvgImporter : SVGImporter
     private static int RasterSize(string name)
     {
         if (name.StartsWith("button_")) return 1536;
-        if (name == "surface_modal" || name == "surface_result_modal") return 2048;
+        if (name == "surface_modal" || name == "surface_result_modal" || name == "surface_lives_modal") return 2048;
         if (name == "surface_white" || name == "surface_result_inner") return 1536;
         if (name == "surface_header" || name == "surface_result_header") return 1024;
         if (name.StartsWith("title_") || name.StartsWith("logo") || name == "ribbon_purple" || name == "panel_tip" || name.EndsWith("rays")) return 2048;
