@@ -19,7 +19,9 @@ namespace BusJam.UI
         [SerializeField] private LevelTimer levelTimer;
         [SerializeField] private LayoutModeController layoutMode;
 
-        private VisualElement documentRoot, root, start, hud, ready, readyDim;
+        private VisualElement documentRoot, root, start, startBar, hud, ready, readyDim;
+        private static readonly CustomStyleProperty<float> StartTopInset = new CustomStyleProperty<float>("--start-top-inset");
+        private float startTopInset = .12f;
         private VisualElement settings, resetConfirmation, pause, pauseConfirmation;
         private Button startButton, startSettings, pauseSettings, settingsClose, resetButton, resetYes, resetNo;
         private Button pauseClose, restartButton, menuButton, confirmYes, confirmNo;
@@ -43,6 +45,7 @@ namespace BusJam.UI
             waitingForTree = false;
             BindResults(true);
             root.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+            root.RegisterCallback<CustomStyleResolvedEvent>(OnStartStyleResolved);
             root.RegisterCallback<ClickEvent>(OnButtonSound, TrickleDown.TrickleDown);
             layoutMode.Changed += ApplyLayout;
             BindButtons(true);
@@ -87,6 +90,7 @@ namespace BusJam.UI
             root = documentRoot.Q("ui-root");
             VectorArt.Apply(root);
             start = root.Q("start-screen"); hud = root.Q("hud");
+            startBar = start.Q(className: "start-bar");
             ready = root.Q("ready-overlay"); readyDim = root.Q("ready-dim");
             settings = root.Q("settings-overlay"); resetConfirmation = root.Q("reset-confirmation");
             pause = root.Q("pause-overlay"); pauseConfirmation = root.Q("pause-confirmation");
@@ -129,6 +133,7 @@ namespace BusJam.UI
             if (waitingForTree) { waitingForTree = false; return; }
             if (root == null) return;
             root.UnregisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+            root.UnregisterCallback<CustomStyleResolvedEvent>(OnStartStyleResolved);
             root.UnregisterCallback<ClickEvent>(OnButtonSound, TrickleDown.TrickleDown);
             BindResults(false);
             StopResults();
@@ -256,6 +261,11 @@ namespace BusJam.UI
         }
 
         private void OnGeometryChanged(GeometryChangedEvent evt) => ApplyLayout(layoutMode.Mode);
+        private void OnStartStyleResolved(CustomStyleResolvedEvent evt)
+        {
+            if (evt.customStyle.TryGetValue(StartTopInset, out float inset)) startTopInset = Mathf.Clamp01(inset);
+            ApplyLayout(layoutMode.Mode);
+        }
         private void ApplyLayout(LayoutMode mode)
         {
             root.EnableInClassList("portrait", mode == LayoutMode.Portrait);
@@ -268,6 +278,8 @@ namespace BusJam.UI
             root.style.paddingRight = width * (1f - safe.xMax);
             root.style.paddingTop = height * (1f - safe.yMax);
             root.style.paddingBottom = height * safe.yMin;
+            // The inset is measured from the full screen; safe-area padding must not add it twice.
+            startBar.style.top = height * Mathf.Max(0, startTopInset - (1f - safe.yMax));
         }
 
         private void PrepareLevel() { if (Application.isPlaying) gameManager.PrepareLevel(); }

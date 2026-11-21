@@ -1,4 +1,5 @@
 .ui-root {
+    --start-top-inset: 0.12;
     flex-grow: 1;
     -unity-font-definition: url("Fonts/Fredoka-Bold.asset");
     font-size: 58px;
@@ -24,8 +25,7 @@
     height: 202px;
     flex-shrink: 0;
 }
-.start-screen { --start-top-inset: 12%; }
-.start-bar { position: absolute; left: 0; right: 0; top: var(--start-top-inset); justify-content: flex-start; padding-left: 0; padding-right: 3.5%; padding-top: 0; height: 98px; align-items: flex-start; }
+.start-bar { position: absolute; left: 0; right: 0; top: 0; justify-content: flex-start; padding-left: 0; padding-right: 3.5%; padding-top: 0; height: 98px; align-items: flex-start; }
 .start-bar > .lives-plate { margin-left: 29%; }
 .start-bar > .gear { margin-left: auto; }
 .start-bar > .counter { width: 234px; height: 98px; }
