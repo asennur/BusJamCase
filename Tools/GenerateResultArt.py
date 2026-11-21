@@ -101,33 +101,37 @@ def save(name,w,h,defs,body):
         template=template.replace('004e24079bb97bf408f0c444800e6f31',uuid.uuid4().hex)
         meta.write_text(template)
 
-title('title_complete',True)
-title('title_failed',False)
-defs='<linearGradient id="band" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffb2ff"/><stop offset=".16" stop-color="#e23bfa"/><stop offset=".65" stop-color="#b500ed"/><stop offset="1" stop-color="#7200ad"/></linearGradient><linearGradient id="fold"><stop stop-color="#4a0466"/><stop offset="1" stop-color="#ad05df"/></linearGradient>'
-body=path('M240 210 Q75 221 35 263 L111 345 L54 451 Q32 501 87 480 Q231 431 364 455 L345 285Z','url(#band)','#510273',13)
-body+=path('M1280 210 Q1445 221 1485 263 L1409 345 L1466 451 Q1488 501 1433 480 Q1289 431 1156 455 L1175 285Z','url(#band)','#510273',13)
-body+=path('M258 351 Q455 361 366 451 Q429 422 279 408Z','url(#fold)','#510273',8)
-body+=path('M1262 351 Q1065 361 1154 451 Q1091 422 1241 408Z','url(#fold)','#510273',8)
-body+=path('M233 153 C256 -13 1264 -13 1287 153 L1248 376 C1215 280 305 280 272 376Z','url(#band)','#510273',14)
-body+=path('M272 376 C305 280 1215 280 1248 376 Q1240 407 1161 416 C1210 337 310 337 359 416 Q280 407 272 376Z','url(#fold)','#7200ad',7)
-body+=path('M285 133 C406 23 1137 25 1237 130 C1080 55 438 49 304 152 Q276 165 285 133Z','#fff',extra='opacity=".62"')
-body+=path('M65 266 Q148 225 236 231 L244 251 Q129 248 77 285Z','#fff',extra='opacity=".4"')
-body+=path('M1284 231 Q1382 225 1455 266 L1443 285 Q1390 248 1276 251Z','#fff',extra='opacity=".4"')
-save('ribbon_purple',1520,520,defs,body)
-save('fx_confetti_heart',64,64,'',path('M32 57 C-18 26 13 -7 32 14 C51 -7 82 26 32 57Z','#fff'))
-save('fx_confetti_disc',64,64,'','<circle cx="32" cy="32" r="27" fill="#fff"/>')
-defs='<radialGradient id="halo"><stop stop-color="#df9dff" stop-opacity=".65"/><stop offset=".4" stop-color="#a83eff" stop-opacity=".3"/><stop offset="1" stop-color="#7200bd" stop-opacity="0"/></radialGradient>'
-body='<circle cx="500" cy="500" r="495" fill="url(#halo)"/>'
-for i in range(16):
-    body+=path('M488 490 L454 55 Q500 5 546 55 L512 490Z','url(#halo)',extra=f'transform="rotate({i*22.5} 500 500)"')
-save('result_rays',1000,1000,defs,body)
+def legacy():
+    title('title_complete',True)
+    title('title_failed',False)
+    defs='<linearGradient id="band" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffb2ff"/><stop offset=".16" stop-color="#e23bfa"/><stop offset=".65" stop-color="#b500ed"/><stop offset="1" stop-color="#7200ad"/></linearGradient><linearGradient id="fold"><stop stop-color="#4a0466"/><stop offset="1" stop-color="#ad05df"/></linearGradient>'
+    body=path('M240 210 Q75 221 35 263 L111 345 L54 451 Q32 501 87 480 Q231 431 364 455 L345 285Z','url(#band)','#510273',13)
+    body+=path('M1280 210 Q1445 221 1485 263 L1409 345 L1466 451 Q1488 501 1433 480 Q1289 431 1156 455 L1175 285Z','url(#band)','#510273',13)
+    body+=path('M258 351 Q455 361 366 451 Q429 422 279 408Z','url(#fold)','#510273',8)
+    body+=path('M1262 351 Q1065 361 1154 451 Q1091 422 1241 408Z','url(#fold)','#510273',8)
+    body+=path('M233 153 C256 -13 1264 -13 1287 153 L1248 376 C1215 280 305 280 272 376Z','url(#band)','#510273',14)
+    body+=path('M272 376 C305 280 1215 280 1248 376 Q1240 407 1161 416 C1210 337 310 337 359 416 Q280 407 272 376Z','url(#fold)','#7200ad',7)
+    body+=path('M285 133 C406 23 1137 25 1237 130 C1080 55 438 49 304 152 Q276 165 285 133Z','#fff',extra='opacity=".62"')
+    body+=path('M65 266 Q148 225 236 231 L244 251 Q129 248 77 285Z','#fff',extra='opacity=".4"')
+    body+=path('M1284 231 Q1382 225 1455 266 L1443 285 Q1390 248 1276 251Z','#fff',extra='opacity=".4"')
+    save('ribbon_purple',1520,520,defs,body)
+    save('fx_confetti_heart',64,64,'',path('M32 57 C-18 26 13 -7 32 14 C51 -7 82 26 32 57Z','#fff'))
+    save('fx_confetti_disc',64,64,'','<circle cx="32" cy="32" r="27" fill="#fff"/>')
+    defs='<radialGradient id="halo"><stop stop-color="#df9dff" stop-opacity=".65"/><stop offset=".4" stop-color="#a83eff" stop-opacity=".3"/><stop offset="1" stop-color="#7200bd" stop-opacity="0"/></radialGradient>'
+    body='<circle cx="500" cy="500" r="495" fill="url(#halo)"/>'
+    for i in range(16):
+        body+=path('M488 490 L454 55 Q500 5 546 55 L512 490Z','url(#halo)',extra=f'transform="rotate({i*22.5} 500 500)"')
+    save('result_rays',1000,1000,defs,body)
 
-# Record representative opaque source colours independently of the vector construction.
-samples={}
-for name in ('title_complete','title_failed','ribbon_purple'):
-    im=Image.open(ROOT/f'Assets/_BusJam/Art/UI/{name}.png').convert('RGBA')
-    colors=im.getcolors(im.width*im.height)
-    samples[name]=[{'rgba':c,'pixels':n} for n,c in sorted(colors,reverse=True) if c[3]>240][:16]
-EVIDENCE.mkdir(parents=True,exist_ok=True)
-(EVIDENCE/'source-colours.json').write_text(json.dumps(samples,indent=2))
-print('Constructed six UI Toolkit vector images from Fredoka glyphs and hand-authored shapes.')
+    # Record representative opaque source colours independently of the vector construction.
+    samples={}
+    for name in ('title_complete','title_failed','ribbon_purple'):
+        im=Image.open(ROOT/f'Assets/_BusJam/Art/UI/{name}.png').convert('RGBA')
+        colors=im.getcolors(im.width*im.height)
+        samples[name]=[{'rgba':c,'pixels':n} for n,c in sorted(colors,reverse=True) if c[3]>240][:16]
+    EVIDENCE.mkdir(parents=True,exist_ok=True)
+    (EVIDENCE/'source-colours.json').write_text(json.dumps(samples,indent=2))
+    print('Constructed six UI Toolkit vector images from Fredoka glyphs and hand-authored shapes.')
+
+if __name__ == '__main__':
+    legacy()

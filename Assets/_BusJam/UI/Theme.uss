@@ -121,12 +121,12 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .result-content { width: 960px; max-width: 85%; height: 1270px; max-height: 96%; align-items: center; justify-content: space-between; }
 .result-heading { width: 100%; height: 440px; flex-shrink: 1; min-height: 190px; justify-content: center; align-items: center; }
 .portrait .result-heading { width: 74%; translate: 0 -245px; }
-.complete-title { position: absolute; left: 10%; right: 10%; top: 0; bottom: 10%; background-image: url("Vector/title_complete.svg"); -unity-background-scale-mode: scale-to-fit; }
+.complete-title { position: absolute; left: 7%; right: 7%; top: 0; bottom: 10%; background-image: url("Vector/title_complete.svg"); -unity-background-scale-mode: scale-to-fit; }
 .complete-ribbon { position: absolute; left: 0; right: 0; top: 30%; bottom: 0; background-image: url("Vector/ribbon_purple.svg"); -unity-background-scale-mode: scale-to-fit; }
 .result-rays { background-image: url("Vector/result_rays.svg"); -unity-background-scale-mode: scale-to-fit; }
 .reward-content { width: 580px; max-width: 90%; height: 470px; min-height: 240px; flex-shrink: 1; align-items: center; justify-content: center; margin-bottom: 35px; }
 .reward-pile { width: 100%; height: 72%; background-image: url("Vector/coin_pile.svg"); -unity-background-scale-mode: scale-to-fit; }
-.reward-label { font-size: 100px; color: rgb(255, 230, 135); margin: 0; padding: 0; }
+.reward-label { font-size: 86px; color: white; margin: 0; padding: 0; -unity-text-outline-color: #190e1e; -unity-text-outline-width: 5px; text-shadow: 3px 6px 0 #08060c; }
 .reward-flash { background-image: url("Vector/glow_soft.svg"); -unity-background-scale-mode: scale-to-fit; }
 .pooled-effect { position: absolute; left: 0; top: 0; -unity-background-scale-mode: scale-to-fit; }
 .confetti-piece { width: 36px; height: 54px; background-image: url("Vector/fx_confetti_rect.svg"); }
@@ -282,3 +282,9 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .vector-check-stroke { position: absolute; left: 34%; top: 24%; width: 26%; height: 45%; border-width: 0; border-right-width: 7px; border-bottom-width: 7px; border-color: #FEFEFE; rotate: 40deg; display: none; }
 .sound-toggle:checked .vector-check { display: flex; }
 .sound-toggle .unity-toggle__input { background-color: transparent; border-width: 0; }
+
+/* Portrait positions use the video width ratios; square/landscape keep their flow. */
+.portrait .result-content { width: 100%; max-width: 100%; height: 100%; max-height: 100%; }
+.portrait .result-heading { position: absolute; top: -85px; width: 64%; height: 440px; translate: 0 0; flex-shrink: 0; }
+.portrait .reward-content { position: absolute; top: 36%; width: 54%; max-width: 90%; height: 450px; margin-bottom: 0; }
+.portrait .continue-wrap { position: absolute; bottom: 19%; }
