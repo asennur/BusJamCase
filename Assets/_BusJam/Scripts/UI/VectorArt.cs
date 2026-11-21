@@ -48,6 +48,13 @@ namespace BusJam.UI
             var rim = new VisualElement { pickingMode = PickingMode.Ignore };
             rim.AddToClassList("vector-art"); rim.AddToClassList("vector-" + palette);
             element.hierarchy.Insert(0, rim);
+            if (palette == "green" || palette == "red" || palette == "yellow")
+            {
+                rim.AddToClassList("raster-button-art");
+                // Unity 2022's USS validator treats this float property as a length; assign it once here.
+                rim.style.unitySliceScale = element.ClassListContains("editor-button") ? .18f : .390625f;
+                return;
+            }
             var edge = Layer(rim, "vector-edge");
             var body = Layer(edge, "vector-body");
             var face = Layer(body, "vector-face");
