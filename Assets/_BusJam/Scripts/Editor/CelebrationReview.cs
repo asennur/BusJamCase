@@ -14,7 +14,7 @@ using UnityEngine.UIElements;
 /// <summary>Isolated Edit-mode evidence; never saves a scene or writes player progress.</summary>
 public static class CelebrationReview
 {
-    private const string Folder = "C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/celeb";
+    private const string Folder = "C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/celeb2";
     private const BindingFlags Flags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
     private static readonly int[,] Sizes = {{1080,1920},{1080,2400},{1170,2532},{1536,2048},{1080,1080},{1768,2208},{2208,1768},{1920,1080},{2560,1080}};
     private static ToolkitGameUI game;
@@ -103,6 +103,7 @@ public static class CelebrationReview
             if (tick >= 3) { Sample(shot.Time); Render(); }
             if (++tick < 6) return;
             Review("SaveTarget", Folder + "/" + shot.Name + ".png");
+            if (shot.Name.StartsWith("ours/mid-", StringComparison.Ordinal)) SaveBusMask(shot.Name.Substring(9));
             tick = 0; index++;
             if (index == Shots.Count)
             {
@@ -110,6 +111,27 @@ public static class CelebrationReview
             }
         }
         catch (Exception error) { File.WriteAllText(Folder+"/capture-error.txt",error.ToString()); Stop(); }
+    }
+
+    private static void SaveBusMask(string size)
+    {
+        var bodies = (Renderer[])typeof(CompleteCelebration).GetField("riderBodies", Flags).GetValue(bus);
+        foreach (var body in bodies) body.enabled = false;
+        var previous = RenderTexture.active;
+        Texture2D texture = null;
+        try
+        {
+            bus.Camera.Render(); RenderTexture.active = bus.Target;
+            texture = new Texture2D(bus.Target.width, bus.Target.height, TextureFormat.RGBA32, false);
+            texture.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0); texture.Apply();
+            File.WriteAllBytes(Folder + "/ours/bus-mask-" + size + ".png", texture.EncodeToPNG());
+        }
+        finally
+        {
+            RenderTexture.active = previous;
+            if (texture != null) UnityEngine.Object.DestroyImmediate(texture);
+            foreach (var body in bodies) body.enabled = true;
+        }
     }
 
     public static void Stop() { EditorApplication.update -= Step; running = false; Cleanup(); }
