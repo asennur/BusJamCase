@@ -17,6 +17,7 @@ MonoBehaviour:
   drive: {fileID: -4698200198064148922, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
   exhaust: {fileID: 7400000, guid: 956e57130732d9a46ad12391f79ba96a, type: 2}
   wave: {fileID: -57793324751458776, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
+  idle: {fileID: -3100369314251171874, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
   colors:
   - {fileID: 2100000, guid: 8704c296d4af58c4396adb0a4e87ce9c, type: 2}
   - {fileID: 2100000, guid: 78ca3a4aed7b08c4f93012ada5fcc88c, type: 2}
@@ -25,7 +26,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: affd5ada359936549a8a712185dfce9c, type: 2}
   - {fileID: 2100000, guid: a6f899608bbd6894c91c04e136da1c79, type: 2}
   - {fileID: 2100000, guid: 8b0665dba53bd5247adffc0e89b986ce, type: 2}
-  cameraPitch: 14
+  cameraPitch: -5
   fieldOfView: 35
   keyColor: {r: 1, g: 0.94, b: 0.86, a: 1}
   keyIntensity: 0.75

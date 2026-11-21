@@ -12,7 +12,7 @@ namespace BusJam.UI
     /// <summary>One pooled 3D bus pass, sampled by the existing unscaled DOTween result timeline.</summary>
     public sealed class CompleteCelebration : IDisposable
     {
-        public const float StartTime = 1.20f, Duration = 1.05f;
+        public const float StartTime = 1.05f, Duration = 1.05f;
         private readonly CelebrationSettings settings;
         private readonly GameObject stage, cast, driveRoot;
         private readonly Camera camera;
@@ -24,7 +24,9 @@ namespace BusJam.UI
         private readonly Transform[] riders = new Transform[3];
         private readonly GameObject[] waveRoots = new GameObject[3];
         private readonly Vector3[] riderScales = new Vector3[3];
-        private readonly Vector3[] hopAxes = new Vector3[3];
+        private readonly Quaternion[] riderRotations = new Quaternion[3];
+        private readonly Transform[] upperArms = new Transform[3], lowerArms = new Transform[3], heads = new Transform[3], thighs = new Transform[3];
+        private readonly float[] riderHeights = new float[3];
         private readonly Renderer[] riderBodies = new Renderer[3];
         private readonly Renderer busBody;
         private readonly Material[] busMaterials;
@@ -51,7 +53,7 @@ namespace BusJam.UI
             bus.name = "Celebration Bus";
             busBody = vehicle.PresentationBody; busMaterials = busBody.sharedMaterials;
             driveRoot = vehicle.GetComponentInChildren<Animator>(true).gameObject;
-            bus.localRotation = Quaternion.Euler(0, 180, 0);
+            bus.localRotation = Quaternion.Euler(0, 135, 0);
             for (int i = 0; i < riders.Length; i++)
             {
                 Passenger passenger = Object.Instantiate(settings.passengerPrefab, cast.transform);
@@ -59,14 +61,18 @@ namespace BusJam.UI
                 riders[i] = passenger.transform;
                 Vector3 worldScale = riders[i].lossyScale;
                 riders[i].SetParent(vehicle.PresentationSeat(i), false);
-                riders[i].localRotation = Quaternion.Euler(passenger.PresentationSeatRotation);
-                riders[i].Rotate(Vector3.up, 60, Space.World);
-                hopAxes[i] = riders[i].parent.InverseTransformDirection(Vector3.up);
+                riders[i].rotation = Quaternion.Euler(0, 175 + (i - 1) * 12, 0);
+                riderRotations[i] = riders[i].localRotation;
                 Vector3 stretch = riders[i].lossyScale;
-                riderScales[i] = new Vector3(worldScale.x / stretch.x, worldScale.y / stretch.y, worldScale.z / stretch.z);
+                riderScales[i] = new Vector3(worldScale.x / stretch.x, worldScale.y / stretch.y, worldScale.z / stretch.z) * 1.65f;
                 riders[i].localScale = riderScales[i];
                 riderBodies[i] = passenger.PresentationBody;
                 waveRoots[i] = passenger.PresentationAnimator.gameObject;
+                Transform spine = waveRoots[i].transform.Find("YolcuRig/Root/Hips/Spine");
+                upperArms[i] = spine.Find("UpperArm.R"); lowerArms[i] = upperArms[i].Find("LowerArm.R");
+                heads[i] = spine.Find("Head"); thighs[i] = spine.parent.Find("Thigh.R");
+                settings.idle.SampleAnimation(waveRoots[i], 0);
+                riderHeights[i] = riderBodies[i].bounds.size.y;
                 Destroy(passenger);
             }
             // Remove gameplay scripts before the inactive clones can Awake or create their own tweens.
@@ -131,9 +137,9 @@ namespace BusJam.UI
             target.Create(); camera.targetTexture = target; camera.aspect = (float)width / height; image.image = target;
             halfHeight = Mathf.Tan(settings.fieldOfView * .5f * Mathf.Deg2Rad) * 18;
             halfWidth = halfHeight * camera.aspect;
-            float scale = Mathf.Min(halfWidth * .1764f, halfHeight * (camera.aspect > 1.25f ? .12f : .18f));
+            float scale = Mathf.Min(halfWidth * .20f, halfHeight * .15f);
             cast.transform.localScale = Vector3.one * scale;
-            radius = scale * 4.7f;
+            radius = scale * 5.5f;
         }
 
         public void Sample(float timeline)
@@ -144,19 +150,38 @@ namespace BusJam.UI
             { cast.SetActive(true); camera.enabled = key.enabled = true; image.style.display = DisplayStyle.Flex; }
             float p = elapsed / Duration;
             Vector3 origin = camera.transform.position + camera.transform.forward * 18;
-            float x = Mathf.Lerp(halfWidth + radius, -halfWidth - radius, p);
-            float y = -halfHeight * (camera.aspect > 1.25f ? .75f : .61f);
+            // Fast entrance, readable central drift, then a full left exit within the same pass.
+            float x = p < .24f ? Mathf.Lerp(halfWidth + radius, halfWidth * .14f, 1 - Mathf.Pow(1 - p / .24f, 3))
+                : p < .7f ? Mathf.Lerp(halfWidth * .14f, 0, (p - .24f) / .46f)
+                : Mathf.Lerp(0, -halfWidth - radius, Mathf.Pow((p - .7f) / .3f, 3));
+            float suspension = Mathf.Sin(elapsed * 19);
+            float y = -halfHeight * .66f + suspension * cast.transform.localScale.y * .06f;
             cast.transform.position = origin + camera.transform.right * x + camera.transform.up * y;
+            cast.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(elapsed * 13) * 3.5f);
             settings.drive.SampleAnimation(driveRoot, elapsed % settings.drive.length);
             settings.exhaust.SampleAnimation(driveRoot, elapsed % settings.exhaust.length);
             for (int i = 0; i < riders.Length; i++)
             {
                 settings.wave.SampleAnimation(waveRoots[i], (elapsed + i * .13f) % settings.wave.length);
+                Quaternion upper = upperArms[i].localRotation, lower = lowerArms[i].localRotation;
+                // Keep Wave on the raised arm and standing Idle on the remaining rig.
+                settings.idle.SampleAnimation(waveRoots[i], (elapsed + i * .13f) % settings.idle.length);
+                upperArms[i].localRotation = upper; lowerArms[i].localRotation = lower;
                 float cycle = Mathf.Repeat(elapsed / .43f + i * .24f, 1);
-                float hop = cycle < .78f ? Mathf.Sin(cycle / .78f * Mathf.PI) * .32f : 0;
-                float squash = cycle >= .78f ? Mathf.Sin((cycle - .78f) / .22f * Mathf.PI) * .10f : 0;
-                riders[i].localPosition = hopAxes[i] * hop;
+                float passengerHeight = riderHeights[i] * cast.transform.localScale.y;
+                float hop = cycle < .78f ? Mathf.Sin(cycle / .78f * Mathf.PI) * passengerHeight * .5f : 0;
+                float squash = cycle >= .78f ? Mathf.Sin((cycle - .78f) / .22f * Mathf.PI) * .14f : 0;
+                riders[i].position = riders[i].parent.position + bus.up * (hop + .06f) + (i == 2 ? bus.right * .4f : Vector3.zero);
+                riders[i].localRotation = riderRotations[i] * Quaternion.Euler(i == 2 ? -38 : Mathf.Sin(cycle * Mathf.PI * 2) * 9, 0, i == 2 ? -15 : 0);
                 riders[i].localScale = Vector3.Scale(riderScales[i], new Vector3(1 + squash * .5f, 1 - squash, 1 + squash * .5f));
+                Vector3 raisedDirection = bus.up + camera.transform.right * (.4f + Mathf.Sin(elapsed * 16 + i) * .18f);
+                upperArms[i].rotation = Quaternion.FromToRotation(upperArms[i].up, raisedDirection) * upperArms[i].rotation;
+                lowerArms[i].rotation = Quaternion.FromToRotation(lowerArms[i].up, raisedDirection) * lowerArms[i].rotation;
+                // Lengthen the existing raised arm for a clear silhouette above the large head.
+                upperArms[i].localScale = new Vector3(1, 1.7f, 1);
+                lowerArms[i].localScale = new Vector3(1, 1.2f, 1);
+                heads[i].localScale = Vector3.one * .85f;
+                thighs[i].localRotation *= Quaternion.Euler(-hop / passengerHeight * 65, 0, 0);
             }
         }
 
