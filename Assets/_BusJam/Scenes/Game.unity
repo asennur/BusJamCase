@@ -1502,6 +1502,7 @@ MonoBehaviour:
   hiddenMaterial: {fileID: 2100000, guid: f1807f7c66fdbc94384ba29352548984, type: 2}
   cellSize: 1
   baseMaterial: {fileID: 2100000, guid: 77d794c9eb61150489aa5d7967782816, type: 2}
+  sidewalkMaterial: {fileID: 2100000, guid: a894c916c1d5c674f82ca49ee0a5aa56, type: 2}
 --- !u!1 &96968483
 GameObject:
   m_ObjectHideFlags: 0

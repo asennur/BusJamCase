@@ -32,6 +32,8 @@ namespace BusJam.Gameplay
         [SerializeField] private Material hiddenMaterial;
         [SerializeField] private float cellSize = 1f;
         [SerializeField] private Material baseMaterial;
+        [Tooltip("Board-only backing and flush rim. Match the surrounding sidewalk colour and world height.")]
+        [SerializeField] private Material sidewalkMaterial;
 
         private Mesh baseMesh;
 
@@ -64,7 +66,7 @@ namespace BusJam.Gameplay
                 p => { p.gameObject.SetActive(false); p.transform.SetParent(transform, false); });
 
             tilePool = new ObjectPool<Transform>(
-                () => Instantiate(tilePrefab, transform),
+                () => CreateBoardVisual(tilePrefab, true),
                 t => t.gameObject.SetActive(true),
                 t => t.gameObject.SetActive(false));
 
@@ -74,13 +76,29 @@ namespace BusJam.Gameplay
                 t => t.gameObject.SetActive(false));
 
             obstaclePool = CreatePool(obstaclePrefab);
-            rimStraightPool = CreatePool(rimStraightPrefab);
-            rimOuterPool = CreatePool(rimOuterPrefab);
-            rimInnerPool = CreatePool(rimInnerPrefab);
+            rimStraightPool = CreatePool(rimStraightPrefab, true);
+            rimOuterPool = CreatePool(rimOuterPrefab, true);
+            rimInnerPool = CreatePool(rimInnerPrefab, true);
         }
 
-        private ObjectPool<Transform> CreatePool(Transform prefab) => new ObjectPool<Transform>(
-            () => Instantiate(prefab, transform),
+        // Material overrides belong to pooled board visuals, never the shared kit prefabs or slots.
+        private Transform CreateBoardVisual(Transform prefab, bool tile)
+        {
+            Transform visual = Instantiate(prefab, transform);
+            if (sidewalkMaterial == null) return visual;
+            var renderer = visual.GetComponentInChildren<MeshRenderer>();
+            if (tile)
+            {
+                var materials = renderer.sharedMaterials;
+                materials[0] = sidewalkMaterial;
+                renderer.sharedMaterials = materials;
+            }
+            else renderer.sharedMaterial = sidewalkMaterial;
+            return visual;
+        }
+
+        private ObjectPool<Transform> CreatePool(Transform prefab, bool sidewalk = false) => new ObjectPool<Transform>(
+            () => sidewalk ? CreateBoardVisual(prefab, false) : Instantiate(prefab, transform),
             t => t.gameObject.SetActive(true),
             t => t.gameObject.SetActive(false));
 
@@ -151,7 +169,7 @@ namespace BusJam.Gameplay
                 baseMesh = new Mesh { name = "BoardBase" };
                 plate.GetComponent<MeshFilter>().sharedMesh = baseMesh;
                 var renderer = plate.GetComponent<MeshRenderer>();
-                renderer.sharedMaterial = baseMaterial;
+                renderer.sharedMaterial = sidewalkMaterial != null ? sidewalkMaterial : baseMaterial;
                 renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 renderer.receiveShadows = false;
             }

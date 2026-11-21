@@ -310,3 +310,62 @@ The corrected movie fixture reapplies portrait panel sizing, safe viewport and a
 `final-interrupted-audit.json`: **48/48 protected hashes match** the beginning of this resume, including Global Volume Profile, ResultTimeline, BackgroundStyle, protected materials/levels, sprite atlases and ArtSource. All Game.unity blocks except MenuWorldPresentation's camera-band block match the beginning of this resume. Both Light blocks match byte-for-byte. Existing user changes remain untouched and unstaged. Temporary helpers were copied outside Assets and removed again. **Compilation after this latest removal, final saved-scene reload/captures and final Console verification remain unverified.** No files were staged or committed.
 
 Resume after Unity responds: compile/import final camera defaults and helper removal, confirm Console 0, resolve the portrait-width preference, reload the saved scene using short calls, capture final native stills and 120 corrected portrait frames at 30 fps, then encode/inspect a 4-second MP4. Recheck protected files and scene preservation. Stage only task files and task scene hunks, excluding Asen's 0.5-to-0.75 Light hunk; create small English commits without pushing.
+
+# ZPOLISH — Start speed, UI, lighting and flush board
+
+21 November 2026. Baseline **570b404**, main, single **BusJamCase@c4dcbf17c52e6f1b**, Unity **2022.3.19f1**. Initial and final live responses succeeded. Edit mode only: no Play, scene reload, MP4, vault write or push. Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/polish/`.
+
+## Menu speed
+
+**Menu Presentation > MenuWorldPresentation > Scroll Speed: 0.9 → 4.5** world units/second. This remains tunable. Road texture/lane marks and the 72 existing scenery slots use the same absolute travel. The menu Animator runs at `scrollSpeed / 0.9`, so the imported Drive's wheels and exhaust run **5×**; deterministic Edit preview uses the same phase multiplier. Gameplay bus animation assets are unchanged.
+
+The fixed 144-unit circuit and 12-unit scenery spacing remain sufficient. Far recycling is at local Z **-96**, beyond the **-39…-29** fade window; that window lasts **2.22 seconds** at the new speed. Near recycling at Z **48** is behind the camera. All **72/72** renderer bounds are outside the near-wrap frustum at each requested aspect. No pool growth or runtime instantiation was added. `speed.txt` records a **0.45-unit** translation over 0.1 seconds and Drive speed 5; `recycle-*.txt` records the frustum checks. These are Edit-mode samples, not a runtime pacing test.
+
+## Start UI
+
+Read-only references: **menu_4.0.png / menu_92.0.png**, both **1640×2360**. Approximate visible width measurements agree across both frames: lives plate **20%**, coins **19%**, Settings **7.5–8%**, Level button **30%**. The previous portrait plate/button widths already matched closely, so a blanket 1.5× enlargement would overshoot those proportions. Plates grow **216→234**, icons **88→98**, Settings **78×80→90×92**, and Level **338×158→365×176** logical pixels. FULL/lives text grows **31→40 / 33→43**. The actual Level caption grows **44→68**; its former 52px rule had been overridden by the later shared button rule. The Start selector now wins explicitly.
+
+Only Start selectors and Start-specific layout handling change. The Level button is absolute, horizontally centred over the road in every band, including its pressed position; landscape places it below the bus instead of over the right building. Gameplay HUD selectors and values are unchanged.
+
+The single USS tuning control is **`.ui-root { --start-top-inset: 0.12; }`**. This is a fraction of full screen height. The controller subtracts existing safe-area top padding and clamps to the safe edge, avoiding a double inset. Validated layout checks with a **5%** top safe area produce **12.006%** screen height; a deliberately oversized **20%** safe area produces **19.984%**. Normal native capture bounds:
+
+| Resolution | Top bar Y | Level button bounds (x, y, width, height) |
+| --- | --- | --- |
+| 580×1250 | 150 px (12%) | 192, 918, 196, 95 |
+| 1080×1920 | 230 px (12%) | 357.5, 1379, 365, 176 |
+| 2560×1080 | 130 px (12%) | 1156, 892, 248, 102 |
+
+All three final views have separated counters/Settings and a centred Level button. The later safe-area calculation preserves the captured no-notch placement; it was verified through layout bounds without taking another capture.
+
+## Menu lighting
+
+Tune **Menu Fill Light > Light / Transform**, under the Start menu world. It is active only during Start; a direct state check confirms it becomes inactive in Playing and returns in Start. Its existing menu-only culling scope is retained. Neither the gameplay directional light nor ambient/volume settings were changed.
+
+| Property / visual comparison | Before | After / reference direction |
+| --- | --- | --- |
+| Fill intensity | 0.85 | **1.1**; clearer cyan rear and brighter building faces, following the reference's readable bus |
+| Fill RGB | 1, 0.97, 0.90 | **1, 0.985, 0.96**; less yellow, with mild warmth retained |
+| Rotation (pitch, yaw, roll) | 35°, 180°, 0° | **50°, 155°, 0°**; higher, diagonal illumination instead of straight opposing fill |
+| Fill shadow setting | None | **Soft, strength 0.45**; actual shadow rendering remains subject to the authored URP main-light path |
+| Bus rear sampled linear luminance | 0.0293 | **0.1742**, lifting the nearly black rear toward the reference's visible blue |
+| Left roof / road sampled luminance | 0.0950 / 0.0992 | **0.1970 / 0.2530**, reducing crushed dark contrast |
+
+The references have softer-looking foliage and darker roofs/road than the final brighter treatment; our low-poly facets and stronger foreground contrast remain visible. This is a reference-guided lighting adjustment, not a pixel-equivalent reproduction. No new grading or volume was introduced. `lighting-measurements.json` supplies the exact fixed 1080×1920 sample rectangles, encoded RGB means and linear-sRGB Rec.709 luminance. `menu-comparison-*` supplies before/after sheets.
+
+**Protected baseline discrepancy:** the working file already contained directional intensity **0.85**, not the prompt's expected 0.75. That exact initial light block is preserved. Its 0.5→0.85 hunk, the existing MenuCamera transform hunk and the existing resultTimeline binding remain unstaged. The Global Volume Profile is untouched.
+
+## Gameplay board
+
+**Board > BoardView > Sidewalk Material** now binds **M_BoardSidewalk**. Its colour **(0.8, 0.735, 0.895)** exactly matches Modular Ground's `_Sidewalk`. It uses the same `MuteBackground` function and current BackgroundStyle globals; none of those style values changed. Board backing, tile undersides and rim visuals use this board-only material. White inset tile tops remain readable. Shared kit materials, prefabs, waiting slots, tunnels and obstacles are unchanged.
+
+The new **Board Sidewalk** shader projects backing/rim vertices to sidewalk world height **-0.30**, with a depth bias to resolve coplanar coverage. This removes the raised rim visually without moving any rim object, tile cell, slot or tunnel gameplay anchor. There is no geometric height offset above the sidewalk. The first draft exposed coplanar flicker; the final depth-biased captures resolve it. Original CPU mesh bounds remain conservative for these board views.
+
+`board-final-*` shows **Level_05**, Level 5 / 1:15 HUD, populated passengers and three frozen prefab buses at the authored queue positions at **580×1250, 1080×1920, 2560×1080**. `board-edge-*` contains before/after crops. Temporary DontSave fixtures used the existing BoardView.Build path, wrote no PlayerPrefs and were removed. This verifies presentation, not gameplay flow. At 1080×1920, fixed timer, Settings, grass and sidewalk sample rectangles are pixel-identical before/after; animated water is excluded.
+
+## Validation and preservation
+
+Three capture passes per resolution were used for each presentation: menu baseline/UI/final and board baseline/draft/final. Raw PNGs are native GameView final-target readbacks; `-view` derivatives only correct vertical GPU orientation. No camera-only UI reconstruction. Draw calls/triangles are unchanged: menu **43/47818, 44/49194, 47/53666**; populated gameplay **126/162904, 128/163080, 157/188378**. The board shader increases gameplay SetPass **14→16, 14→16, 10→11**; these are Edit-mode totals, not device profiling.
+
+All **56 protected hashes match** the initial snapshot, including ArtSource, sprite atlases, M_Purple/M_Yellow, LevelDatabase/Level_26, ResultTimeline, BackgroundStyle and Global Volume Profile. Scene audit permits only Scroll Speed, the two Menu Fill Light blocks and the Board material binding. Capture-time camera/sky/aspect-extension values and the automatic untracked LightingData binding were excluded from the saved diff. The existing user scene hunks remain on disk and outside the commits.
+
+Final compilation completed, both temporary helper types are absent, Unity responds in Edit mode and **Console has 0 errors, 0 warnings, 0 logs**. No scene reload was needed; scene saves were limited to the speed, lighting and board items. Small English commits, no push.
