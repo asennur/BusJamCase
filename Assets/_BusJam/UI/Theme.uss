@@ -223,75 +223,15 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .unity-base-dropdown__item:checked { background-color: rgb(41, 82, 184); color: rgb(255, 228, 90); }
 .unity-base-dropdown__container-inner { background-color: rgb(10, 32, 71); }
 
-/* Shared source-art layers. Decoration never changes a control's layout or picking. */
-.vector-art { position: absolute; left: 1.5%; right: 1.5%; top: 2%; bottom: 8%; border-radius: 76px; background-color: #522100; border-width: 2px; border-color: #522100; }
-.vector-edge { position: absolute; left: 1px; right: 1px; top: 1px; bottom: 1px; border-radius: 73px; background-color: #FDC808; border-width: 2px; border-top-color: #FDF294; border-left-color: #FDF294; border-right-color: #FDC808; border-bottom-color: #963D01; }
-.vector-body { position: absolute; left: 6px; right: 6px; top: 6px; bottom: 2px; border-radius: 66px; border-width: 3px; border-color: #CB7C02; border-bottom-width: 13px; background-color: #FDC808; transition-property: border-bottom-width; transition-duration: .1s; }
-.vector-face { position: absolute; left: 0; right: 0; top: 0; bottom: 0; border-radius: 63px; background-color: #71DB06; border-width: 2px; border-color: #B9F312; -unity-background-scale-mode: stretch-to-fill; }
-.vector-highlight { position: absolute; left: 6%; right: 6%; top: 4%; height: 28%; border-top-left-radius: 90px; border-top-right-radius: 90px; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; background-color: rgba(255,255,255,.3); }
-.vector-glint { position: absolute; left: 6%; top: 12%; width: 9%; height: 12%; border-radius: 100px; rotate: -18deg; background-color: rgba(255,255,255,.82); }
+/* Source-matched SVG decoration keeps every control's layout and picking. */
+.vector-art { position: absolute; left: 1.5%; right: 1.5%; top: 2%; bottom: 8%; }
 .vector-caption { flex-grow: 1; align-self: stretch; margin: 0; padding: 0; -unity-text-align: middle-center; }
 .art-button, .editor-button { border-width: 0; background-color: transparent; color: white; -unity-font-style: normal; justify-content: center; align-items: stretch; transition-property: translate; transition-duration: .1s; }
 .art-button { margin: 0; padding: 0; }
-.art-button:active, .editor-button:active { translate: 0 5px; }
-.art-button:active .vector-body, .editor-button:active .vector-body { border-bottom-width: 4px; }
-.art-button:hover .vector-highlight, .editor-button:hover .vector-highlight { background-color: rgba(255,255,255,.38); }
-.art-button:disabled, .editor-button:disabled { opacity: .5; }
-.vector-red { background-color: #6D2901; border-color: #6D2901; }
-.vector-red .vector-edge { border-top-color: #FDF3AD; border-left-color: #FDF3AD; border-bottom-color: #702200; }
-.vector-red .vector-face { background-color: #E1020A; border-color: #FC2B2E; }
-.vector-yellow { background-color: #7E3001; border-color: #7E3001; }
-.vector-yellow .vector-edge { border-top-color: #FDF6A7; border-left-color: #FDF6A7; border-bottom-color: #963701; }
-.vector-yellow .vector-face { background-color: #FDE906; border-color: #FEED05; }
-.editor-button .vector-art { border-width: 1px; border-radius: 35px; }
-.editor-button .vector-edge { border-width: 1px; border-radius: 33px; }
-.editor-button .vector-body { left: 3px; right: 3px; top: 3px; bottom: 1px; border-width: 1px; border-bottom-width: 7px; border-radius: 29px; }
-.editor-button .vector-face { border-radius: 27px; }
-.editor-button .vector-highlight { border-top-left-radius: 27px; border-top-right-radius: 27px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
-.editor-button .vector-glint { left: 14%; top: 14%; }
+.art-button:active { translate: 0 5px; }
 .editor-button:active { translate: 0 3px; }
-.editor-button:active .vector-body { border-bottom-width: 2px; }
-.vector-white { left: 6px; right: 7px; top: 9px; bottom: 10px; border-radius: 40px; border-color: #ACACAD; background-color: #ACACAD; border-width: 1px; }
-.vector-white .vector-edge { left: 0; right: 0; top: 0; bottom: 0; border-radius: 38px; background-color: #CBCBCD; border-width: 2px; border-color: #EFEFF1; border-top-color: #FEFEFE; }
-.vector-white .vector-body { left: 1px; right: 1px; top: 1px; bottom: 0; border-radius: 36px; background-color: #CBCBCD; border-color: #CBCBCD; border-width: 0; border-bottom-width: 5px; }
-.vector-white .vector-face { border-radius: 35px; background-color: #EFEFF1; border-width: 0; }
-.vector-white .vector-highlight { left: 14%; right: 14%; top: 6%; height: 14%; background-color: rgba(255,255,255,.16); }
-.vector-header { left: 5px; right: 5px; top: 13px; bottom: 13px; border-radius: 58px; border-color: #0048C2; background-color: #0048C2; }
-.vector-header .vector-edge { border-radius: 55px; border-color: #0D9CFC; background-color: #0043E1; }
-.vector-header .vector-body { left: 4px; right: 4px; top: 4px; bottom: 1px; border-radius: 49px; border-color: #001B54; border-bottom-width: 3px; background-color: #0043E1; }
-.vector-header .vector-face { border-radius: 46px; border-color: #01286E; background-color: #01286E; }
-.vector-header .vector-highlight { height: 30%; background-color: rgba(100,170,255,.2); }
-.vector-modal { left: 18px; right: 20px; top: 16px; bottom: 25px; border-radius: 110px; background-color: #86A0FC; border-color: #86A0FC; border-width: 3px; }
-.vector-modal .vector-edge { left: 1px; right: 1px; top: 1px; bottom: 1px; border-radius: 105px; background-color: #97BAFB; border-width: 5px; border-color: #97BAFB; border-top-color: #E4F2FD; border-bottom-color: #86A0FC; }
-.vector-modal .vector-body { left: 13px; right: 13px; top: 13px; bottom: 7px; border-radius: 92px; border-color: #001C7C; border-width: 3px; border-bottom-width: 3px; background-color: #095DF3; }
-.vector-modal .vector-face { border-radius: 88px; border-width: 2px; border-color: #1FA3FB; background-color: #095DF3; }
-.vector-modal .vector-highlight { height: 14%; background-color: rgba(135,227,255,.28); }
-.vector-modal .vector-glint { left: 6%; top: 4%; width: 11%; height: 2%; }
-.confirm-modal > .vector-white { left: 16px; right: 18px; top: 23px; bottom: 25px; border-radius: 100px; }
-.confirm-modal > .vector-white .vector-edge, .confirm-modal > .vector-white .vector-body, .confirm-modal > .vector-white .vector-face { border-radius: 95px; }
-.vector-badge { left: 5px; right: 10px; top: 10px; bottom: 13px; border-radius: 48px; background-color: #610C9C; border-color: #8C23DE; border-width: 3px; }
-.vector-badge .vector-edge { left: 1px; right: 1px; top: 1px; bottom: 1px; border-radius: 44px; background-color: #B145F9; border-width: 3px; border-color: #CC71FB; }
-.vector-badge .vector-body { left: 5px; right: 5px; top: 5px; bottom: 4px; border-radius: 37px; border-width: 2px; border-color: #610C9C; border-bottom-width: 2px; background-color: #E8EBF5; }
-.vector-badge .vector-face { border-width: 1px; border-color: #F1F1F4; border-radius: 34px; background-color: #E8EBF5; }
-.vector-badge .vector-highlight { left: 10%; right: 10%; top: 8%; height: 10%; background-color: rgba(255,255,255,.16); }
-.vector-badge .vector-glint { left: 12%; top: 15%; width: 18%; height: 8%; }
-.vector-blue { left: 2px; right: 3px; top: 2px; bottom: 3px; border-radius: 48px; border-color: #013EAA; background-color: #011847; }
-.vector-blue .vector-edge { border-radius: 45px; background-color: #015DF3; border-color: #3FEDFC; }
-.vector-blue .vector-body { left: 4px; right: 4px; top: 4px; bottom: 0; border-radius: 39px; border-width: 0; border-bottom-width: 6px; border-bottom-color: #011847; background-color: #015DF3; }
-.vector-blue .vector-face { border-radius: 38px; border-color: #3FEDFC; border-width: 1px; background-color: #015DF3; }
-.vector-blue .vector-highlight { left: 16%; right: 16%; top: 8%; height: 26%; background-color: rgba(170,247,255,.3); }
-.vector-blue .vector-glint { left: 20%; top: 20%; width: 30%; height: 12%; rotate: -35deg; }
-.vector-check-stroke { position: absolute; left: 34%; top: 24%; width: 26%; height: 45%; border-width: 0; border-right-width: 7px; border-bottom-width: 7px; border-color: #FEFEFE; rotate: 40deg; display: none; }
-.sound-toggle:checked .vector-check { display: flex; }
-.sound-toggle:checked .vector-blue .vector-highlight { background-color: rgba(150,255,160,.45); }
-.sound-toggle .unity-toggle__input { background-color: transparent; border-width: 0; }
-
-.vector-green .vector-highlight { background-color: rgba(255,255,255,.42); }
-.vector-yellow .vector-highlight { background-color: rgba(255,255,255,.4); }
-
-/* SVG-derived button decoration: transparent texels smooth corners without changing hit areas. */
-.raster-button-art { border-width: 0; background-color: transparent; border-radius: 0; -unity-background-scale-mode: stretch-to-fill; -unity-slice-left: 195; -unity-slice-right: 195; -unity-slice-top: 0; -unity-slice-bottom: 0; }
-.editor-button .raster-button-art { border-width: 0; border-radius: 0; }
+.art-button:disabled, .editor-button:disabled { opacity: .5; }
+.raster-button-art { -unity-background-scale-mode: stretch-to-fill; -unity-slice-left: 195; -unity-slice-right: 195; -unity-slice-top: 0; -unity-slice-bottom: 0; }
 .raster-button-art.vector-green { background-image: url("Vector/button_green_normal.svg"); }
 .raster-button-art.vector-red { background-image: url("Vector/button_red_normal.svg"); }
 .raster-button-art.vector-yellow { background-image: url("Vector/button_yellow_normal.svg"); }
@@ -301,3 +241,13 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .art-button:active .raster-button-art.vector-green, .editor-button:active .raster-button-art.vector-green { background-image: url("Vector/button_green_pressed.svg"); }
 .art-button:active .raster-button-art.vector-red, .editor-button:active .raster-button-art.vector-red { background-image: url("Vector/button_red_pressed.svg"); }
 .art-button:active .raster-button-art.vector-yellow, .editor-button:active .raster-button-art.vector-yellow { background-image: url("Vector/button_yellow_pressed.svg"); }
+.raster-panel-art { -unity-background-scale-mode: stretch-to-fill; }
+.raster-panel-art.vector-white { left: 6px; right: 7px; top: 9px; bottom: 10px; background-image: url("Vector/surface_white.svg"); -unity-slice-left: 327; -unity-slice-right: 188; -unity-slice-top: 233; -unity-slice-bottom: 173; }
+.raster-panel-art.vector-header { left: 5px; right: 5px; top: 13px; bottom: 13px; background-image: url("Vector/surface_header.svg"); -unity-slice-left: 173; -unity-slice-right: 122; -unity-slice-top: 117; -unity-slice-bottom: 122; }
+.raster-panel-art.vector-modal { left: 18px; right: 20px; top: 16px; bottom: 25px; background-image: url("Vector/surface_modal.svg"); -unity-slice-left: 479; -unity-slice-right: 363; -unity-slice-top: 494; -unity-slice-bottom: 334; }
+.raster-panel-art.vector-badge { left: 5px; right: 10px; top: 10px; bottom: 13px; background-image: url("Vector/surface_badge.svg"); -unity-slice-left: 167; -unity-slice-right: 110; -unity-slice-top: 143; -unity-slice-bottom: 110; }
+.raster-panel-art.vector-blue { left: 2px; right: 3px; top: 2px; bottom: 3px; background-image: url("Vector/surface_blue.svg"); }
+.confirm-modal > .vector-white { left: 16px; right: 18px; top: 23px; bottom: 25px; }
+.vector-check-stroke { position: absolute; left: 34%; top: 24%; width: 26%; height: 45%; border-width: 0; border-right-width: 7px; border-bottom-width: 7px; border-color: #FEFEFE; rotate: 40deg; display: none; }
+.sound-toggle:checked .vector-check { display: flex; }
+.sound-toggle .unity-toggle__input { background-color: transparent; border-width: 0; }

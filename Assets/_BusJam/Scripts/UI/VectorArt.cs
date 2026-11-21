@@ -1,16 +1,11 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace BusJam.UI
 {
-    /// <summary>Builds shared, non-pickable USS layers once per visual tree.</summary>
+    /// <summary>Installs source-matched, non-pickable SVG decoration once per visual tree.</summary>
     public static class VectorArt
     {
-        private const string TexturePrefix = "BusJam.VectorGradient.v2.";
-        private const int GradientHeight = 64;
-        private static readonly Dictionary<string, Texture2D> Gradients = RestoreGradients();
-
         public static void Apply(VisualElement root)
         {
             root.Query<VisualElement>().ForEach(element =>
@@ -55,59 +50,9 @@ namespace BusJam.UI
                 rim.style.unitySliceScale = element.ClassListContains("editor-button") ? .18f : .390625f;
                 return;
             }
-            var edge = Layer(rim, "vector-edge");
-            var body = Layer(edge, "vector-body");
-            var face = Layer(body, "vector-face");
-            face.style.backgroundImage = new StyleBackground(Gradient(palette));
-            Layer(face, "vector-highlight");
-            Layer(face, "vector-glint");
+            rim.AddToClassList("raster-panel-art");
+            rim.style.unitySliceScale = palette == "modal" ? .5f : palette == "badge" ? .14f : .2f;
         }
-
-        // DontSave textures survive editor domain reloads; recover them instead of creating duplicates.
-        private static Dictionary<string, Texture2D> RestoreGradients()
-        {
-            var cache = new Dictionary<string, Texture2D>(8);
-            foreach (var texture in Resources.FindObjectsOfTypeAll<Texture2D>())
-                if (texture.name.StartsWith(TexturePrefix, System.StringComparison.Ordinal)
-                    && texture.width == 1 && texture.height == GradientHeight
-                    && texture.format == TextureFormat.RGBA32 && texture.mipmapCount == 1
-                    && texture.hideFlags == HideFlags.DontSave)
-                    cache[texture.name.Substring(TexturePrefix.Length)] = texture;
-            return cache;
-        }
-
-        private static Texture2D Gradient(string palette)
-        {
-            if (Gradients.TryGetValue(palette, out var cached) && cached != null) return cached;
-            Color top, middle, bottom;
-            switch (palette)
-            {
-                case "red": top = Hex(0xF53136); middle = Hex(0xE1020A); bottom = Hex(0x800203); break;
-                case "yellow": top = Hex(0xFDF158); middle = Hex(0xFDE906); bottom = Hex(0xED9702); break;
-                case "green": top = Hex(0xA5EE3C); middle = Hex(0x71DB06); bottom = Hex(0x219600); break;
-                case "header": top = Hex(0x0E4090); middle = Hex(0x01286E); bottom = Hex(0x011444); break;
-                case "modal": top = Hex(0x0D73FA); middle = Hex(0x095DF3); bottom = Hex(0x0543E1); break;
-                case "blue": top = Hex(0x219BFC); middle = Hex(0x015DF3); bottom = Hex(0x0032CD); break;
-                default: top = Hex(palette == "badge" ? 0xE8EBF5 : 0xEFEFF1); middle = bottom = top; break;
-            }
-            var texture = new Texture2D(1, GradientHeight, TextureFormat.RGBA32, false)
-            {
-                name = TexturePrefix + palette,
-                wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Bilinear,
-                hideFlags = HideFlags.DontSave
-            };
-            for (int y = 0; y < GradientHeight; y++)
-            {
-                float t = 1f - y / (GradientHeight - 1f);
-                texture.SetPixel(0, y, t < .5f ? Color.Lerp(top, middle, t * 2) : Color.Lerp(middle, bottom, t * 2 - 1));
-            }
-            texture.Apply(false, true);
-            Gradients[palette] = texture;
-            return texture;
-        }
-
-        private static Color Hex(int value) => new Color32((byte)(value >> 16), (byte)(value >> 8), (byte)value, 255);
     }
 
     /// <summary>Keeps Button.text and native activation while drawing text above the art layers.</summary>
