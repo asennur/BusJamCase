@@ -1,3 +1,42 @@
+# ZCELEB-4 - Tunable celebration choreography
+
+21 November 2026. Implementation: `ae09b91`. Unity **2022.3.19f1**, MCP pinned to **BusJamCase@c4dcbf17c52e6f1b**. Edit mode only; never Play. No scene save, push or AsenOS access.
+
+The existing open-top bus now shows its side profile under a camera pitched down 10 degrees. It enters from the right at **1.05 s**, decelerates over **0.55 s**, stops at normalized **(0.5, 0.2)** for **1.2 s**, then accelerates downward over **0.65 s**. It hides at **3.45 s**. The hold freezes the driving pose and bus position; exhaust continues. Three matching riders Wave, hop with 0.2-second spacing, and return to the deck before exit. Default hop height is **0.25 of standing head-to-sole height**, capped at **0.4**.
+
+## Asen's controls
+
+Select `Assets/_BusJam/Data/ResultTimeline.asset` and expand **Celebration**. Every requested field has an English tooltip: start time; enter duration/side; normalized stop position; hold duration; exit duration/direction; camera yaw/pitch/distance/FOV; bus scale; rider hop height/frequency/stagger; enter/exit AnimationCurves; bus bounce amplitude. Duplicate camera settings were removed from CelebrationSettings. The named CelebrationBus step retains Enabled, with derived Start/Duration. The Complete length follows the phase sum.
+
+Open **Bus Jam > Result Timeline Preview**, play Complete, pause, or scrub Time. Inspector edits resample the current paused time. Camera changes apply without resizing. Other result steps retain independent timings; rewards and Continue can be delayed separately for a longer hold. Last-bus colour, shared materials, existing Drive/Exhaust/Idle/Wave clips, pooled cast, transparent 2x MSAA RenderTexture and tap-to-skip remain in use.
+
+Standing height is cached from the existing head vertices transformed by the posed bone, minus the supporting sole. This avoids stale BakeMesh data from inactive clones. Mesh reads happen only during pool construction.
+
+## Evidence
+
+Folder: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/celeb4/`.
+
+- Twelve raw `enter/stop/hold/exit-<resolution>.png` files at **580x1250, 1080x1920 and 2560x1080**; upright copies in `upright/`, contact sheet `phase-contact.jpg`.
+- `default.mp4`: default choreography, **1080x1920, 30 fps, 108 frames / 3.60 s**.
+- `tuned.mp4`: **135 frames / 4.50 s**, after changing exactly **Enter Side: Right to Left**, **Hold Duration: 1.2 to 2.1 s**, **Exit Direction: Down to Right** in the saved asset. Defaults are restored afterward.
+- `default-asset.json`, `tuned-asset.json`, `restored-asset.json`: serialized snapshots. `evidence-verification.json` records restoration, frame counts, video metadata and protected-file comparison.
+
+Captures use the visible native Game View's normal repaint and final render target, with the actual screen UIDocument (`PanelSettings.targetTexture == null`) and ZAA's imported raster SVG artwork. Only the existing bus compositor uses its own RenderTexture. `native-path.tsv` records the path. No offscreen UI fixture supplies the videos or phase captures. As in ZAA, the native Edit-mode readback vertically inverts the overlay; raw PNGs remain intact and upright review PNGs/MP4s apply a vertical flip. These are deterministic Edit-mode presentation recordings, not Play or device touch/GPU measurements.
+
+## Verification
+
+- `validation.txt`: **3,603 hold samples across three resolutions**, **zero bus drift**, default peak **0.2501 standing heights** including numerical tolerance, maximum **two riders airborne**. An independent posed head-to-sole measurement checks the cache. Deck footprint, 0.4 maximum, zero hop/frequency/durations, start/length edits, normalized stop, both entry sides, all three exits, camera controls, scale and tooltips pass.
+- **20 warmup cycles plus 50 Complete/disable/enable cycles:** zero retained growth; 119 transforms, 302 UI elements, zero Edit-mode tween clocks, same render-target identity and stable loaded texture/material counts.
+- **400 warmed production sampler frames: 0 managed bytes.** All seven last-bus colours, three matching rider materials, pointer skip/release, Fail/disable cleanup and unchanged saved coins pass.
+- `parameter-validation.txt`: independent projected-pose checks confirm enter/exit curves, moving bounce, camera distance/FOV apparent size, hop frequency and stagger.
+- `preview-validation.txt`: twelve open/sample/reverse-scrub/resize/close cycles after warmup, all four tracks at three sizes, zero owned target/object/preview-scene growth. Cloned timeline and paused live stop/hold edits drive the preview.
+
+The editor/MCP closed during the work. Recovery used the same pinned Unity version with normal licensing access, no forced stop and no scene save. Final compiled Edit-mode/Console state is in `final-unity.json`. Console was cleared after an MCP reconnect warning and rechecked at **0 entries**; no project compile errors or warnings. All **17 protected files** remain SHA-256 identical to the initial snapshot (`protected-before.json` / `protected-after.json`), including Asen's uncommitted Game.unity, both materials, database, Level_26, ArtSource, Otobus Materials and spriteatlases. Existing unrelated changes remain unstaged.
+
+---
+
+The ZCELEB-3 report below is historical; its continuous pass and framing values are superseded above.
+
 # ZCELEB-3 — Final celebration tuning
 
 21 November 2026. Implementation: **`10440bd`**, following `c97d47f` / `ad4ad1e`. Unity **2022.3.19f1**, MCP pinned to **BusJamCase@c4dcbf17c52e6f1b** throughout.

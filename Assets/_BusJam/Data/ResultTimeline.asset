@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c9624905ba1d364faa7ba053ebf359f, type: 3}
   m_Name: ResultTimeline
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   steps:
   - id: 0
     enabled: 1
