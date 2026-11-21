@@ -1,5 +1,7 @@
 # ZVEC — Vector UI artwork
 
+The original sections record v1. The v2 correction and current measurements are at the end.
+
 21 November 2026. Baseline: `main`, `fefcd04`. Unity **2022.3.19f1**, Android target. MCP was pinned to `BusJamCase@c4dcbf17c52e6f1b`; project root and Edit mode were checked before execution. No Play mode, build, push or AsenOS access.
 
 ## Converted artwork
@@ -72,3 +74,22 @@ The layered approach increases retained element counts. It adds no per-frame app
 Final validation: script compilation clean; Console **0 entries**. No scene changes or temporary review objects remain.
 
 Implementation commit: `cd7aab7`. Retained raster import commit: `d8cf6d0`. Both are on `main`; no push.
+
+## v2 — Cached gradients and smooth face edges
+
+21 November 2026. Removed the 32 `vector-tone` children and `.vector-face` overflow mask. Each palette now shares one static-cached **1×64 RGBA32** texture: Clamp, Bilinear, no mipmaps, `HideFlags.DontSave`. The sampled top/body/bottom colours are unchanged. `StyleBackground` stretches the texture to the face; its border radius supplies the smooth rounded edge without a stencil mask. Eight textures retain identical instance IDs across a real editor domain reload; no runtime destruction is used. After warm-up, 1,000 idempotent `Apply` calls allocated **0 bytes** on the calling thread.
+
+Each surface has **six decorative elements** (plus the existing v1 caption on VectorButton). The secondary glint dot was removed; highlight/glint insets now keep them within the face without clipping. Rim/body/face dimensions, depth bands, hover tint and press transitions remain unchanged. The sound control has separate plate/indicator surfaces and its existing tick.
+
+| Visual elements | Original `fefcd04` | ZVEC v1 | ZVEC v2 |
+| --- | ---: | ---: | ---: |
+| Game | 174 | 929 | **329** |
+| LevelEditor | 249 | 599 | **203** |
+
+Original totals are the archived U4 measurements in `UITK-Report.md`; v1/v2 use the same ZVEC preview harness with a Level_01 editor draft. Editor totals depend on draft contents, so the original column is historical rather than an identical-fixture comparison.
+
+The repeated 20-warm-up/50-cycle check had **zero growth**: Game elements 329→329, callbacks 336→336; editor elements 203→203, callbacks 679→679; gradient textures 8→8 with unchanged IDs. Managed heap did not grow (editor-wide GC snapshots).
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/v2/`. `ContactSheet-v2.png` covers the same nine resolutions and seven screens; `After/` contains 126 captures, including hover/pressed states. `Compare-Button-3x.png` and `Compare-Panel-3x.png` show Original PNG / v1 / v2 side by side. Visual inspection confirms the v1 inner-edge stair steps are removed. All **954 v1 control-bound records match**; sampled geometry checks found no protrusion in 1,656 highlights/glints. See `Verification.json`, `LeakCheck.txt`, `ButtonStates.txt` and `TextureCache-*.json`.
+
+Unity 2022.3.19f1 compiled clean; final Console **0 entries**. Pinned instance `BusJamCase@c4dcbf17c52e6f1b`, Edit mode only. Protected files/backgrounds unchanged; temporary harness removed. No Play, vault access or push. Device rendering cost remains unprofiled.

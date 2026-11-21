@@ -216,11 +216,9 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .vector-art { position: absolute; left: 1.5%; right: 1.5%; top: 2%; bottom: 8%; border-radius: 76px; background-color: #522100; border-width: 2px; border-color: #522100; }
 .vector-edge { position: absolute; left: 1px; right: 1px; top: 1px; bottom: 1px; border-radius: 73px; background-color: #FDC808; border-width: 2px; border-top-color: #FDF294; border-left-color: #FDF294; border-right-color: #FDC808; border-bottom-color: #963D01; }
 .vector-body { position: absolute; left: 6px; right: 6px; top: 6px; bottom: 2px; border-radius: 66px; border-width: 3px; border-color: #CB7C02; border-bottom-width: 13px; background-color: #FDC808; transition-property: border-bottom-width; transition-duration: .1s; }
-.vector-face { position: absolute; left: 0; right: 0; top: 0; bottom: 0; overflow: hidden; border-radius: 63px; background-color: #71DB06; border-width: 2px; border-color: #B9F312; }
-.vector-tone { position: absolute; left: 0; right: 0; }
-.vector-highlight { position: absolute; left: 1%; right: 1%; top: 1%; height: 30%; border-top-left-radius: 90px; border-top-right-radius: 90px; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; background-color: rgba(255,255,255,.3); }
-.vector-glint { position: absolute; left: 4%; top: 6%; width: 9%; height: 12%; border-radius: 100px; rotate: -18deg; background-color: rgba(255,255,255,.82); }
-.vector-glint-dot { position: absolute; left: 2.5%; top: 22%; width: 7px; height: 10px; border-radius: 20px; rotate: 25deg; background-color: rgba(255,255,255,.85); }
+.vector-face { position: absolute; left: 0; right: 0; top: 0; bottom: 0; border-radius: 63px; background-color: #71DB06; border-width: 2px; border-color: #B9F312; -unity-background-scale-mode: stretch-to-fill; }
+.vector-highlight { position: absolute; left: 6%; right: 6%; top: 4%; height: 28%; border-top-left-radius: 90px; border-top-right-radius: 90px; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; background-color: rgba(255,255,255,.3); }
+.vector-glint { position: absolute; left: 6%; top: 12%; width: 9%; height: 12%; border-radius: 100px; rotate: -18deg; background-color: rgba(255,255,255,.82); }
 .vector-caption { flex-grow: 1; align-self: stretch; margin: 0; padding: 0; -unity-text-align: middle-center; }
 .art-button, .editor-button { border-width: 0; background-color: transparent; color: white; -unity-font-style: normal; justify-content: center; align-items: stretch; transition-property: translate; transition-duration: .1s; }
 .art-button { margin: 0; padding: 0; }
@@ -239,14 +237,14 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .editor-button .vector-body { left: 3px; right: 3px; top: 3px; bottom: 1px; border-width: 1px; border-bottom-width: 7px; border-radius: 29px; }
 .editor-button .vector-face { border-radius: 27px; }
 .editor-button .vector-highlight { border-top-left-radius: 27px; border-top-right-radius: 27px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+.editor-button .vector-glint { left: 14%; top: 14%; }
 .editor-button:active { translate: 0 3px; }
 .editor-button:active .vector-body { border-bottom-width: 2px; }
-.editor-button .vector-glint-dot { width: 3px; height: 5px; }
 .vector-white { left: 6px; right: 7px; top: 9px; bottom: 10px; border-radius: 40px; border-color: #ACACAD; background-color: #ACACAD; border-width: 1px; }
 .vector-white .vector-edge { left: 0; right: 0; top: 0; bottom: 0; border-radius: 38px; background-color: #CBCBCD; border-width: 2px; border-color: #EFEFF1; border-top-color: #FEFEFE; }
 .vector-white .vector-body { left: 1px; right: 1px; top: 1px; bottom: 0; border-radius: 36px; background-color: #CBCBCD; border-color: #CBCBCD; border-width: 0; border-bottom-width: 5px; }
 .vector-white .vector-face { border-radius: 35px; background-color: #EFEFF1; border-width: 0; }
-.vector-white .vector-highlight { height: 14%; background-color: rgba(255,255,255,.16); }
+.vector-white .vector-highlight { left: 14%; right: 14%; top: 6%; height: 14%; background-color: rgba(255,255,255,.16); }
 .vector-header { left: 5px; right: 5px; top: 13px; bottom: 13px; border-radius: 58px; border-color: #0048C2; background-color: #0048C2; }
 .vector-header .vector-edge { border-radius: 55px; border-color: #0D9CFC; background-color: #0043E1; }
 .vector-header .vector-body { left: 4px; right: 4px; top: 4px; bottom: 1px; border-radius: 49px; border-color: #001B54; border-bottom-width: 3px; background-color: #0043E1; }
@@ -256,23 +254,22 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .vector-modal .vector-edge { left: 1px; right: 1px; top: 1px; bottom: 1px; border-radius: 105px; background-color: #97BAFB; border-width: 5px; border-color: #97BAFB; border-top-color: #E4F2FD; border-bottom-color: #86A0FC; }
 .vector-modal .vector-body { left: 13px; right: 13px; top: 13px; bottom: 7px; border-radius: 92px; border-color: #001C7C; border-width: 3px; border-bottom-width: 3px; background-color: #095DF3; }
 .vector-modal .vector-face { border-radius: 88px; border-width: 2px; border-color: #1FA3FB; background-color: #095DF3; }
-.vector-modal .vector-highlight { left: 1%; right: 1%; height: 14%; background-color: rgba(135,227,255,.28); }
-.vector-modal .vector-glint { left: 3%; top: 3%; width: 11%; height: 2%; }
-.vector-modal .vector-glint-dot { left: 2%; top: 7%; width: 10px; height: 14px; }
+.vector-modal .vector-highlight { height: 14%; background-color: rgba(135,227,255,.28); }
+.vector-modal .vector-glint { left: 6%; top: 4%; width: 11%; height: 2%; }
 .confirm-modal > .vector-white { left: 16px; right: 18px; top: 23px; bottom: 25px; border-radius: 100px; }
 .confirm-modal > .vector-white .vector-edge, .confirm-modal > .vector-white .vector-body, .confirm-modal > .vector-white .vector-face { border-radius: 95px; }
 .vector-badge { left: 5px; right: 10px; top: 10px; bottom: 13px; border-radius: 48px; background-color: #610C9C; border-color: #8C23DE; border-width: 3px; }
 .vector-badge .vector-edge { left: 1px; right: 1px; top: 1px; bottom: 1px; border-radius: 44px; background-color: #B145F9; border-width: 3px; border-color: #CC71FB; }
 .vector-badge .vector-body { left: 5px; right: 5px; top: 5px; bottom: 4px; border-radius: 37px; border-width: 2px; border-color: #610C9C; border-bottom-width: 2px; background-color: #E8EBF5; }
 .vector-badge .vector-face { border-width: 1px; border-color: #F1F1F4; border-radius: 34px; background-color: #E8EBF5; }
-.vector-badge .vector-highlight { height: 10%; background-color: rgba(255,255,255,.16); }
-.vector-badge .vector-glint { top: 6%; width: 24%; height: 10%; }
+.vector-badge .vector-highlight { left: 10%; right: 10%; top: 8%; height: 10%; background-color: rgba(255,255,255,.16); }
+.vector-badge .vector-glint { left: 12%; top: 15%; width: 18%; height: 8%; }
 .vector-blue { left: 2px; right: 3px; top: 2px; bottom: 3px; border-radius: 48px; border-color: #013EAA; background-color: #011847; }
 .vector-blue .vector-edge { border-radius: 45px; background-color: #015DF3; border-color: #3FEDFC; }
 .vector-blue .vector-body { left: 4px; right: 4px; top: 4px; bottom: 0; border-radius: 39px; border-width: 0; border-bottom-width: 6px; border-bottom-color: #011847; background-color: #015DF3; }
 .vector-blue .vector-face { border-radius: 38px; border-color: #3FEDFC; border-width: 1px; background-color: #015DF3; }
-.vector-blue .vector-highlight { height: 34%; background-color: rgba(170,247,255,.3); }
-.vector-blue .vector-glint { left: 8%; top: 9%; width: 32%; height: 12%; rotate: -35deg; }
+.vector-blue .vector-highlight { left: 16%; right: 16%; top: 8%; height: 26%; background-color: rgba(170,247,255,.3); }
+.vector-blue .vector-glint { left: 20%; top: 20%; width: 30%; height: 12%; rotate: -35deg; }
 .vector-check-stroke { position: absolute; left: 34%; top: 24%; width: 26%; height: 45%; border-width: 0; border-right-width: 7px; border-bottom-width: 7px; border-color: #FEFEFE; rotate: 40deg; display: none; }
 .sound-toggle:checked .vector-check { display: flex; }
 .sound-toggle:checked .vector-blue .vector-highlight { background-color: rgba(150,255,160,.45); }

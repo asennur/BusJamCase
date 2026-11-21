@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -6,6 +7,10 @@ namespace BusJam.UI
     /// <summary>Builds shared, non-pickable USS layers once per visual tree.</summary>
     public static class VectorArt
     {
+        private const string TexturePrefix = "BusJam.VectorGradient.v2.";
+        private const int GradientHeight = 64;
+        private static readonly Dictionary<string, Texture2D> Gradients = RestoreGradients();
+
         public static void Apply(VisualElement root)
         {
             root.Query<VisualElement>().ForEach(element =>
@@ -46,7 +51,27 @@ namespace BusJam.UI
             var edge = Layer(rim, "vector-edge");
             var body = Layer(edge, "vector-body");
             var face = Layer(body, "vector-face");
-            // Solid element bands reproduce the sampled source shading without a raster or shader.
+            face.style.backgroundImage = new StyleBackground(Gradient(palette));
+            Layer(face, "vector-highlight");
+            Layer(face, "vector-glint");
+        }
+
+        // DontSave textures survive editor domain reloads; recover them instead of creating duplicates.
+        private static Dictionary<string, Texture2D> RestoreGradients()
+        {
+            var cache = new Dictionary<string, Texture2D>(8);
+            foreach (var texture in Resources.FindObjectsOfTypeAll<Texture2D>())
+                if (texture.name.StartsWith(TexturePrefix, System.StringComparison.Ordinal)
+                    && texture.width == 1 && texture.height == GradientHeight
+                    && texture.format == TextureFormat.RGBA32 && texture.mipmapCount == 1
+                    && texture.hideFlags == HideFlags.DontSave)
+                    cache[texture.name.Substring(TexturePrefix.Length)] = texture;
+            return cache;
+        }
+
+        private static Texture2D Gradient(string palette)
+        {
+            if (Gradients.TryGetValue(palette, out var cached) && cached != null) return cached;
             Color top, middle, bottom;
             switch (palette)
             {
@@ -58,18 +83,21 @@ namespace BusJam.UI
                 case "blue": top = Hex(0x219BFC); middle = Hex(0x015DF3); bottom = Hex(0x0032CD); break;
                 default: top = Hex(palette == "badge" ? 0xE8EBF5 : 0xEFEFF1); middle = bottom = top; break;
             }
-            if (top != bottom)
-                for (int i = 0; i < 32; i++)
-                {
-                    var band = Layer(face, "vector-tone");
-                    band.style.top = Length.Percent(i * 100f / 32);
-                    band.style.height = Length.Percent(100f / 32 + .2f);
-                    float t = i / 31f;
-                    band.style.backgroundColor = t < .5f ? Color.Lerp(top, middle, t * 2) : Color.Lerp(middle, bottom, t * 2 - 1);
-                }
-            Layer(face, "vector-highlight");
-            Layer(face, "vector-glint");
-            Layer(face, "vector-glint-dot");
+            var texture = new Texture2D(1, GradientHeight, TextureFormat.RGBA32, false)
+            {
+                name = TexturePrefix + palette,
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Bilinear,
+                hideFlags = HideFlags.DontSave
+            };
+            for (int y = 0; y < GradientHeight; y++)
+            {
+                float t = 1f - y / (GradientHeight - 1f);
+                texture.SetPixel(0, y, t < .5f ? Color.Lerp(top, middle, t * 2) : Color.Lerp(middle, bottom, t * 2 - 1));
+            }
+            texture.Apply(false, true);
+            Gradients[palette] = texture;
+            return texture;
         }
 
         private static Color Hex(int value) => new Color32((byte)(value >> 16), (byte)(value >> 8), (byte)value, 255);
