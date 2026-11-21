@@ -67,10 +67,15 @@ def button(palette,state):
 
 def plate():
     defs=gradient('rim',['#35d6ff','#469eff','#2f6efa','#5773ff'])+gradient('body',['#092b4b','#123d5c','#174361','#15405b','#10324f'])
+    # Preserve every rim/shadow contour, with a common transparent interior cutout.
+    def ring(x,y,w,h,r,fill,extra=''):
+        d=f'M{x+r} {y} H{x+w-r} A{r} {r} 0 0 1 {x+w} {y+r} V{y+h-r} A{r} {r} 0 0 1 {x+w-r} {y+h} H{x+r} A{r} {r} 0 0 1 {x} {y+h-r} V{y+r} A{r} {r} 0 0 1 {x+r} {y} Z'
+        hole='M49 21 A28 28 0 0 0 21 49 V115 A28 28 0 0 0 49 143 H471 A28 28 0 0 0 499 115 V49 A28 28 0 0 0 471 21 H49 Z'
+        return path(d+' '+hole,fill,extra='fill-rule="evenodd" '+extra)
     body=''
-    for i in range(5,0,-1):body+=rect(7-i,15-i,506+2*i,150+2*i,40+i,'#06162e',f'opacity="{.025:.3f}"')
-    body+=rect(5,6,510,154,43,'#102b66')+rect(9,9,502,146,39,'url(#rim)')
-    body+=rect(16,16,488,132,33,'#071f43')+rect(21,21,478,122,28,'url(#body)',extra='opacity=".83"')
+    for i in range(5,0,-1):body+=ring(7-i,15-i,506+2*i,150+2*i,40+i,'#06162e',f'opacity="{.025:.3f}"')
+    body+=ring(5,6,510,154,43,'#102b66')+ring(9,9,502,146,39,'url(#rim)')
+    body+=ring(16,16,488,132,33,'#071f43')+rect(21,21,478,122,28,'url(#body)',extra='opacity=".40"')
     body+=path('M14 44 Q14 13 47 13 H473 Q503 13 507 43 Q500 20 473 20 H47 Q23 20 14 44Z','#9ce9ff',extra='opacity=".7"')
     save('hud_counter',520,180,defs,body)
 
