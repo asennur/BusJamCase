@@ -30,7 +30,7 @@ Shader "BusJam/Board Sidewalk"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_TRANSFER_INSTANCE_ID(input,output);
                 float3 world = TransformObjectToWorld(input.positionOS.xyz);
-                // Flatten only the backing/rim visuals; gameplay anchors keep their authored height.
+                // The board backing and tile undersides meet the sidewalk without a height step.
                 world.y = _GroundHeight;
                 output.positionCS = TransformWorldToHClip(world);
                 return output;

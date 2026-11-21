@@ -32,7 +32,7 @@ namespace BusJam.Gameplay
         [SerializeField] private Material hiddenMaterial;
         [SerializeField] private float cellSize = 1f;
         [SerializeField] private Material baseMaterial;
-        [Tooltip("Board-only backing and flush rim. Match the surrounding sidewalk colour and world height.")]
+        [Tooltip("Board backing and tile undersides only. Matches the surrounding sidewalk; the frame stays white.")]
         [SerializeField] private Material sidewalkMaterial;
 
         private Mesh baseMesh;
@@ -76,9 +76,9 @@ namespace BusJam.Gameplay
                 t => t.gameObject.SetActive(false));
 
             obstaclePool = CreatePool(obstaclePrefab);
-            rimStraightPool = CreatePool(rimStraightPrefab, true);
-            rimOuterPool = CreatePool(rimOuterPrefab, true);
-            rimInnerPool = CreatePool(rimInnerPrefab, true);
+            rimStraightPool = CreatePool(rimStraightPrefab);
+            rimOuterPool = CreatePool(rimOuterPrefab);
+            rimInnerPool = CreatePool(rimInnerPrefab);
         }
 
         // Material overrides belong to pooled board visuals, never the shared kit prefabs or slots.
@@ -243,6 +243,15 @@ namespace BusJam.Gameplay
 
                     Vector3 corner = CellToLocal(new Vector2Int(cx, cy)) + new Vector3(-0.5f, 0f, 0.5f) * cellSize;
 
+                    // The exit opens onto the sidewalk. Finish only the side edges here, without a cross-board lip.
+                    if (cy == 0)
+                    {
+                        if (se != sw)
+                            PlaceRim(rimStraightPool, activeRimStraights, corner + Vector3.back * (cellSize * .25f),
+                                (se ? 90f : 270f) + rimStraightYaw, .5f);
+                        continue;
+                    }
+
                     if (count == 1)
                     {
                         int quadrant = ne ? 0 : se ? 1 : sw ? 2 : 3;
@@ -279,11 +288,12 @@ namespace BusJam.Gameplay
             return type == CellType.Empty || type == CellType.Passenger || type == CellType.Tunnel;
         }
 
-        private static void PlaceRim(ObjectPool<Transform> pool, List<Transform> active, Vector3 local, float yaw)
+        private static void PlaceRim(ObjectPool<Transform> pool, List<Transform> active, Vector3 local, float yaw, float length = 1f)
         {
             Transform rim = pool.Get();
             rim.localPosition = local;
             rim.localRotation = Quaternion.Euler(0f, yaw, 0f);
+            rim.localScale = new Vector3(length, 1f, 1f);
             active.Add(rim);
         }
 
