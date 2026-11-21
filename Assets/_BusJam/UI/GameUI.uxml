@@ -85,16 +85,18 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="fail-panel" class="modal fail-modal">
-                    <ui:VisualElement class="fail-heading">
-                        <ui:Button name="fail-close" class="close-button" tooltip="Close" />
-                        <ui:VisualElement name="fail-title" class="fail-title" picking-mode="Ignore" tooltip="Level Failed!" />
+                    <ui:VisualElement class="fail-heading" picking-mode="Ignore">
+                        <ui:Label name="fail-level" text="Level 1" class="fail-level" picking-mode="Ignore" />
                     </ui:VisualElement>
-                    <ui:Label name="fail-level" text="Level 1" class="fail-level" picking-mode="Ignore" />
-                    <ui:VisualElement class="life-loss" picking-mode="Ignore">
-                        <ui:VisualElement name="fail-icon" class="fail-icon broken-heart" picking-mode="Ignore" />
-                        <ui:Label name="life-cost" text="-1" class="life-cost" picking-mode="Ignore" />
+                    <ui:VisualElement class="fail-inner" picking-mode="Ignore">
+                        <ui:Label name="fail-title" text="Level Failed!" class="fail-title" picking-mode="Ignore" />
+                        <ui:VisualElement class="life-loss" picking-mode="Ignore">
+                            <ui:VisualElement name="fail-icon" class="fail-icon broken-heart" picking-mode="Ignore" />
+                            <ui:Label name="life-cost" text="-1" class="life-cost" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label name="fail-reason" text="No space left!" class="question fail-reason" picking-mode="Ignore" />
                     </ui:VisualElement>
-                    <ui:Label name="fail-reason" text="No space left!" class="question fail-reason" picking-mode="Ignore" />
+                    <ui:Button name="fail-close" class="close-button" tooltip="Close" />
                     <art:VectorButton name="retry-button" text="Try Again" class="art-button green" />
                 </ui:VisualElement>
                 <ui:VisualElement name="fail-effects" class="fill" picking-mode="Ignore" />

@@ -141,16 +141,20 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .life-float { width: 66px; height: 66px; background-image: url("Vector/icon_heart.svg"); }
 .fail-bar { position: absolute; left: 0; right: 0; top: 0; }
 .fail-hud .level-badge { visibility: hidden; }
-.fail-modal { width: 940px; height: 1120px; }
-.fail-heading { width: 100%; align-items: center; }
-.fail-heading > .close-button { align-self: flex-end; }
-.fail-title { width: 100%; height: 300px; min-height: 150px; flex-shrink: 1; background-image: url("Vector/title_failed.svg"); -unity-background-scale-mode: scale-to-fit; }
-.fail-level { font-size: 52px; margin: 0; padding: 0; }
-.life-loss { flex-direction: row; align-items: center; justify-content: center; height: 240px; flex-shrink: 1; }
-.fail-icon { width: 210px; height: 230px; -unity-background-scale-mode: scale-to-fit; }
+.fail-modal { width: 486px; height: 850px; padding: 0; justify-content: flex-start; }
+.fail-modal > .raster-panel-art.vector-modal { left: 0; right: 0; top: 0; bottom: 0; background-image: url("Vector/surface_result_modal.svg"); -unity-slice-left: 220; -unity-slice-right: 220; -unity-slice-top: 220; -unity-slice-bottom: 220; -unity-slice-scale: .24; }
+.fail-heading { position: absolute; left: 22px; right: 22px; top: 20px; height: 138px; align-items: center; justify-content: center; background-image: url("Vector/surface_result_header.svg"); -unity-background-scale-mode: stretch-to-fill; -unity-slice-left: 260; -unity-slice-right: 260; -unity-slice-top: 250; -unity-slice-bottom: 70; -unity-slice-scale: .25; }
+.fail-level { font-size: 52px; margin: 0; padding: 0; color: #fff9df; -unity-text-outline-color: #090d16; -unity-text-outline-width: 3px; text-shadow: 0 3px 0 #07101e; }
+.fail-inner { position: absolute; left: 37px; right: 37px; top: 184px; height: 408px; align-items: center; background-image: url("Vector/surface_result_inner.svg"); -unity-background-scale-mode: stretch-to-fill; -unity-slice-left: 250; -unity-slice-right: 250; -unity-slice-top: 250; -unity-slice-bottom: 250; -unity-slice-scale: .16; }
+.fail-title { height: 48px; width: 100%; margin: 35px 0 12px 0; padding: 0; font-size: 29px; color: white; -unity-text-outline-color: #191919; -unity-text-outline-width: 1.8px; text-shadow: 0 2px 0 #242424; }
+.life-loss { position: relative; width: 250px; height: 246px; flex-shrink: 0; align-items: center; justify-content: center; }
+.fail-icon { position: absolute; left: 0; top: 0; width: 250px; height: 246px; -unity-background-scale-mode: scale-to-fit; }
 .broken-heart { background-image: url("Vector/icon_heart_broken.svg"); }
-.life-cost { font-size: 90px; color: rgb(255, 170, 195); }
-.fail-reason { margin: 10px 0 25px 0; }
+.life-cost { position: absolute; left: 0; right: 0; top: 84px; height: 90px; margin: 0; padding: 0; font-size: 72px; color: white; -unity-text-outline-color: #080809; -unity-text-outline-width: 4px; text-shadow: 0 4px 0 #130c10; }
+.fail-reason { font-size: 20px; height: 30px; margin: 5px 0 0 0; padding: 0; color: #28364e; -unity-text-outline-width: 0; text-shadow: none; }
+.fail-modal > .close-button { position: absolute; right: -17px; top: -18px; width: 82px; height: 84px; }
+.fail-modal > .art-button { position: absolute; bottom: 75px; width: 270px; height: 124px; font-size: 35px; }
+.fail-modal > .art-button > .vector-caption { font-size: 35px; -unity-text-outline-color: #12230c; -unity-text-outline-width: 2px; text-shadow: 0 2px 0 #18300c; }
 .no-lives-modal { height: 660px; }
 .no-lives-hint { font-size: 42px; white-space: normal; }
 .tutorial-overlay { justify-content: flex-end; align-items: center; padding-bottom: 180px; }
