@@ -24,9 +24,16 @@
     height: 202px;
     flex-shrink: 0;
 }
-.start-bar { justify-content: flex-start; padding-left: 0; padding-right: 3.5%; padding-top: 68px; height: 182px; }
-.start-bar > .lives-plate { margin-left: 30.5%; }
+.start-screen { --start-top-inset: 12%; }
+.start-bar { position: absolute; left: 0; right: 0; top: var(--start-top-inset); justify-content: flex-start; padding-left: 0; padding-right: 3.5%; padding-top: 0; height: 98px; align-items: flex-start; }
+.start-bar > .lives-plate { margin-left: 29%; }
 .start-bar > .gear { margin-left: auto; }
+.start-bar > .counter { width: 234px; height: 98px; }
+.start-bar .heart-icon, .start-bar .coin-icon { width: 98px; height: 98px; }
+.start-bar .counter-text { font-size: 40px; }
+.start-bar .lives-count { font-size: 43px; }
+.start-bar .coin-plus { width: 40px; height: 41px; }
+.start-bar > .gear { width: 90px; height: 92px; }
 .counter {
     flex-direction: row;
     align-items: center;
@@ -48,13 +55,14 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .gear:hover { background-image: url("Vector/btn_settings_hover.svg"); }
 .gear:active { background-image: url("Vector/btn_settings_pressed.svg"); }
 .gear:active, .close-button:active { scale: 0.95 0.95; }
-.start-body { flex-grow: 1; align-items: center; justify-content: flex-end; }
+.start-body { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; }
 .art-button {
     width: 338px; max-width: 100%; height: 146px; min-height: 110px;
     flex-shrink: 0; font-size: 46px;
 }
-.start-button { position: absolute; bottom: 21%; width: 338px; height: 158px; font-size: 76px; }
-.start-button > .vector-caption { font-size: 52px; }
+.start-button { position: absolute; left: 50%; translate: -50% 0; bottom: 19%; width: 365px; height: 176px; font-size: 76px; }
+.start-button.art-button > .vector-caption { font-size: 68px; }
+.start-button:active { translate: -50% 5px; }
 .level-badge {
     width: 106px; height: 110px; flex-shrink: 0; justify-content: center;
 }
@@ -100,12 +108,12 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .sound-toggle .unity-toggle__checkmark { width: 96px; height: 96px; border-width: 0; background-color: transparent; background-image: none; }
 
 .square .start-button { bottom: 18.5%; }
-.landscape .start-body { flex-direction: row; padding: 50px 17.5% 100px 8%; }
-.landscape .start-button { position: relative; bottom: auto; width: 32%; max-width: 700px; }
+.landscape .start-button { bottom: 8%; width: 440px; height: 180px; }
 .square .top-bar, .landscape .top-bar { padding-top: 20px; }
 .square .start-bar > .lives-plate, .landscape .start-bar > .lives-plate { margin-left: 0; }
 .square .start-bar, .landscape .start-bar { justify-content: flex-end; }
 .square .start-bar > .gear, .landscape .start-bar > .gear { margin-left: 0; }
+.square .start-bar, .landscape .start-bar { padding-top: 0; }
 .square .hud, .landscape .hud { padding-left: 42px; padding-right: 42px; }
 /* Result art is constructed from glyph paths and stays sharp at every viewport. */
 .result-overlay { background-color: rgba(26, 11, 46, 0.65); }
