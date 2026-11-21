@@ -290,7 +290,7 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .vector-yellow .vector-highlight { background-color: rgba(255,255,255,.4); }
 
 /* SVG-derived button decoration: transparent texels smooth corners without changing hit areas. */
-.raster-button-art { border-width: 0; background-color: transparent; border-radius: 0; -unity-background-scale-mode: stretch-to-fill; -unity-slice-left: 195; -unity-slice-right: 195; -unity-slice-top: 195; -unity-slice-bottom: 195; }
+.raster-button-art { border-width: 0; background-color: transparent; border-radius: 0; -unity-background-scale-mode: stretch-to-fill; -unity-slice-left: 195; -unity-slice-right: 195; -unity-slice-top: 0; -unity-slice-bottom: 0; }
 .editor-button .raster-button-art { border-width: 0; border-radius: 0; }
 .raster-button-art.vector-green { background-image: url("Vector/button_green_normal.svg"); }
 .raster-button-art.vector-red { background-image: url("Vector/button_red_normal.svg"); }
