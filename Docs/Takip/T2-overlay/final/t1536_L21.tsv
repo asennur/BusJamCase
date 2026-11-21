@@ -1,0 +1,13 @@
+safe-area	0	40	1536	2008
+hud	0	40	1536	2008
+level-badge	410	92	128	128
+pause-settings	1031	114	102	104
+booster-bar	295	1753	946	143
+ad-banner	0	1929	1536	119
+timer-counter	665	121	205	71
+slot0	369	691
+slot6	1167	691
+anchor(0.00, 1.93, 5.03)	205
+anchor(0.00, 0.00, 0.50)	648
+anchor(0.00, 0.00, -7.50)	1358
+camera	(0.00, 30.32, -16.14)	40
