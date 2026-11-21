@@ -231,7 +231,8 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .art-button:active { translate: 0 5px; }
 .editor-button:active { translate: 0 3px; }
 .art-button:disabled, .editor-button:disabled { opacity: .5; }
-.raster-button-art { -unity-background-scale-mode: stretch-to-fill; -unity-slice-left: 195; -unity-slice-right: 195; -unity-slice-top: 0; -unity-slice-bottom: 0; }
+/* Painted contours and shadows must remain one continuous image, without slice joins. */
+.raster-button-art { -unity-background-scale-mode: stretch-to-fill; }
 .raster-button-art.vector-green { background-image: url("Vector/button_green_normal.svg"); }
 .raster-button-art.vector-red { background-image: url("Vector/button_red_normal.svg"); }
 .raster-button-art.vector-yellow { background-image: url("Vector/button_yellow_normal.svg"); }
@@ -242,10 +243,10 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .art-button:active .raster-button-art.vector-red, .editor-button:active .raster-button-art.vector-red { background-image: url("Vector/button_red_pressed.svg"); }
 .art-button:active .raster-button-art.vector-yellow, .editor-button:active .raster-button-art.vector-yellow { background-image: url("Vector/button_yellow_pressed.svg"); }
 .raster-panel-art { -unity-background-scale-mode: stretch-to-fill; }
-.raster-panel-art.vector-white { left: 6px; right: 7px; top: 9px; bottom: 10px; background-image: url("Vector/surface_white.svg"); -unity-slice-left: 327; -unity-slice-right: 188; -unity-slice-top: 233; -unity-slice-bottom: 173; }
-.raster-panel-art.vector-header { left: 5px; right: 5px; top: 13px; bottom: 13px; background-image: url("Vector/surface_header.svg"); -unity-slice-left: 173; -unity-slice-right: 122; -unity-slice-top: 117; -unity-slice-bottom: 122; }
-.raster-panel-art.vector-modal { left: 18px; right: 20px; top: 16px; bottom: 25px; background-image: url("Vector/surface_modal.svg"); -unity-slice-left: 479; -unity-slice-right: 363; -unity-slice-top: 494; -unity-slice-bottom: 334; }
-.raster-panel-art.vector-badge { left: 5px; right: 10px; top: 10px; bottom: 13px; background-image: url("Vector/surface_badge.svg"); -unity-slice-left: 167; -unity-slice-right: 110; -unity-slice-top: 143; -unity-slice-bottom: 110; }
+.raster-panel-art.vector-white { left: 6px; right: 7px; top: 9px; bottom: 10px; background-image: url("Vector/surface_white.svg"); }
+.raster-panel-art.vector-header { left: 5px; right: 5px; top: 13px; bottom: 13px; background-image: url("Vector/surface_header.svg"); }
+.raster-panel-art.vector-modal { left: 18px; right: 20px; top: 16px; bottom: 25px; background-image: url("Vector/surface_modal.svg"); }
+.raster-panel-art.vector-badge { left: 5px; right: 10px; top: 10px; bottom: 13px; background-image: url("Vector/surface_badge.svg"); }
 .raster-panel-art.vector-blue { left: 2px; right: 3px; top: 2px; bottom: 3px; background-image: url("Vector/surface_blue.svg"); }
 .confirm-modal > .vector-white { left: 16px; right: 18px; top: 23px; bottom: 25px; }
 .vector-check-stroke { position: absolute; left: 34%; top: 24%; width: 26%; height: 45%; border-width: 0; border-right-width: 7px; border-bottom-width: 7px; border-color: #FEFEFE; rotate: 40deg; display: none; }

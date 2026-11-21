@@ -46,12 +46,9 @@ namespace BusJam.UI
             if (palette == "green" || palette == "red" || palette == "yellow")
             {
                 rim.AddToClassList("raster-button-art");
-                // Unity 2022's USS validator treats this float property as a length; assign it once here.
-                rim.style.unitySliceScale = element.ClassListContains("editor-button") ? .18f : .390625f;
                 return;
             }
             rim.AddToClassList("raster-panel-art");
-            rim.style.unitySliceScale = palette == "modal" ? .5f : palette == "badge" ? .14f : .2f;
         }
     }
 
