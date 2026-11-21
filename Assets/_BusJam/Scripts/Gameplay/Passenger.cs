@@ -66,6 +66,18 @@ namespace BusJam.Gameplay
         private Vector3 seatedLocalScale;
 
         public PassengerColor Color { get; private set; }
+        internal Renderer PresentationBody => body;
+        internal Animator PresentationAnimator => animator;
+        internal Vector3 PresentationSeatRotation => seatRotation;
+
+        // The isolated presentation reuses the prefab without gameplay state, feedback or input.
+        internal void PrepareCelebration()
+        {
+            outline.SetActive(false); angryIcon.gameObject.SetActive(false); hiddenMark.SetActive(false);
+            if (cloakVisual != null) cloakVisual.gameObject.SetActive(false);
+            SetRopes(0);
+            if (visualRoot != null) visualRoot.localPosition = new Vector3(0, seatedVisualHeight, 0);
+        }
         public Vector2Int Cell { get; private set; }
         public bool IsHidden { get; private set; }
         public int RopesLeft { get; private set; }

@@ -30,10 +30,23 @@ namespace BusJam.UI
         private int rewardStart, arrivedCoins, resultCoinValue = -1, rewardValue = -1;
         private bool rewardPending, rewardCredited, completionSession, collecting, retrying, resultTransitionDone;
         private int skipPointer = -1;
+        private CompleteCelebration celebrationBus;
+        private Image celebrationImage;
+
+        // Edit-mode reviews opt in explicitly; the real scene never creates preview objects.
+        private void InitializeCelebrationBus()
+        {
+            if (celebrationBus != null) return;
+            var assets = Resources.Load<CelebrationSettings>("CelebrationSettings");
+            celebrationBus = new CompleteCelebration(assets, celebrationImage, gameObject.scene, Application.isPlaying ? Camera.main : null);
+            celebrationBus.Resize(Screen.width, Screen.height);
+        }
 
         private void CacheResults()
         {
             complete = root.Q("complete-overlay"); completePanel = root.Q("complete-panel");
+            celebrationImage = root.Q<Image>("celebration-bus");
+            if (Application.isPlaying) InitializeCelebrationBus();
             resultHeader = root.Q("complete-title-group"); rays = root.Q("complete-rays");
             pile = root.Q("reward-pile"); rewardContent = root.Q("reward-content");
             rewardFlash = root.Q("reward-flash"); rewardLabel = root.Q<Label>("reward-label");
@@ -122,6 +135,7 @@ namespace BusJam.UI
         {
             if (complete == null) return;
             HideNoLives(); PauseResultTweens();
+            celebrationBus?.Hide();
             collecting = retrying = resultTransitionDone = false;
             Show(complete, state == GameState.Complete); Show(fail, state == GameState.Fail);
             if (state == GameState.Complete)
@@ -130,6 +144,7 @@ namespace BusJam.UI
                 complete.style.opacity = completePanel.style.opacity = 1;
                 if (completionSession) { FinishCelebration(); celebrationIdle.Restart(); return; }
                 completionSession = true;
+                celebrationBus?.Prepare(gameManager.CurrentLevel);
                 rewardStart = SaveSystem.Coins; arrivedCoins = 0; resultCoinValue = rewardValue = -1;
                 rewardPending = true; rewardCredited = false;
                 for (int i = 0; i <= FlyingCoinCount; i++)
@@ -151,6 +166,7 @@ namespace BusJam.UI
         private void SetCelebrationTime(float time)
         {
             celebrationTime = time;
+            celebrationBus?.Sample(time);
             complete.style.backgroundColor = new Color(.10f, .015f, .18f, .88f * Phase(time, 1.05f, .2f));
             resultCoinPlate.style.opacity = Phase(time, .3f, .15f);
             float title = Phase(time, 1.75f, .3f);
@@ -371,6 +387,7 @@ namespace BusJam.UI
 
         private void StopResults()
         {
+            celebrationBus?.Hide();
             CreditReward(); HideNoLives(); collecting = retrying = false;
             celebration?.Rewind(); celebrationIdle?.Rewind(); failureEntry?.Rewind(); collection?.Rewind(); failureExit?.Rewind();
             PauseResultTweens();

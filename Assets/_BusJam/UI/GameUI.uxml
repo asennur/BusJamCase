@@ -46,6 +46,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="complete-overlay" class="fill result-overlay hidden">
+                <ui:Image name="celebration-bus" class="fill" picking-mode="Ignore" />
                 <ui:VisualElement class="top-bar result-bar" picking-mode="Ignore">
                     <ui:VisualElement name="result-coin-plate" class="counter coins-plate" picking-mode="Ignore">
                         <ui:VisualElement class="coin-icon" picking-mode="Ignore" />

@@ -70,6 +70,7 @@ namespace BusJam.UI
         private void Update()
         {
             if (waitingForTree && document.rootVisualElement?.Q("ui-root") != null) OnEnable();
+            if (Application.isPlaying) celebrationBus?.Resize(Screen.width, Screen.height);
         }
 
         /// <summary>Returns false until the UIDocument tree exists; never binds to a half-built tree.</summary>
@@ -79,6 +80,7 @@ namespace BusJam.UI
             if (current == null || current.Q("ui-root") == null) return false;
             if (documentRoot == current && root != null) return true;
             KillTweens();
+            celebrationBus?.Dispose(); celebrationBus = null;
             documentRoot = current;
             documentRoot.pickingMode = PickingMode.Ignore;
             root = documentRoot.Q("ui-root");
@@ -143,7 +145,7 @@ namespace BusJam.UI
             startPulse?.Rewind(); readyPulse?.Rewind(); urgentPulse?.Rewind(); coinPulse?.Rewind();
         }
 
-        private void OnDestroy() => KillTweens();
+        private void OnDestroy() { celebrationBus?.Dispose(); celebrationBus = null; KillTweens(); }
 
         private void BuildTweens()
         {
