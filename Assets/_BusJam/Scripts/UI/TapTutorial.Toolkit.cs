@@ -33,7 +33,7 @@ namespace BusJam.UI
             var burst = overlay.Q("tutorial-burst");
             for (int i = 0; i < tapDots.Length; i++)
             {
-                tapDots[i] = new VisualElement { pickingMode = PickingMode.Ignore };
+                tapDots[i] = new VisualElement { pickingMode = PickingMode.Ignore, usageHints = UsageHints.DynamicTransform };
                 tapDots[i].AddToClassList("pooled-effect"); tapDots[i].AddToClassList("tutorial-dot");
                 burst.Add(tapDots[i]);
             }

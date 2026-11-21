@@ -39,10 +39,10 @@
                 <ui:VisualElement name="tutorial-tip" class="tutorial-tip hidden" picking-mode="Ignore">
                     <ui:Label name="tutorial-hint" class="tutorial-hint" picking-mode="Ignore" />
                 </ui:VisualElement>
-                <ui:VisualElement name="tutorial-pointer" class="tutorial-pointer hidden" picking-mode="Ignore">
-                    <ui:VisualElement name="tutorial-ring" class="tutorial-ring" picking-mode="Ignore" />
+                <ui:VisualElement name="tutorial-pointer" class="tutorial-pointer hidden" picking-mode="Ignore" usage-hints="DynamicTransform">
+                    <ui:VisualElement name="tutorial-ring" class="tutorial-ring" picking-mode="Ignore" usage-hints="DynamicTransform" />
                     <ui:VisualElement name="tutorial-burst" class="fill" picking-mode="Ignore" />
-                    <ui:VisualElement name="tutorial-hand" class="tutorial-hand" picking-mode="Ignore" />
+                    <ui:VisualElement name="tutorial-hand" class="tutorial-hand" picking-mode="Ignore" usage-hints="DynamicTransform" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="complete-overlay" class="fill result-overlay hidden">
@@ -55,7 +55,7 @@
                 <ui:VisualElement name="complete-body" class="result-body" picking-mode="Ignore">
                     <ui:VisualElement name="complete-panel" class="result-content" picking-mode="Ignore">
                         <ui:VisualElement name="complete-heading" class="result-heading" picking-mode="Ignore">
-                            <ui:VisualElement name="complete-rays" class="fill result-rays" picking-mode="Ignore" />
+                            <ui:VisualElement name="complete-rays" class="fill result-rays" picking-mode="Ignore" usage-hints="DynamicTransform" />
                             <ui:Label text="LEVEL COMPLETED!" class="result-title" picking-mode="Ignore" />
                             <ui:VisualElement name="complete-sparkles" class="fill" picking-mode="Ignore" />
                         </ui:VisualElement>

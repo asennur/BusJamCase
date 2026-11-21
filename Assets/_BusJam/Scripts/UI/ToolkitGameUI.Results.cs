@@ -58,7 +58,7 @@ namespace BusJam.UI
 
         private static VisualElement Effect(VisualElement parent, string style)
         {
-            var element = new VisualElement { pickingMode = PickingMode.Ignore };
+            var element = new VisualElement { pickingMode = PickingMode.Ignore, usageHints = UsageHints.DynamicTransform };
             element.AddToClassList("pooled-effect"); element.AddToClassList(style); parent.Add(element);
             return element;
         }
