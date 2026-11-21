@@ -161,6 +161,15 @@ MonoBehaviour:
     overshoot: 1.70158
     stagger: 0
   celebration:
+    pathMode: 0
+    enterStart: {x: 1.15, y: -0.35}
+    enterArcControl: {x: 0.85, y: 0.2}
+    exitEnd: {x: -0.15, y: -0.35}
+    exitArcControl: {x: 0.15, y: 0.2}
+    pathTilt: 5
+    waveArmRaise: 24
+    waveSpeed: 1
+    waveAmplitude: 25
     startTime: 1.05
     enterDuration: 0.55
     enterSide: 1

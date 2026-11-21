@@ -8,11 +8,21 @@ namespace BusJam.UI
     public enum ResultEase { Linear, InQuad, OutQuad, OutCubic, OutBack }
     public enum CelebrationEnterSide { Left, Right }
     public enum CelebrationExitDirection { Down, Left, Right }
+    public enum CelebrationPathMode { Arc, Straight }
 
     /// <summary>Screen-space bus choreography shared by runtime and the Edit-mode preview.</summary>
     [Serializable]
     public sealed class CelebrationChoreography
     {
+        [Tooltip("Arc follows the curved screen path. Straight uses the legacy Enter Side and Exit Direction.")] public CelebrationPathMode pathMode = CelebrationPathMode.Arc;
+        [Tooltip("Entry origin in normalized screen coordinates; (0,0) is bottom left. Values outside 0 to 1 are offscreen.")] public Vector2 enterStart = new Vector2(1.15f, -.35f);
+        [Tooltip("Quadratic entry arc control in normalized screen coordinates. Place it above the entry origin for an upward curve.")] public Vector2 enterArcControl = new Vector2(.85f, .2f);
+        [Tooltip("Exit destination in normalized screen coordinates, just beyond the bottom-left corner by default.")] public Vector2 exitEnd = new Vector2(-.15f, -.35f);
+        [Tooltip("Quadratic exit arc control in normalized screen coordinates. Keep it near stop height for a smooth downward exit.")] public Vector2 exitArcControl = new Vector2(.15f, .2f);
+        [Tooltip("Maximum bus roll in degrees toward the arc tangent. Settles flat at the stop. Zero disables tilt."), Range(0, 15)] public float pathTilt = 5;
+        [Tooltip("Upper-arm elevation above the sideward shoulder line, in degrees. The forearm stays bent beside the head."), Range(0, 30)] public float waveArmRaise = 24;
+        [Tooltip("Playback multiplier for the existing side-wave clip. One uses its original speed; zero freezes the wave."), Range(0, 3)] public float waveSpeed = 1;
+        [Tooltip("Forearm side-to-side wave amplitude in degrees. Zero keeps the bent forearm still."), Range(0, 30)] public float waveAmplitude = 25;
         [Tooltip("Seconds after Complete before the bus enters."), Min(0)] public float startTime = 1.05f;
         [Tooltip("Seconds spent slowing from the entry edge to the stop."), Min(0)] public float enterDuration = .55f;
         [Tooltip("Screen edge from which the bus enters.")] public CelebrationEnterSide enterSide = CelebrationEnterSide.Right;
@@ -43,7 +53,18 @@ namespace BusJam.UI
             busScale = Mathf.Clamp(Clean(busScale), .2f, 2); riderHopHeight = Mathf.Clamp(Clean(riderHopHeight), 0, .4f);
             riderHopFrequency = Mathf.Clamp(Clean(riderHopFrequency), 0, 5); riderHopStagger = Clean(riderHopStagger);
             busBounceAmplitude = Mathf.Clamp(Clean(busBounceAmplitude), 0, .2f);
+            enterStart = FinitePoint(enterStart); enterArcControl = FinitePoint(enterArcControl);
+            exitEnd = FinitePoint(exitEnd); exitArcControl = FinitePoint(exitArcControl);
+            pathTilt = Mathf.Clamp(Clean(pathTilt), 0, 15); waveArmRaise = Mathf.Clamp(Clean(waveArmRaise), 0, 30);
+            waveSpeed = Mathf.Clamp(Clean(waveSpeed), 0, 3); waveAmplitude = Mathf.Clamp(Clean(waveAmplitude), 0, 30);
         }
+        private static Vector2 FinitePoint(Vector2 value) => new Vector2(Signed(value.x), Signed(value.y));
+
+        public static Vector2 Arc(Vector2 start, Vector2 control, Vector2 end, float t)
+            => (1 - t) * (1 - t) * start + 2 * (1 - t) * t * control + t * t * end;
+
+        public static Vector2 ArcTangent(Vector2 start, Vector2 control, Vector2 end, float t)
+            => 2 * ((1 - t) * (control - start) + t * (end - control));
         private static float Signed(float value) => float.IsNaN(value) || float.IsInfinity(value) ? 0 : value;
         private static float Clean(float value) => Mathf.Max(0, Signed(value));
     }

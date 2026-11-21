@@ -16,6 +16,7 @@ public sealed class ResultTimelinePreview : EditorWindow
     private ResultTrack track;
     private float time;
     private bool playing;
+    private bool showPath = true;
     private double previousTick;
     private int sizeIndex;
     private static readonly Vector2Int[] Sizes = { new Vector2Int(1080,1920),new Vector2Int(580,1250),new Vector2Int(2560,1080) };
@@ -86,9 +87,32 @@ public sealed class ResultTimelinePreview : EditorWindow
         float sampled=EditorGUILayout.Slider("Time (seconds)",time,0,Mathf.Max(.001f,timeline.Length(track)));
         if(EditorGUI.EndChangeCheck()){time=sampled;playing=false;}
         EditorGUILayout.LabelField("Edit-mode preview • No progress or scene saves",EditorStyles.miniLabel);
+        showPath = EditorGUILayout.Toggle("Show celebration path", showPath);
         var rect=GUILayoutUtility.GetRect(100,100,GUILayout.ExpandWidth(true),GUILayout.ExpandHeight(true));
         if(target!=null) EditorGUI.DrawPreviewTexture(rect,target,null,ScaleMode.ScaleToFit);
         else EditorGUI.LabelField(rect,"Preparing isolated preview. Open the Game scene if it is not loaded.");
+        if(target!=null && showPath && track==ResultTrack.Complete && timeline.Celebration.pathMode==CelebrationPathMode.Arc)
+        {
+            float scale=Mathf.Min(rect.width/target.width,rect.height/target.height);
+            var fit=new Rect(rect.center-new Vector2(target.width,target.height)*scale*.5f,new Vector2(target.width,target.height)*scale);
+            GUI.BeginClip(fit); Handles.BeginGUI();
+            var motion=timeline.Celebration;
+            DrawArc(fit.size,motion.enterStart,motion.enterArcControl,motion.stopPosition,Color.cyan);
+            DrawArc(fit.size,motion.stopPosition,motion.exitArcControl,motion.exitEnd,Color.yellow);
+            Handles.EndGUI(); GUI.EndClip();
+        }
+    }
+
+    private static void DrawArc(Vector2 size,Vector2 start,Vector2 control,Vector2 end,Color color)
+    {
+        Handles.color=color;
+        Vector2 previous=new Vector2(start.x*size.x,(1-start.y)*size.y);
+        for(int i=1;i<=32;i++)
+        {
+            Vector2 p=CelebrationChoreography.Arc(start,control,end,i/32f);
+            Vector2 next=new Vector2(p.x*size.x,(1-p.y)*size.y);
+            Handles.DrawLine(previous,next); previous=next;
+        }
     }
 
     private void Play(ResultTrack value) { track=value;time=0;playing=true;previousTick=EditorApplication.timeSinceStartup; }

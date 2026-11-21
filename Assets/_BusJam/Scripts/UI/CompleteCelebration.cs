@@ -28,6 +28,9 @@ namespace BusJam.UI
         private readonly Vector3[] riderScales = new Vector3[3];
         private readonly Quaternion[] riderRotations = new Quaternion[3];
         private readonly Transform[] upperArms = new Transform[3], lowerArms = new Transform[3], heads = new Transform[3], thighs = new Transform[3];
+        private readonly Transform[] clipUpperArms = new Transform[3], clipLowerArms = new Transform[3];
+        private readonly Quaternion[] waveCenters = new Quaternion[3];
+        private readonly float[] waveRaises = new float[3];
         private readonly float[] riderHeights = new float[3];
         private readonly Transform[] feet = new Transform[3];
         private readonly Vector3[] footSoles = new Vector3[3], deckPositions = new Vector3[3];
@@ -73,11 +76,16 @@ namespace BusJam.UI
                 riderBodies[i] = passenger.PresentationBody;
                 waveRoots[i] = passenger.PresentationAnimator.gameObject;
                 Transform spine = waveRoots[i].transform.Find("YolcuRig/Root/Hips/Spine");
-                upperArms[i] = spine.Find("UpperArm.R"); lowerArms[i] = upperArms[i].Find("LowerArm.R");
+                clipUpperArms[i] = spine.Find("UpperArm.R"); clipLowerArms[i] = clipUpperArms[i].Find("LowerArm.R");
+                upperArms[i] = spine.Find(i % 2 == 0 ? "UpperArm.R" : "UpperArm.L");
+                lowerArms[i] = upperArms[i].GetChild(0);
                 heads[i] = spine.Find("Head"); thighs[i] = spine.parent.Find("Thigh.R");
                 feet[i] = spine.parent.Find("Thigh.L/Shin.L/Foot.L");
+                settings.wave.SampleAnimation(waveRoots[i], settings.wave.length * .125f);
+                waveCenters[i] = clipLowerArms[i].localRotation;
+                Vector3 direction = spine.InverseTransformDirection(clipUpperArms[i].up);
+                waveRaises[i] = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
                 settings.idle.SampleAnimation(waveRoots[i], 0);
-                heads[i].localScale = Vector3.one * .85f;
                 footSoles[i] = FindSole((SkinnedMeshRenderer)riderBodies[i], feet[i]);
                 riderHeights[i] = StandingHeight((SkinnedMeshRenderer)riderBodies[i], heads[i], feet[i].TransformPoint(footSoles[i]));
                 deckPositions[i] = bus.InverseTransformPoint(riders[i].parent.position);
@@ -196,8 +204,22 @@ namespace BusJam.UI
             radius = scale * 7;
         }
 
-        private static float Ease(AnimationCurve curve, float phase)
-            => phase <= 0 ? 0 : phase >= 1 ? 1 : Mathf.Clamp01(curve == null || curve.length == 0 ? phase : curve.Evaluate(phase));
+        private static float Ease(AnimationCurve curve, float phase, bool normalize = false)
+        {
+            if (phase <= 0) return 0;
+            if (phase >= 1) return 1;
+            if (curve == null || curve.length == 0) return phase;
+            float value = curve.Evaluate(phase);
+            // Preserve authored ascending or descending curve keys while traversing the arc forward.
+            if (normalize)
+            {
+                float start = curve.Evaluate(0), range = curve.Evaluate(1) - start;
+                value = Mathf.Abs(range) > .00001f ? (value - start) / range : phase;
+            }
+            return Mathf.Clamp01(value);
+        }
+
+        private Vector2 ScreenPoint(Vector2 point) => new Vector2((point.x * 2 - 1) * halfWidth, (point.y * 2 - 1) * halfHeight);
 
         public void Sample(float time)
         {
@@ -208,8 +230,10 @@ namespace BusJam.UI
             if (!camera.enabled)
             { cast.SetActive(true); camera.enabled = key.enabled = true; image.style.display = DisplayStyle.Flex; }
             Vector3 origin = stage.transform.position;
-            Vector2 stop = new Vector2((motion.stopPosition.x * 2 - 1) * halfWidth, (motion.stopPosition.y * 2 - 1) * halfHeight);
+            Vector2 stop = ScreenPoint(motion.stopPosition);
             Vector2 point = stop;
+            Vector2 tangent = Vector2.left;
+            bool arc = motion.pathMode == CelebrationPathMode.Arc;
             float moving = 0;
             bool entering = elapsed < motion.enterDuration;
             bool holding = !entering && elapsed < motion.enterDuration + motion.holdDuration;
@@ -217,7 +241,14 @@ namespace BusJam.UI
             {
                 float p = elapsed / motion.enterDuration;
                 float edge = motion.enterSide == CelebrationEnterSide.Left ? -halfWidth - radius : halfWidth + radius;
-                point.x = Mathf.Lerp(edge, stop.x, Ease(motion.enterEase, p));
+                float progress = Ease(motion.enterEase, p, arc);
+                if (arc)
+                {
+                    Vector2 start = ScreenPoint(motion.enterStart), control = ScreenPoint(motion.enterArcControl);
+                    point = CelebrationChoreography.Arc(start, control, stop, progress);
+                    tangent = CelebrationChoreography.ArcTangent(start, control, stop, progress);
+                }
+                else point.x = Mathf.Lerp(edge, stop.x, progress);
                 moving = 1 - p;
             }
             else if (!holding)
@@ -225,12 +256,20 @@ namespace BusJam.UI
                 float p = motion.exitDuration > 0 ? (elapsed - motion.enterDuration - motion.holdDuration) / motion.exitDuration : 1;
                 Vector2 exit = motion.exitDirection == CelebrationExitDirection.Down ? new Vector2(stop.x, -halfHeight - radius)
                     : new Vector2(motion.exitDirection == CelebrationExitDirection.Left ? -halfWidth - radius : halfWidth + radius, stop.y);
-                point = Vector2.Lerp(stop, exit, Ease(motion.exitEase, p));
+                float progress = Ease(motion.exitEase, p, arc);
+                if (arc)
+                {
+                    Vector2 end = ScreenPoint(motion.exitEnd), control = ScreenPoint(motion.exitArcControl);
+                    point = CelebrationChoreography.Arc(stop, control, end, progress);
+                    tangent = CelebrationChoreography.ArcTangent(stop, control, end, progress);
+                }
+                else point = Vector2.Lerp(stop, exit, progress);
                 moving = p;
             }
             point.y += Mathf.Sin(elapsed * 19) * cast.transform.localScale.y * motion.busBounceAmplitude * moving;
             cast.transform.position = origin + camera.transform.right * point.x + camera.transform.up * point.y;
-            cast.transform.localRotation = Quaternion.identity;
+            float tilt = arc ? Mathf.Clamp(Mathf.Atan2(-tangent.y, Mathf.Abs(tangent.x)) * Mathf.Rad2Deg, -motion.pathTilt, motion.pathTilt) * moving : 0;
+            cast.transform.rotation = Quaternion.AngleAxis(tilt, camera.transform.forward);
             // Freeze the driving pose during the stop; exhaust and riders keep their own clocks.
             float driveTime = entering ? elapsed : holding ? motion.enterDuration : elapsed - motion.holdDuration;
             settings.drive.SampleAnimation(driveRoot, driveTime % settings.drive.length);
@@ -239,9 +278,15 @@ namespace BusJam.UI
             for (int i = 0; i < riders.Length; i++)
             {
                 float riderTime = Mathf.Max(0, holdTime - i * motion.riderHopStagger);
-                settings.wave.SampleAnimation(waveRoots[i], riderTime % settings.wave.length);
-                Quaternion upper = upperArms[i].localRotation, lower = lowerArms[i].localRotation;
+                settings.wave.SampleAnimation(waveRoots[i], riderTime * motion.waveSpeed % settings.wave.length);
+                Quaternion upper = Quaternion.AngleAxis(motion.waveArmRaise - waveRaises[i], Vector3.forward) * clipUpperArms[i].localRotation;
+                Quaternion lower = Quaternion.SlerpUnclamped(waveCenters[i], clipLowerArms[i].localRotation, motion.waveAmplitude / 25);
                 settings.idle.SampleAnimation(waveRoots[i], riderTime % settings.idle.length);
+                if (i % 2 != 0)
+                {
+                    upper = new Quaternion(upper.x, -upper.y, -upper.z, upper.w);
+                    lower = new Quaternion(lower.x, -lower.y, -lower.z, lower.w);
+                }
                 upperArms[i].localRotation = upper; lowerArms[i].localRotation = lower;
                 float cycle = Mathf.Repeat(riderTime * motion.riderHopFrequency, 1);
                 float passengerHeight = riderHeights[i] * cast.transform.localScale.y;
@@ -257,12 +302,6 @@ namespace BusJam.UI
                 riders[i].position = bus.TransformPoint(deckPositions[i]);
                 float soleHeight = Vector3.Dot(feet[i].TransformPoint(footSoles[i]) - riders[i].position, bus.up);
                 riders[i].position += bus.up * (hop - soleHeight);
-                Vector3 raisedDirection = bus.up + camera.transform.right * (.25f + Mathf.Sin(riderTime * 16 + i) * .15f);
-                upperArms[i].rotation = Quaternion.FromToRotation(upperArms[i].up, raisedDirection) * upperArms[i].rotation;
-                lowerArms[i].rotation = Quaternion.FromToRotation(lowerArms[i].up, raisedDirection) * lowerArms[i].rotation;
-                upperArms[i].localScale = new Vector3(1, 1.7f, 1);
-                lowerArms[i].localScale = new Vector3(1, 1.2f, 1);
-                heads[i].localScale = Vector3.one * .85f;
             }
         }
 
