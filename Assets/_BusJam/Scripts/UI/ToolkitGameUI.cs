@@ -31,12 +31,16 @@ namespace BusJam.UI
         private enum PendingAction { None, Restart, MainMenu }
         private PendingAction pending;
         private bool subscribed;
+        // UIDocument builds its tree in its own OnEnable; Unity does not order sibling OnEnable calls,
+        // so after a domain reload ours can run first. Bind on the first Update that sees the tree.
+        private bool waitingForTree;
         private int lastTime = -1, lastLives = -1, lastLifeSeconds = -1, lastCoins = -1;
 
         private void OnEnable()
         {
             if (document == null || gameManager == null || livesSystem == null || levelTimer == null || layoutMode == null) return;
-            CacheElements();
+            if (!CacheElements()) { waitingForTree = true; return; }
+            waitingForTree = false;
             BindResults(true);
             root.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
             root.RegisterCallback<ClickEvent>(OnButtonSound, TrickleDown.TrickleDown);
@@ -63,11 +67,19 @@ namespace BusJam.UI
             ApplyLayout(layoutMode.Mode);
         }
 
-        private void CacheElements()
+        private void Update()
         {
-            if (documentRoot == document.rootVisualElement) return;
+            if (waitingForTree && document.rootVisualElement?.Q("ui-root") != null) OnEnable();
+        }
+
+        /// <summary>Returns false until the UIDocument tree exists; never binds to a half-built tree.</summary>
+        private bool CacheElements()
+        {
+            var current = document.rootVisualElement;
+            if (current == null || current.Q("ui-root") == null) return false;
+            if (documentRoot == current && root != null) return true;
             KillTweens();
-            documentRoot = document.rootVisualElement;
+            documentRoot = current;
             documentRoot.pickingMode = PickingMode.Ignore;
             root = documentRoot.Q("ui-root");
             VectorArt.Apply(root);
@@ -85,6 +97,7 @@ namespace BusJam.UI
             livesCount = root.Q<Label>("lives-count"); lifeCountdown = root.Q<Label>("life-countdown"); coinCount = root.Q<Label>("coin-count");
             readyPrompt = root.Q<Label>("ready-prompt"); confirmText = root.Q<Label>("confirm-text"); soundToggle = root.Q<Toggle>("sound-toggle");
             CacheResults();
+            return true;
         }
 
         private void BindButtons(bool bind)
@@ -111,6 +124,7 @@ namespace BusJam.UI
 
         private void OnDisable()
         {
+            if (waitingForTree) { waitingForTree = false; return; }
             if (root == null) return;
             root.UnregisterCallback<GeometryChangedEvent>(OnGeometryChanged);
             root.UnregisterCallback<ClickEvent>(OnButtonSound, TrickleDown.TrickleDown);
