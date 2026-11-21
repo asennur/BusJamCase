@@ -133,8 +133,8 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .confetti-star { width: 54px; height: 54px; background-image: url("Vector/fx_confetti_star.svg"); }
 .confetti-heart { width: 48px; height: 48px; background-image: url("Vector/fx_confetti_heart.svg"); }
 .confetti-disc { width: 28px; height: 28px; background-image: url("Vector/fx_confetti_disc.svg"); }
-.flying-coin { width: 68px; height: 68px; background-image: url("Vector/icon_coin.svg"); }
-.result-sparkle { width: 72px; height: 72px; background-image: url("Vector/fx_sparkle.svg"); }
+.flying-coin { width: 58px; height: 58px; background-image: url("Vector/fx_flying_coin.svg"); }
+.result-sparkle { width: 38px; height: 38px; background-image: url("Vector/fx_result_sparkle.svg"); }
 .continue-wrap { width: 338px; max-width: 100%; height: 146px; min-height: 110px; flex-shrink: 0; }
 .continue-wrap > .art-button { width: 100%; height: 100%; }
 .continue-glow { background-image: url("Vector/glow_soft.svg"); -unity-background-scale-mode: stretch-to-fill; -unity-background-image-tint-color: #ffe143; scale: 1.4 2.3; }
