@@ -14,7 +14,7 @@ using UnityEngine.UIElements;
 /// <summary>Isolated Edit-mode evidence; never saves a scene or writes player progress.</summary>
 public static class CelebrationReview
 {
-    private const string Folder = "C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/celeb2";
+    private const string Folder = "C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/celeb3";
     private const BindingFlags Flags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
     private static readonly int[,] Sizes = {{1080,1920},{1080,2400},{1170,2532},{1536,2048},{1080,1080},{1768,2208},{2208,1768},{1920,1080},{2560,1080}};
     private static ToolkitGameUI game;
@@ -28,6 +28,7 @@ public static class CelebrationReview
     private static bool running;
     private sealed class Shot { public int Width, Height; public float Time; public string Name; }
     private static readonly List<Shot> Shots = new List<Shot>();
+    private static readonly List<string> Measurements = new List<string>();
     private static object Call(object obj, string name, params object[] args) => obj.GetType().GetMethod(name, Flags).Invoke(obj, args);
     private static object Review(string name, params object[] args) => typeof(ResultScreenReview).GetMethod(name, Flags).Invoke(null, args);
     private static T Field<T>(string name) => (T)typeof(ResultScreenReview).GetField(name, Flags).GetValue(null);
@@ -75,7 +76,8 @@ public static class CelebrationReview
     {
         Guard(); if (running) throw new InvalidOperationException("Already capturing.");
         Directory.CreateDirectory(Folder + "/ours"); Directory.CreateDirectory(Folder + "/frames");
-        Shots.Clear(); index = tick = 0;
+        Shots.Clear(); Measurements.Clear(); index = tick = 0;
+        Measurements.Add("shot\tresolution\toffset_s\trail_top_px\twheel_bottom_px\trail_to_wheel_percent\trider\tfoot_above_deck_world\tfoot_body_ratio\tfoot_screen_y_px\tdeck_screen_y_px\thead_top_px\ttitle_bottom_px");
         foreach (float offset in new[] {0, .3f, .6f, .9f, 1.2f})
             Shots.Add(new Shot {Width=1080,Height=1920,Time=1.05f+offset,Name="ours/timeline-"+offset.ToString("0.0",System.Globalization.CultureInfo.InvariantCulture)});
         if (!quick)
@@ -83,6 +85,8 @@ public static class CelebrationReview
             for (int i=0;i<Sizes.GetLength(0);i++)
                 foreach (bool mid in new[] {true,false}) Shots.Add(new Shot {Width=Sizes[i,0],Height=Sizes[i,1],Time=mid?1.725f:3.45f,
                     Name="ours/"+(mid?"mid-":"end-")+Sizes[i,0]+"x"+Sizes[i,1]});
+            for (int i=0;i<Sizes.GetLength(0);i++) Shots.Add(new Shot {Width=Sizes[i,0],Height=Sizes[i,1],Time=1.95f,
+                Name="ours/overlap-"+Sizes[i,0]+"x"+Sizes[i,1]});
             for (int frame=0;frame<=105;frame++) Shots.Add(new Shot {Width=1080,Height=1920,Time=frame/30f,Name="frames/frame-"+frame.ToString("D3")});
         }
         running = true; EditorApplication.update += Step;
@@ -103,14 +107,92 @@ public static class CelebrationReview
             if (tick >= 3) { Sample(shot.Time); Render(); }
             if (++tick < 6) return;
             Review("SaveTarget", Folder + "/" + shot.Name + ".png");
+            if (bus.Visible && shot.Name.StartsWith("ours/", StringComparison.Ordinal)) MeasurePose(shot);
             if (shot.Name.StartsWith("ours/mid-", StringComparison.Ordinal)) SaveBusMask(shot.Name.Substring(9));
             tick = 0; index++;
             if (index == Shots.Count)
             {
                 Stop(); File.WriteAllText(Folder+"/captures-done.txt",index+" captures, Unity "+Application.unityVersion+", Edit mode only.");
+                File.WriteAllLines(Folder+"/pose-measurements.tsv",Measurements);
             }
         }
         catch (Exception error) { File.WriteAllText(Folder+"/capture-error.txt",error.ToString()); Stop(); }
+    }
+
+    private static T BusField<T>(string name) => (T)typeof(CompleteCelebration).GetField(name, Flags).GetValue(bus);
+    private static Vector3[] SkinVertices(SkinnedMeshRenderer body)
+    {
+        var mesh = new Mesh();
+        try
+        {
+            body.BakeMesh(mesh, true);
+            var points = mesh.vertices;
+            for (int i=0;i<points.Length;i++) points[i]=body.transform.TransformPoint(points[i]);
+            return points;
+        }
+        finally { UnityEngine.Object.DestroyImmediate(mesh); }
+    }
+
+    private static void MeasurePose(Shot shot)
+    {
+        var body=BusField<Renderer>("busBody") as SkinnedMeshRenderer;
+        Vector3[] vertices=SkinVertices(body);
+        float railTop=0, wheelBottom=shot.Height;
+        foreach(int i in body.sharedMesh.GetIndices(9)) railTop=Mathf.Max(railTop,bus.Camera.WorldToScreenPoint(vertices[i]).y);
+        foreach(int i in body.sharedMesh.GetIndices(6)) wheelBottom=Mathf.Min(wheelBottom,bus.Camera.WorldToScreenPoint(vertices[i]).y);
+        var feet=BusField<Transform[]>("feet"); var soles=BusField<Vector3[]>("footSoles");
+        var decks=BusField<Vector3[]>("deckPositions"); var heights=BusField<float[]>("riderHeights");
+        var vehicle=BusField<Transform>("bus"); var riders=BusField<Renderer[]>("riderBodies");
+        var heads=BusField<Transform[]>("heads");
+        var cast=BusField<GameObject>("cast");
+        float uiScale=shot.Width/document.rootVisualElement.resolvedStyle.width;
+        float titleBottom=Root.Q("complete-heading").worldBound.yMax*uiScale;
+        for(int i=0;i<3;i++)
+        {
+            Vector3 sole=feet[i].TransformPoint(soles[i]), deck=vehicle.TransformPoint(decks[i]);
+            float lift=Vector3.Dot(sole-deck,vehicle.up), headTop=0;
+            var skin=(SkinnedMeshRenderer)riders[i];
+            var points=SkinVertices(skin); var weights=skin.sharedMesh.boneWeights;
+            int head=Array.IndexOf(skin.bones,heads[i]);
+            for(int v=0;v<points.Length;v++) if(weights[v].boneIndex0==head && weights[v].weight0>.5f)
+                headTop=Mathf.Max(headTop,bus.Camera.WorldToScreenPoint(points[v]).y);
+            string[] values={shot.Name,shot.Width+"x"+shot.Height,(shot.Time-CompleteCelebration.StartTime).ToString("F3"),
+                (shot.Height-railTop).ToString("F2"),(shot.Height-wheelBottom).ToString("F2"),((railTop-wheelBottom)/shot.Height*100).ToString("F3"),
+                i.ToString(),lift.ToString("F5"),(lift/(heights[i]*cast.transform.localScale.y)).ToString("F5"),
+                (shot.Height-bus.Camera.WorldToScreenPoint(sole).y).ToString("F2"),(shot.Height-bus.Camera.WorldToScreenPoint(deck).y).ToString("F2"),
+                (shot.Height-headTop).ToString("F2"),titleBottom.ToString("F2")};
+            Measurements.Add(string.Join("\t",values));
+        }
+    }
+
+    public static string VerifyMotion()
+    {
+        Guard(); Assert(!running,"Wait for captures."); Create(1080,1920);
+        try
+        {
+            var feet=BusField<Transform[]>("feet"); var soles=BusField<Vector3[]>("footSoles");
+            var decks=BusField<Vector3[]>("deckPositions"); var heights=BusField<float[]>("riderHeights");
+            var vehicle=BusField<Transform>("bus"); var cast=BusField<GameObject>("cast");
+            int[] grounded=new int[3]; float[] peaks=new float[3]; int maxAir=0;
+            for(int frame=0;frame<600;frame++)
+            {
+                bus.Sample(CompleteCelebration.StartTime+frame*.001f); int air=0;
+                for(int i=0;i<3;i++)
+                {
+                    float lift=Vector3.Dot(feet[i].TransformPoint(soles[i])-vehicle.TransformPoint(decks[i]),vehicle.up);
+                    float ratio=lift/(heights[i]*cast.transform.localScale.y);
+                    peaks[i]=Mathf.Max(peaks[i],ratio);
+                    if(ratio<=.001f) grounded[i]++; else air++;
+                }
+                maxAir=Mathf.Max(maxAir,air);
+            }
+            Assert(maxAir<=2,"Three riders airborne together.");
+            for(int i=0;i<3;i++) Assert(grounded[i]>=360 && peaks[i]<=.501f,"Grounded fraction or hop peak out of range.");
+            string report="PASS: 600 samples over a full 0.6 s cycle. Max simultaneous airborne riders: "+maxAir+".\n";
+            for(int i=0;i<3;i++) report+="Rider "+i+": grounded "+(grounded[i]/6f).ToString("F2")+"%; peak "+peaks[i].ToString("F4")+" x cached standing body height.\n";
+            File.WriteAllText(Folder+"/motion-validation.txt",report); return report;
+        }
+        finally { Cleanup(); }
     }
 
     private static void SaveBusMask(string size)

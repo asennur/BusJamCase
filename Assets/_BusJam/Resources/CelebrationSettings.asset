@@ -26,7 +26,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: affd5ada359936549a8a712185dfce9c, type: 2}
   - {fileID: 2100000, guid: a6f899608bbd6894c91c04e136da1c79, type: 2}
   - {fileID: 2100000, guid: 8b0665dba53bd5247adffc0e89b986ce, type: 2}
-  cameraPitch: -5
+  cameraPitch: -7
   fieldOfView: 35
   keyColor: {r: 1, g: 0.94, b: 0.86, a: 1}
   keyIntensity: 0.75
