@@ -46,7 +46,7 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .gear:hover, .close-button:hover { -unity-background-image-tint-color: rgb(230, 240, 255); }
 .gear:active, .close-button:active { scale: 0.95 0.95; }
 .start-body { flex-grow: 1; align-items: center; justify-content: space-around; padding-bottom: 140px; }
-.logo { width: 100%; max-width: 1000px; height: 550px; flex-shrink: 1; background-image: url("../Art/UI/Renkli Bus Jam Oyun Logosu.png"); -unity-background-scale-mode: scale-to-fit; }
+.logo { width: 100%; max-width: 1000px; height: 550px; flex-shrink: 1; background-image: url("Vector/logo.svg"); -unity-background-scale-mode: scale-to-fit; }
 .art-button {
     width: 600px; max-width: 100%; height: 170px; min-height: 110px;
     flex-shrink: 0; font-size: 64px;
@@ -108,7 +108,7 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .result-title { max-width: 100%; margin: 0; padding: 10px 8px; white-space: normal; -unity-font-definition: url("Fonts/LilitaOne.asset"); font-size: 108px; color: rgb(255, 221, 116); -unity-text-outline-width: 5px; -unity-text-outline-color: rgb(99, 40, 74); text-shadow: 0 8px 0 rgba(44, 16, 54, 0.8); }
 .result-rays { background-image: url("Vector/glow_rays.svg"); -unity-background-scale-mode: scale-to-fit; scale: 1.5 1.5; }
 .reward-content { width: 440px; max-width: 90%; height: 410px; min-height: 240px; flex-shrink: 1; align-items: center; justify-content: center; margin-bottom: 35px; }
-.reward-pile { width: 100%; height: 72%; background-image: url("../Art/UI/coin_pile.png"); -unity-background-scale-mode: scale-to-fit; }
+.reward-pile { width: 100%; height: 72%; background-image: url("Vector/coin_pile.svg"); -unity-background-scale-mode: scale-to-fit; }
 .reward-label { font-size: 100px; color: rgb(255, 230, 135); margin: 0; padding: 0; }
 .reward-flash { background-image: url("Vector/glow_soft.svg"); -unity-background-scale-mode: scale-to-fit; }
 .pooled-effect { position: absolute; left: 0; top: 0; -unity-background-scale-mode: scale-to-fit; }
@@ -132,7 +132,7 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .tutorial-tip { width: 900px; max-width: 92%; padding: 35px 45px; background-image: url("Vector/panel_tip.svg"); -unity-background-scale-mode: stretch-to-fill; }
 .tutorial-hint { margin: 0; padding: 0; white-space: normal; font-size: 46px; }
 .tutorial-pointer { position: absolute; left: 0; top: 0; width: 0; height: 0; }
-.tutorial-hand { position: absolute; left: -109px; top: -226px; width: 180px; height: 254px; background-image: url("../Art/UI/fx_tap_hand.png"); -unity-background-scale-mode: scale-to-fit; transform-origin: 61% 89%; }
+.tutorial-hand { position: absolute; left: -109px; top: -226px; width: 180px; height: 254px; background-image: url("Vector/fx_tap_hand.svg"); -unity-background-scale-mode: scale-to-fit; transform-origin: 61% 89%; }
 .tutorial-ring { position: absolute; left: -50px; top: -50px; width: 100px; height: 100px; border-width: 5px; border-color: rgb(255, 232, 157); border-radius: 50px; background-image: url("Vector/glow_soft.svg"); -unity-background-scale-mode: scale-to-fit; }
 .tutorial-dot { width: 24px; height: 24px; background-image: url("Vector/fx_sparkle.svg"); }
 .square .result-body, .landscape .result-body { padding-bottom: 80px; }
