@@ -19,17 +19,29 @@
                     <art:VectorButton name="start-button" text="Level 1" class="art-button green start-button" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="hud" class="top-bar hud hidden" picking-mode="Ignore">
-                <ui:VisualElement class="level-badge" picking-mode="Ignore">
-                    <ui:Label text="Level" class="level-title" picking-mode="Ignore" />
-                    <ui:Label name="level-number" text="1" class="level-number" picking-mode="Ignore" />
+            <ui:VisualElement name="hud" class="fill hud hidden" picking-mode="Ignore">
+                <ui:VisualElement name="hud-top" class="hud-column hud-top" picking-mode="Ignore">
+                    <ui:VisualElement class="level-badge" picking-mode="Ignore">
+                        <ui:Label text="Level" class="level-title" picking-mode="Ignore" />
+                        <ui:Label name="level-number" text="1" class="level-number" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="timer-counter" picking-mode="Ignore">
+                        <ui:Label name="timer-level" text="Level 1" class="timer-level" picking-mode="Ignore" />
+                        <ui:VisualElement class="clock-icon" picking-mode="Ignore" />
+                        <ui:Label name="timer-text" text="0:30" class="timer-text" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Button name="pause-settings" class="gear" tooltip="Settings" />
                 </ui:VisualElement>
-                <ui:VisualElement class="timer-counter" picking-mode="Ignore">
-                    <ui:Label name="timer-level" text="Level 1" class="timer-level" picking-mode="Ignore" />
-                    <ui:VisualElement class="clock-icon" picking-mode="Ignore" />
-                    <ui:Label name="timer-text" text="0:30" class="timer-text" picking-mode="Ignore" />
+                <ui:VisualElement name="booster-bar" class="hud-column booster-bar">
+                    <ui:VisualElement class="booster-track" picking-mode="Ignore" />
+                    <ui:VisualElement class="booster-lock" picking-mode="Ignore"><ui:Label text="Level 8" class="booster-label" picking-mode="Ignore" /></ui:VisualElement>
+                    <ui:VisualElement class="booster-lock" picking-mode="Ignore"><ui:Label text="Level 15" class="booster-label" picking-mode="Ignore" /></ui:VisualElement>
+                    <ui:VisualElement class="booster-lock" picking-mode="Ignore"><ui:Label text="Level 25" class="booster-label" picking-mode="Ignore" /></ui:VisualElement>
+                    <ui:VisualElement class="booster-lock" picking-mode="Ignore"><ui:Label text="Level 35" class="booster-label" picking-mode="Ignore" /></ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="pause-settings" class="gear" tooltip="Settings" />
+                <ui:VisualElement name="ad-banner" class="ad-banner">
+                    <ui:Label text="AD" class="ad-label" picking-mode="Ignore" />
+                </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="ready-overlay" class="fill ready-overlay hidden" picking-mode="Ignore">
                 <ui:Label name="ready-prompt" text="Tap to start" class="ready-prompt" picking-mode="Ignore" />

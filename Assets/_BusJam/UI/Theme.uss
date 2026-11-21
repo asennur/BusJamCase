@@ -67,8 +67,6 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
     width: 106px; height: 110px; flex-shrink: 0; justify-content: center;
 }
 .level-title { height: 31px; font-size: 28px; padding: 0; margin: 0; color: #241832; -unity-text-outline-width: 0; text-shadow: 0 0 0 transparent; }
-.hud { padding-left: 24.5%; padding-right: 24.5%; padding-top: 68px; height: 182px; }
-.hud > .gear { margin-left: 0; }
 .level-number { height: 62px; font-size: 70px; padding: 0; margin: 0; -unity-text-outline-color: #211b26; -unity-text-outline-width: 2.5px; text-shadow: 0 2px 0 #45364c; }
 .timer-counter {
     width: 216px; height: 88px; flex-shrink: 0; flex-direction: row; align-items: center; padding-right: 10px;
@@ -114,7 +112,6 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .square .start-bar, .landscape .start-bar { justify-content: flex-end; }
 .square .start-bar > .gear, .landscape .start-bar > .gear { margin-left: 0; }
 .square .start-bar, .landscape .start-bar { padding-top: 0; }
-.square .hud, .landscape .hud { padding-left: 42px; padding-right: 42px; }
 /* Result art is constructed from glyph paths and stays sharp at every viewport. */
 .result-overlay { background-color: rgba(26, 11, 46, 0.65); }
 .result-bar { justify-content: flex-end; flex-shrink: 0; }
@@ -371,3 +368,26 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 
 /* ZHUD-2: live level caption above the counter surface. */
 .timer-level { position: absolute; left: 42px; right: 0; top: -18px; height: 27px; margin: 0; padding: 0; font-size: 21px; color: white; -unity-text-outline-color: #10121c; -unity-text-outline-width: 1.2px; text-shadow: 0 2px 0 #081423; }
+
+/* T2: reference phone HUD. Values are reference pixels (739x1600 capture); ToolkitGameUI.Layout scales the columns by screen height. */
+.hud-column { position: absolute; left: 50%; width: 739px; translate: -50% 0; }
+.hud-top { top: 0; height: 100px; transform-origin: 50% 0; }
+.hud-top > .level-badge { position: absolute; left: 90px; top: 0; width: 100px; height: 100px; padding-top: 2px; }
+.hud-top .level-title { height: 26px; font-size: 26px; color: #1d3c91; -unity-text-outline-width: 0; text-shadow: 0 0 0 transparent; }
+.hud-top .level-number { height: 52px; font-size: 54px; color: white; -unity-text-outline-color: #15141d; -unity-text-outline-width: 3px; text-shadow: 0 2px 0 rgba(21, 20, 29, 0.45); }
+.hud-top > .timer-counter { position: absolute; left: 289px; top: 22px; width: 160px; height: 56px; padding-right: 8px; }
+.hud-top .clock-icon { width: 54px; height: 56px; }
+.hud-top .timer-text { font-size: 30px; }
+.hud-top .timer-level { display: none; }
+.hud-top > .timer-counter > .raster-panel-art.vector-header { left: 28px; top: 8px; bottom: 6px; -unity-slice-scale: .24px; }
+.hud-top > .gear { position: absolute; left: 575px; top: 17px; width: 79px; height: 81px; }
+.booster-bar { height: 111px; flex-direction: row; padding-left: 70px; transform-origin: 50% 100%; }
+.booster-track { position: absolute; left: 48px; right: 49px; top: 18px; height: 86px; background-image: url("Vector/booster_bar.svg"); -unity-background-scale-mode: stretch-to-fill; }
+.booster-lock { width: 127px; height: 111px; margin-right: 31px; flex-shrink: 0; background-image: url("Vector/booster_locked.svg"); -unity-background-scale-mode: stretch-to-fill; }
+.booster-label {
+    position: absolute; left: 7px; top: 83px; width: 111px; height: 28px; margin: 0; padding: 0;
+    background-color: #f7b80f; border-radius: 9px; border-width: 2px; border-color: #c27b04;
+    font-size: 23px; color: #8c1212; -unity-text-outline-width: 0; text-shadow: 0 0 0 transparent;
+}
+.ad-banner { position: absolute; left: 0; right: 0; bottom: 0; height: 93px; background-color: rgb(251, 251, 251); border-top-width: 1px; border-color: rgb(141, 141, 141); align-items: center; justify-content: center; }
+.ad-label { font-size: 22px; color: rgba(0, 0, 0, 0.3); -unity-text-outline-width: 0; text-shadow: 0 0 0 transparent; }

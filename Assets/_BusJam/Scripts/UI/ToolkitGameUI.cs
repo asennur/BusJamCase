@@ -217,7 +217,7 @@ namespace BusJam.UI
             startButton.style.fontSize = Mathf.Min(76f, 720f / textBuffer.Length);
             textBuffer.Clear().Append(number);
             levelNumber.text = textBuffer.ToString();
-            levelNumber.style.fontSize = Mathf.Min(70f, 260f / textBuffer.Length);
+            levelNumber.style.fontSize = Mathf.Min(54f, 150f / textBuffer.Length);
         }
 
         private void ShowTime(int seconds)
@@ -285,6 +285,7 @@ namespace BusJam.UI
             root.style.paddingBottom = height * safe.yMin;
             // The inset is measured from the full screen; safe-area padding must not add it twice.
             startBar.style.top = height * Mathf.Max(0, startTopInset - (1f - safe.yMax));
+            LayoutHud(safe, width, height);
         }
 
         // Without lives Play stays instant so the existing warning shows; otherwise it fades into Ready.
