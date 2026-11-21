@@ -6,7 +6,7 @@ namespace BusJam.Gameplay
 {
     /// <summary>
     /// Displays one bus and tracks seat reservations separately from passenger arrivals.
-    /// Controls drive, brake and door clips; seated passengers follow their seat bones.
+    /// Doors stay closed; they open for each boarding passenger and close once nobody is entering.
     /// </summary>
     public class Bus : MonoBehaviour
     {
@@ -23,8 +23,11 @@ namespace BusJam.Gameplay
         [SerializeField] private GameObject[] seatIndicators;
         [SerializeField] private Animator animator;
         [SerializeField, Min(0f)] private float crossFade = 0.05f;
-        [Tooltip("Authored door-close clip duration; compressed into the anticipation.")]
-        [SerializeField, Min(0f)] private float doorCloseDuration = 0.16666667f;
+        [Tooltip("Door-close state duration (clip length / state speed); compressed into the anticipation.")]
+        [SerializeField, Min(0f)] private float doorCloseDuration = 0.11111111f;
+        [Tooltip("How long the door stays open after the last passenger starts entering.")]
+        [SerializeField, Min(0f)] private float doorHoldTime = 0.22f;
+        [SerializeField, Range(0f, 1f)] private float doorOpenHeadStart = 0.3f;
         [SerializeField] private Transform model;
         [SerializeField] private Transform[] wheels;
         [SerializeField, Min(0.01f)] private float wheelRadius = 0.24f;
@@ -46,6 +49,8 @@ namespace BusJam.Gameplay
         private float motionTime;
         private bool arriving, motionActive;
         private Sequence anticipation;
+        private Tween doorCloseTimer;
+        private bool doorOpen;
         private Passenger[] bufferedPassengers;
         private TweenCallback[] bufferedCallbacks;
         private bool idleShake = true;
@@ -69,6 +74,7 @@ namespace BusJam.Gameplay
             seatedPassengers = new Passenger[seatPoints.Length];
             bufferedPassengers = new Passenger[seatPoints.Length];
             bufferedCallbacks = new TweenCallback[seatPoints.Length];
+            doorCloseTimer = DOVirtual.DelayedCall(doorHoldTime, ShutDoor, false).SetAutoKill(false).Pause();
             wheelRestRotations = new Quaternion[wheels == null ? 0 : wheels.Length];
             for (int i = 0; i < wheelRestRotations.Length; i++)
                 wheelRestRotations[i] = wheels[i].localRotation;
@@ -88,11 +94,16 @@ namespace BusJam.Gameplay
             DOTween.Kill(this);
             transform.DOKill();
             anticipation?.Pause();
+            doorCloseTimer?.Pause();
             motionActive = false;
             RestoreModel();
         }
 
-        private void OnDestroy() => anticipation?.Kill();
+        private void OnDestroy()
+        {
+            anticipation?.Kill();
+            doorCloseTimer?.Kill();
+        }
 
         private void LateUpdate()
         {
@@ -128,6 +139,8 @@ namespace BusJam.Gameplay
             System.Array.Clear(bufferedCallbacks, 0, bufferedCallbacks.Length);
             DOTween.Kill(this);
             anticipation?.Pause();
+            doorCloseTimer?.Pause();
+            doorOpen = false;
             RestoreModel();
             Play(IdleHash);
 
@@ -156,18 +169,39 @@ namespace BusJam.Gameplay
                 TweenCallback callback = bufferedCallbacks[i];
                 bufferedPassengers[i] = null;
                 bufferedCallbacks[i] = null;
-                passenger.EnterBus(doorEntry, seatPoints[i], callback);
+                Enter(i, passenger, callback);
             }
         }
 
         public void BoardWhenReady(int seatIndex, Passenger passenger, TweenCallback onSeated)
         {
-            if (IsAtDoor) passenger.EnterBus(doorEntry, seatPoints[seatIndex], onSeated);
+            if (IsAtDoor) Enter(seatIndex, passenger, onSeated);
             else
             {
                 bufferedPassengers[seatIndex] = passenger;
                 bufferedCallbacks[seatIndex] = onSeated;
             }
+        }
+
+        /// <summary>Opens the door for a passenger standing at it; the door closes after the last one walks in.</summary>
+        public void Enter(int seatIndex, Passenger passenger, TweenCallback onSeated)
+        {
+            if (!doorOpen && animator != null)
+            {
+                doorOpen = true;
+                // No crossfade and a head start: the passenger is already at the door.
+                Play(DoorOpenHash);
+                animator.Play(DoorOpenHash, 0, doorOpenHeadStart);
+            }
+            doorCloseTimer?.Restart();
+            passenger.EnterBus(doorEntry, seatPoints[seatIndex], onSeated);
+        }
+
+        private void ShutDoor()
+        {
+            if (!doorOpen) return;
+            doorOpen = false;
+            Play(DoorCloseHash);
         }
 
         public void AnticipateDeparture()
@@ -219,7 +253,7 @@ namespace BusJam.Gameplay
         public void AllowApproach()
         {
             CanApproach = true;
-            PlayStop(true);
+            PlayStop();
         }
 
         public void EndMotion()
@@ -237,27 +271,21 @@ namespace BusJam.Gameplay
             Play(DriveHash);
         }
 
-        /// <summary>Opens during the final settling motion; readiness still belongs to the station.</summary>
-        public void PlayStop(bool atDoor, System.Action onReady = null)
+        /// <summary>Stops with closed doors; passengers open them on arrival.</summary>
+        public void PlayStop()
         {
             DOTween.Kill(this);
-            if (!atDoor || animator == null)
-            {
-                Play(IdleHash);
-                onReady?.Invoke();
-                return;
-            }
-
-            Play(DoorOpenHash);
-            onReady?.Invoke();
+            Play(IdleHash);
         }
 
-        /// <summary>Closes the full bus and returns the delay before departure.</summary>
+        /// <summary>Closes a still-open door before departure and returns the delay it needs.</summary>
         public float CloseDoor()
         {
-            if (animator == null)
+            doorCloseTimer?.Pause();
+            if (animator == null || !doorOpen)
                 return 0f;
 
+            doorOpen = false;
             DOTween.Kill(this);
             Play(DoorCloseHash);
             animator.Play(DoorCloseHash, 0, 0f);

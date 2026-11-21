@@ -192,7 +192,7 @@ namespace BusJam.Gameplay
                         bus.SetAtDoor(true);
                         BusArrived?.Invoke(bus);
                     }
-                    else bus.PlayStop(false);
+                    else bus.PlayStop();
                 });
         }
     }

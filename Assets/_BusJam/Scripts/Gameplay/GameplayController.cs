@@ -185,11 +185,11 @@ namespace BusJam.Gameplay
 
             if (toBus)
             {
-                Transform seatPoint = bus.ReserveSeat(out int seatIndex);
+                bus.ReserveSeat(out int seatIndex);
                 worldPathBuffer.Add(bus.DoorEntry.position);
                 passenger.RunTo(worldPathBuffer, runSpeed, () =>
                 {
-                    passenger.EnterBus(bus.DoorEntry, seatPoint, () => OnSeatArrived(bus, seatIndex, passenger));
+                    bus.Enter(seatIndex, passenger, () => OnSeatArrived(bus, seatIndex, passenger));
                 });
             }
             else if (hasFreeSlot)

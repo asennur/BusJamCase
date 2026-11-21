@@ -136,10 +136,12 @@ Bus movement never locks normal passenger input. Seat/slot reservations happen o
 ### Continuous bus flow (ZJUICE-A, 20 November 2026)
 
 - Nonfinal fill starts a reusable 0.08-second model squash/recovery; the existing door-close clip is compressed into that interval. Departure then accelerates with InQuad over the existing 0.3 seconds. The next bus starts 0.12 seconds into departure, giving 60% movement overlap; followers start 0.04 seconds apart. Arrival remains 0.3 seconds with OutCubic, zero positional overshoot, a 3-degree model-child pitch and one 0.025-unit suspension bob. Four Inspector-bound wheel bones rotate from actual travel distance, with a 0.24-unit radius.
-- `BusApproaching` fires once at 85% of arrival distance and opens the door during settling. Matching passengers already in slots may reserve seats and run to the stationary final door position then. `Bus.BoardWhenReady` buffers early runners until `IsAtDoor` becomes true; physical seat callbacks still drive fill. Direct grid taps retain the existing door-only rule. No runner spacing, traffic scheduling or extra target reservations are added.
+- `BusApproaching` fires once at 85% of arrival distance and stops with closed doors (see R2 decision below). Matching passengers already in slots may reserve seats and run to the stationary final door position then. `Bus.BoardWhenReady` buffers early runners until `IsAtDoor` becomes true; physical seat callbacks still drive fill. Direct grid taps retain the existing door-only rule. No runner spacing, traffic scheduling or extra target reservations are added.
 - Fill to next boarding-ready event is now 0.500 seconds nominal, versus the 1.066667-second ZFEEL baseline. Final-bus waving, immediate `AllBusesDone`/completion and silent departure retain their existing event timing. Failure guards, timer rules and passenger travel speed are unchanged. Reset/pooling cancels motion and clears buffered passengers/callbacks.
 
 Decision: Overlap bus presentation and allow slot approach at 85%, while gating boarding at the door and retaining immediate final completion (Asen's ZJUICE-A scope, 20 November 2026). Edit-mode timing evidence and the five-frame handoff strip are in `ZJUICE-A-Report.md`.
+
+Decision: Bus doors stay closed on arrival; `Bus.Enter` opens them (no crossfade, 30% head start, 0.11 s states) for each passenger at the door and a reusable 0.22 s timer closes them after the last one walks in. A dark door well sits behind the leaves; the model child is offset so the door centre is on `doorPoint` / the middle slot (R2, 22 November 2026).
 
 ### Tutorials (ZTUT2 + ZTUT3, 20 November 2026)
 
