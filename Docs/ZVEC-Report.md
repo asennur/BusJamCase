@@ -1,6 +1,6 @@
 # ZVEC — Vector UI artwork
 
-The original sections record v1 and v2. Current v3 measurements and illustration exceptions are at the end.
+The original sections record v1–v3. The v4 section supersedes the three illustration exceptions.
 
 21 November 2026. Baseline: `main`, `fefcd04`. Unity **2022.3.19f1**, Android target. MCP was pinned to `BusJamCase@c4dcbf17c52e6f1b`; project root and Edit mode were checked before execution. No Play mode, build, push or AsenOS access.
 
@@ -137,3 +137,27 @@ Game retains **337 elements**, including the eight tutorial dots omitted from v2
 Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/v3/`. `ContactSheet-v3.png` covers the same **9 resolutions × 7 screens**; `After/` has **162 captures**, adding tutorial, confetti/coin flight and broken-heart states. `AssetPairs/` has **32 native PNG/SVG comparisons at display size and 3×**. All **954** comparable v2 control bounds match; all **24 protected files**, including both spriteatlases and backgrounds, match their starting byte hashes. Luma's committed fix still matches exactly. Binding, click/toggle, animation and retention evidence is preserved alongside the temporary harness source.
 
 Final compilation clean, Console **0 entries**; active Game scene clean, temporary harness and review objects removed. Implementation: `4e31d8b`, `9bf5ab5`, `bafcdfa`, `0ea81b7`, in addition to the two binding commits above. No push.
+
+## v4 — All three illustrations use SVG
+
+21 November 2026, starting at `adb94f4` on `main`. Asen's 11:17 decision supersedes the v3 raster exceptions. `Theme.uss` now uses `logo.svg`, `coin_pile.svg` and `fx_tap_hand.svg`, imported as **UI Toolkit VectorImage**. Its only remaining PNG reference is `bg_menu.png`; source PNGs and all backgrounds remain unchanged. No runtime code changed.
+
+The logo uses median denoising, a source-sampled 256-colour palette divided into yellow/orange, purple, blue, green, pink and neutral families, and smoother spline tracing. Three connected yellow letter faces replace mottled interior regions; sampled shade ramps and restored bright gloss contours retain the highlights. The coin pile uses the same cleaned-region approach. The v3 hand has a thinner, lighter warm outline, fingertip gloss and three translucent offset silhouette layers for a soft shadow, without SVG filters. Exact settings and generation scripts are in the evidence folder.
+
+| Asset | Paths | Imported vertices | Imported triangles |
+| --- | ---: | ---: | ---: |
+| Logo | 924 | 33,967 | 31,896 |
+| Coin pile | 886 | 27,865 | 26,023 |
+| Tap hand | 16 + one ellipse | 3,704 | 3,466 |
+
+The logo stays below the 2,500-path budget; every image stays below 65,536 vertices. Native whole-panel totals: Start **38,120–38,122**, Complete **41,516–41,526**, tutorial **10,094** triangles. Tessellation happens at import; no per-frame tessellation was added.
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/v4/`. `Before/` and `After/` contain **66 native offscreen captures**: Start, Complete and tutorial at the same nine resolutions, plus 2160×3840 and 5120×2160 for genuine 2× comparisons. Four `Compare-Logo-Start-*` crops compare PNG/SVG at display size and 2× for 1080×1920 and 2560×1080. `AssetPairs/` contains six native comparisons, one at each scale per asset; the three contact sheets cover all nine resolutions. All **77 control-bound records match**.
+
+After 60 native animation warm-up frames, **120 visible-hand/celebration repaints allocated or updated zero meshes**, with zero visual rebuilds and unchanged imported mesh data. After 20 warm-up/50 screen cycles: Game elements **337→337**, callbacks **336→336**, heap **−57,344 B**; editor **203→203**, callbacks **679→679**, heap **0 B**. These are Edit-mode retention/render-chain measurements, not device timings.
+
+**Visual limit:** the letter speckle is removed and no coloured transparency halo was introduced, but flatter bevels, stepped shading and harder native SVG edges remain visible against the PNGs, including at display size. The requested “viewer should not notice degradation” quality target is **not fully met**; the comparisons document this explicitly. SVG conversion is active as requested.
+
+Unity **2022.3.19f1**, pinned `BusJamCase@c4dcbf17c52e6f1b`; compilation clean, final Console **0**. All **89 protected/source-file byte hashes** match, including Game.unity, both spriteatlases and their metadata. Game.unity was neither saved nor committed. Temporary harness removed; no Play, vault access or push.
+
+Implementation: `aaf1850`.
