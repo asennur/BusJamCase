@@ -261,3 +261,52 @@ Final post-cleanup live audit: compilation finished, editor not updating, Edit m
 Native GameView final-target captures: **580x1250, 1080x1920, 2560x1080, 1080x1080**, under `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/logo-off/`. `before-*` / `after-*` PNGs retain raw readback orientation; `*-view.png` derivatives only flip vertically for inspection. Counter and Settings bounds are identical. Level button bounds change by **(0,+7), (0,-3), (-1,0), (0,0) pixels**, respectively; sizes are unchanged. Independent button positioning removes the logo's layout dependency without a spacer or reserved logo gap, keeping the 3D menu unobstructed.
 
 Temporary capture fixture removed after verification. **37 protected file hashes match**, including the entire Game.unity working file/light 0.75, Global Volume Profile, MenuVolumeProfile, ResultTimeline, protected materials/levels, sprite atlases and ArtSource. No scene save, AsenOS write or push. Final compilation and live Edit-mode audit passed; **Console: 0 errors, 0 warnings, 0 logs**.
+
+
+# ZMENU-MOVE / ZMENU-MOVE-2 - Driving Start world (verification interrupted)
+
+21 November 2026. Baseline `de5d79b`, main; Unity **2022.3.19f1**, original pinned instance **BusJamCase@c4dcbf17c52e6f1b**. **Edit mode only; never Play. No vault write, commit or push.**
+
+**Status: UNITY UNRESPONSIVE.** After the user restarted Unity, the initial live response succeeded. Compilation after the previous helper removal completed, with **Console 0 entries**. A queued Game.unity reload completed; a subsequent live call confirmed the active driving world/camera, 72 scenery slots, six mesh variants and imported Drive clip survived the restart. Later, importing final camera-band changes stopped live responses. A live retry after more than 60 seconds also failed. Computer Use access to Unity was denied. Editor work stopped.
+
+## Presentation retained from ZMENU-MOVE
+
+The world uses **24 pooled house slots / 48 tree slots**, all four approved Menu_Block meshes and both Menu_TreeCluster meshes. Absolute deterministic sampling scrolls scenery toward the camera, changing variants at a hidden wrap; no runtime Instantiate/Destroy, collection growth or Unity random-state mutation. Fade spans local Z -39 to -29, with submissions disabled below -60. Original static layout objects remain disabled.
+
+Bridge arches and rails stay fixed. MenuDrivingBridge removes the 18 original lane-mark triangles; MenuMovingRoad scrolls world-aligned asphalt and analytic lane marks. MenuMovingScenery retains Simple Lit lighting with distant fade. Imported Drive owns wheels/exhaust; the bus has bounded 0.025-unit suspension bob. Start gates the presentation, and other states restore the gameplay camera. Edit preview uses the production sampler.
+
+The three Menu Lens Volume blocks were removed by the original run. MenuCamera volume mask is 1, matching gameplay. MenuVolumeProfile remains unchanged and unreferenced. Both authored lights remain byte-identical to the beginning of this resume, including directional intensity **0.75** and menu fill **0.85**.
+
+## Inspector tunables and framing
+
+Select **Menu Presentation > MenuWorldPresentation**. Only its three serialized camera bands changed in Game.unity during this resume; code defaults agree:
+
+| Aspect band | Height above target | Distance behind target | Downward pitch | Vertical FOV |
+| --- | --- | --- | --- | --- |
+| Portrait | 13 | 23 | 28.5 degrees | 48 degrees |
+| Square | 13 | 23 | 29 degrees | 42 degrees |
+| Landscape | 12 | 24 | 31 degrees | 26 degrees |
+
+The portrait candidates show bridge arches at approximately **38% height**, the bus rear at approximately **62%**, roofs visible on both sides and the Level button over the road below the bus. **Bus width is approximately 14-17%, below the requested 25%.** A preference question was issued; reference composition was used as the stated assumption pending a reply. Exact numerical framing acceptance is not claimed. Landscape uses a narrower FOV so scenery reaches both lower edges.
+
+Other exposed values remain: **Scroll Speed 0.9**, **Scenery Spacing 12** (range 10-18), **Side Offsets 6.4 / 6.4**, **Bus Position Offset (0,0,0)**, **Bob Amplitude 0.025**, **Scenery Seed 20261121**. Animate Preview stays off in the saved scene; Preview Time supports deterministic scrubbing. Lighting is unchanged.
+
+## Verified evidence and limits
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/menumove/`, new files prefixed **final-**. `final-reload.txt` records the successful first reload. `final-draft1-*` through `final-draft4-*` contain native **580x1250, 1080x1920 and 2560x1080** GameView final-target captures. `-view` derivatives only correct vertical GPU orientation; `-small` files are thumbnails. Draft4 uses the final candidate values before their interrupted disk import. These are candidate captures, not final post-cleanup saved-scene verification.
+
+`final-validation.txt`: **101 Edit-mode assertions passed**: mesh variants, fixed pool reuse, deterministic sampling, travel direction/speed, wheels/exhaust, bounded bob, non-Start gating, aspect lenses, sky cover and gameplay camera restoration. **600 warmed production sampler frames allocate 0 managed bytes; another 600 spanning repeated recycling also allocate 0 bytes.** This includes Edit-mode Animator sampling, not complete editor frames or device profiling.
+
+Native candidate GameView totals at t=2 seconds (`stats.tsv`, final-draft4 rows):
+
+| Size | Draw calls | Triangles | Batches | SetPass |
+| --- | --- | --- | --- | --- |
+| 580x1250 | 42 | 46098 | 42 | 13 |
+| 1080x1920 | 44 | 49194 | 44 | 13 |
+| 2560x1080 | 47 | 53666 | 47 | 12 |
+
+The corrected movie fixture reapplies portrait panel sizing, safe viewport and all three aspect classes every update; its external source is `final-ZMenuMoveValidation.cs`. **The corrected MP4 was not captured.** The old `menu-driving-4s.mp4` remains provisional with the documented misplaced portrait UI; it is not final evidence.
+
+`final-interrupted-audit.json`: **48/48 protected hashes match** the beginning of this resume, including Global Volume Profile, ResultTimeline, BackgroundStyle, protected materials/levels, sprite atlases and ArtSource. All Game.unity blocks except MenuWorldPresentation's camera-band block match the beginning of this resume. Both Light blocks match byte-for-byte. Existing user changes remain untouched and unstaged. Temporary helpers were copied outside Assets and removed again. **Compilation after this latest removal, final saved-scene reload/captures and final Console verification remain unverified.** No files were staged or committed.
+
+Resume after Unity responds: compile/import final camera defaults and helper removal, confirm Console 0, resolve the portrait-width preference, reload the saved scene using short calls, capture final native stills and 120 corrected portrait frames at 30 fps, then encode/inspect a 4-second MP4. Recheck protected files and scene preservation. Stage only task files and task scene hunks, excluding Asen's 0.5-to-0.75 Light hunk; create small English commits without pushing.
