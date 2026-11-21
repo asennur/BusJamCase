@@ -361,3 +361,5 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
     -unity-text-outline-color: #10121c; -unity-text-outline-width: 1.6px; text-shadow: 0 2px 0 #081423;
 }
 .no-lives-hint { position: absolute; top: 654px; left: 55px; right: 55px; font-size: 27px; margin: 0; padding: 0; }
+.tutorial-tip { width: 350px; max-width: 92%; padding: 18px 22px; -unity-slice-left: 110; -unity-slice-right: 110; -unity-slice-top: 110; -unity-slice-bottom: 110; -unity-slice-scale: .1px; }
+.tutorial-hint { font-size: 22px; color: white; -unity-text-outline-color: #19171e; -unity-text-outline-width: 1.5px; text-shadow: 0 2px 0 #17151e; }
