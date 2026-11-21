@@ -1,0 +1,16 @@
+# ZAA — UI anti-aliasing
+
+The shipped approach is the authorized SVG raster-import fallback. SVG sources and USS URLs remain intact. `AntialiasedSvgImporter` extends the pinned Vector Graphics importer, retains the original viewport/tessellation/gradient settings, rasterizes with 8 samples, retains the package's transparent-edge dilation, then creates a full mip chain with trilinear filtering. Large art uses a 2048-pixel longest side, the coin pile 1536, hand/glow 1024, icons 512 and small effects 256 (approximately twice their largest supported screen use). Import artifacts are generated from SVG; no replacement PNG sources are introduced.
+
+An MSAA runtime panel prototype was tested first. Its panel target produced smooth edges, but its uGUI screen composite intermittently disappeared after Editor reload/rebuild on Unity 2022.3.19f1 / URP 14.0.10. It did not meet the reliability requirement under the Edit-only constraint, so it was removed. Its diagnostic source and measurements are retained in the evidence directory, clearly named `MSAA-*`. They do not describe the shipped path.
+
+The shipped fallback adds **no runtime pass: 0 ms extra-pass cost**. Raster sampling and texture memory have a different cost from vector rendering; no mobile GPU frame-time claim is made. PanelSettings, screen input mapping, safe-area code, ScrollViews, Level Editor bindings and the CelebrationCamera compositing path are unchanged. Native rounded USS button rims remain the existing UI Toolkit geometry; the button crop is also a control for those edges, rather than a claim that changing SVG import fixes USS geometry.
+
+Evidence is in `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/aa/`:
+
+- `before/after-580x1250.png`, `1080x1920`, `2560x1080`: normal native Game View OnGUI/RenderView final-target readbacks, with a 1x backbuffer and `PanelSettings.targetTexture == null`; never Play and never the old offscreen-only capture fixture. See `raster-game-view-path.txt`.
+- `title/coin/button-compare-<resolution>-3x.png`: nearest-neighbour edge crops. Unity's native Edit-mode readback vertically inverts the overlay; only these detail crops are flipped vertically for readable comparisons. The full readback PNGs are untouched. This is an explicit Edit-mode evidence limitation, not a verified Play orientation defect.
+- `raster-audit.json`: all 23 SVG outputs are Texture2D, trilinear, with complete mip chains. Package edge dilation avoids transparent-black fringes.
+- `raster-validation.txt`: 50 Complete/Fail/disable/enable cycles: elements 351→351, callbacks 339→339, active tweens 15→15; retained growth 0. Result samplers allocated 0 bytes over 200 warmed frames. Saved coins unchanged.
+
+Protected file hashes remain unchanged. Unity compiled successfully; Console was cleared after transient MCP reconnect messages and rechecked empty. Play, device touch/drag and mobile GPU profiling were not performed because the task explicitly prohibits Play. The raw captures demonstrate the SVG edge improvement, not a full runtime interaction acceptance test.
