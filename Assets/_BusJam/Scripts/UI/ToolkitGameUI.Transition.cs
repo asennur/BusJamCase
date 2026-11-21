@@ -17,8 +17,8 @@ namespace BusJam.UI
         private FadeAction fadeAction;
         private VisualElement fadeOverlay;
         private Tween fadeOut, fadeIn;
-        private bool fadeHolding;
-        private int fadeResumeFrame;
+        private bool fadeStarting, fadeHolding;
+        private int fadeStartFrame, fadeResumeFrame;
         private float fadeResumeTime;
 
         // One overlay above ui-root; hidden (display none) when idle.
@@ -54,7 +54,9 @@ namespace BusJam.UI
             gameManager.SetInputLocked(true);
             fadeOverlay.style.display = DisplayStyle.Flex;
             fadeOverlay.pickingMode = PickingMode.Position;
-            fadeOut.Restart();
+            // A stall in the tap frame (first button press, sound load) would otherwise finish the fade-out in one step.
+            fadeStarting = true;
+            fadeStartFrame = Time.frameCount + 2;
         }
 
         private void OnFadedOut()
@@ -80,6 +82,7 @@ namespace BusJam.UI
 
         private void UpdateFadeHold()
         {
+            if (fadeStarting && Time.frameCount >= fadeStartFrame) { fadeStarting = false; fadeOut.Restart(); }
             if (!fadeHolding || Time.frameCount < fadeResumeFrame || Time.unscaledTime < fadeResumeTime) return;
             fadeHolding = false;
             fadeIn.Restart();
@@ -89,7 +92,7 @@ namespace BusJam.UI
 
         private void EndTransition()
         {
-            fadeHolding = false;
+            fadeStarting = fadeHolding = false;
             if (fadeAction != FadeAction.None && gameManager != null) gameManager.SetInputLocked(false);
             fadeAction = FadeAction.None;
             if (fadeOverlay == null) return;
