@@ -369,3 +369,45 @@ Three capture passes per resolution were used for each presentation: menu baseli
 All **56 protected hashes match** the initial snapshot, including ArtSource, sprite atlases, M_Purple/M_Yellow, LevelDatabase/Level_26, ResultTimeline, BackgroundStyle and Global Volume Profile. Scene audit permits only Scroll Speed, the two Menu Fill Light blocks and the Board material binding. Capture-time camera/sky/aspect-extension values and the automatic untracked LightingData binding were excluded from the saved diff. The existing user scene hunks remain on disk and outside the commits.
 
 Final compilation completed, both temporary helper types are absent, Unity responds in Edit mode and **Console has 0 errors, 0 warnings, 0 logs**. No scene reload was needed; scene saves were limited to the speed, lighting and board items. Small English commits, no push.
+
+# ZPOLISH-2 — Board entrance, larger Start UI and menu lens (interrupted)
+
+21 November 2026. Baseline **59aa4e7**, main, single **BusJamCase@c4dcbf17c52e6f1b**, Unity **2022.3.19f1**. **Status: UNITY UNRESPONSIVE.** Initial live responses and compilation checks passed in Edit mode. Unity stopped answering during import/compilation of the curvature draft; the readiness retry after a 60-second wait also failed. No further Unity calls were made. No Play, scene reload, MP4, vault write or push.
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/polish2/`. Native GameView final-target captures exist at **580×1250, 1080×1920 and 2560×1080** for board before/after, Start before/UI/lens, and populated gameplay with the isolated menu lens. `-view` files only correct vertical GPU orientation; `-small` files are thumbnails. `board-edge-*-comparison.png` places before on the left and after on the right. No item exceeds three captures per resolution.
+
+## Completed changes
+
+| Item | Change | Commit |
+| --- | --- | --- |
+| Board | Restore original raised white rim materials. At the y=0 entrance, omit the cross-board rim and finish side edges with half-length straight pieces. Keep sidewalk-coloured backing/tile undersides, depth bias and unchanged per-cell tops, passengers and gameplay anchors. | `c0bc431` |
+| Start UI | Increase plate, icon, Settings and Level-button dimensions and captions by a further **1.3×**. Reposition the portrait counter group to fit its increased width. Keep the **12%** top inset and existing safe-area calculation. Gameplay HUD selectors are unchanged. | `b4e928f` |
+| Menu lens | Reuse MenuVolumeProfile on a global **Menu Lens Volume**, layer **10**, priority **10**. MenuCamera volume mask is **1025** (layers 0 and 10); gameplay remains **1**. CelebrationCamera explicitly uses volume mask **0** and disables post-processing in CompleteCelebration, excluding this lens. | `1a7c842` |
+
+The Start captures have separated counters/Settings and no clipping at all three sizes. At 1080×1920, plate size is **304×128 px**, Settings **117×120 px**, and Level button **475×229 px**. Top UI starts at **230 px**; the 580×1250 and 2560×1080 starts are **150 px** and **130 px**. Native pixel rounding accounts for sub-pixel differences from exactly 1.3. Before/after lens layout bounds are identical. UI Toolkit remains composited as screen UI; the screenshots show an undistorted Start UI over the distorted world. Gameplay captures retain the normal board/HUD presentation. Full-band pixel equality is not used as an assertion because those bands also include the changing world background.
+
+### Live lens values and tuning
+
+The first live MCP asset read preceded any profile edits or compilation. It returned **active=false, intensity=0.578, X multiplier=0.774, Y multiplier=1, center=(0.5,0.5), scale=1**. The live intensity/X values overrode the stale disk values of 1/1. Original override flags were true/true/false/false/false; `live-lens.txt` records the invariant-culture values. The menu override uses these exact values, **active=true**, and explicitly overrides every parameter so other profiles cannot alter them.
+
+Tune **Menu Lens Volume > Volume > Profile**, asset **`Assets/_BusJam/Settings/MenuVolumeProfile.asset`**. The lens is isolated by camera volume masks; the volume can remain enabled outside Start because gameplay/celebration cameras exclude its layer. The global profile's LensDistortion component and its list entry were removed. Every other override block is byte-identical to the initial working file. The lens had only existed as an uncommitted addition, so its removal returns Global Volume Profile byte-for-byte to baseline HEAD and produces no net tracked diff in that asset; the menu isolation commit contains the replacement profile and scene binding.
+
+### Tunables
+
+| Location | Value / purpose |
+| --- | --- |
+| MenuVolumeProfile > LensDistortion | Active on; intensity **0.578**, X **0.774**, Y **1**, center **0.5/0.5**, scale **1**. |
+| Theme.uss > `.ui-root` | `--start-top-inset: 0.12`; existing safe-area clamping retained. |
+| Theme.uss > Start selectors | Plate **304.2×127.4**, Settings **117×119.6**, Level **474.5×228.8**; landscape Level **572×234**, logical pixels. |
+| Board > BoardView > Sidewalk Material | Existing M_BoardSidewalk: grey backing/undersides; frame uses original prefab materials. |
+| M_BoardSidewalk | Sidewalk colour **0.8/0.735/0.895**, world height **-0.30**; depth bias retained. |
+
+## Incomplete work and verification limits
+
+**Curved world and fog reduction are not applied.** The unverified curvature draft was archived to `polish2/unverified-curvature/` and its source changes were removed from Assets after the failed retry. The draft shares a bus-relative vertex bend and normal/tangent correction across moving scenery, road, bridge/walk and ground shaders, leaving sky/bus shaders alone. It is a starting point, not accepted implementation: subdivision, conservative culling bounds, hidden near/far recycling, road continuity, final visual tuning and reference comparison still require verification. No curvature/fog tunables were shipped.
+
+The last successful Console read before the curvature import had **0 entries**. **Final compilation, final Console 0 and the requested 600-frame allocation check are unverified** because Unity stopped responding. Previous package allocation results are not reused as proof for this package. Temporary capture helpers were copied into evidence and removed from Assets; their removal has not been compiled by a responsive editor. Final saved-scene/live parity was not rechecked after cleanup.
+
+`final-audit.json` confirms **51/51 protected hashes match**: protected materials/levels, sprite atlases, ArtSource, ResultTimeline, BackgroundStyle and the untracked LightingData files. The initial directional-light **0.85**, MenuCamera transform and resultTimeline scene blocks match **byte-for-byte** and remain unstaged. Only MenuCamera's volume-mask block changed among existing scene blocks; three new Menu Lens Volume blocks were added. The global-profile audit permits only the lens removal. No protected file was staged.
+
+Resume only after Unity responds: compile the clean saved implementation and helper removal, audit the menu/gameplay/celebration masks live, then implement curvature and the slight menu-only fog reduction, capture both at all three resolutions, validate recycling/road continuity, run 600 warmed menu sampler frames and finish with Console/protected-hash checks.
