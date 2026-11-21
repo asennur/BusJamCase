@@ -1,6 +1,6 @@
 # ZVEC — Vector UI artwork
 
-The original sections record v1. The v2 correction and current measurements are at the end.
+The original sections record v1 and v2. Current v3 measurements and illustration exceptions are at the end.
 
 21 November 2026. Baseline: `main`, `fefcd04`. Unity **2022.3.19f1**, Android target. MCP was pinned to `BusJamCase@c4dcbf17c52e6f1b`; project root and Edit mode were checked before execution. No Play mode, build, push or AsenOS access.
 
@@ -93,3 +93,47 @@ The repeated 20-warm-up/50-cycle check had **zero growth**: Game elements 329→
 Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/v2/`. `ContactSheet-v2.png` covers the same nine resolutions and seven screens; `After/` contains 126 captures, including hover/pressed states. `Compare-Button-3x.png` and `Compare-Panel-3x.png` show Original PNG / v1 / v2 side by side. Visual inspection confirms the v1 inner-edge stair steps are removed. All **954 v1 control-bound records match**; sampled geometry checks found no protrusion in 1,656 highlights/glints. See `Verification.json`, `LeakCheck.txt`, `ButtonStates.txt` and `TextureCache-*.json`.
 
 Unity 2022.3.19f1 compiled clean; final Console **0 entries**. Pinned instance `BusJamCase@c4dcbf17c52e6f1b`, Edit mode only. Protected files/backgrounds unchanged; temporary harness removed. No Play, vault access or push. Device rendering cost remains unprofiled.
+
+## v3 — Remaining UI artwork
+
+21 November 2026. Started at `c81739f` on `main`; pinned `BusJamCase@c4dcbf17c52e6f1b`, Unity **2022.3.19f1**, Edit mode throughout. No Play, vault access, background edits or push.
+
+Luma's `ToolkitGameUI.cs` fix compiled and was committed **unchanged** as `c29e2c4` with the requested message. `5e1c849` applies the same populated-tree check and deferred retry to the editor and tutorial. Empty-tree/retry checks pass without duplicate elements or subscriptions.
+
+**13 PNG assets** now use hand-authored SVGs in `Assets/_BusJam/UI/Vector/`: gear, coin with bus emblem, heart, broken heart, stopwatch, close X, confetti rectangle/star, sparkle, soft glow, rays, tip panel and passenger silhouette. `com.unity.vectorgraphics@2.0.0-preview.24` imports all as **UI Toolkit Vector Image**, preserving source viewports. Fixed tessellation is sized for the largest relevant icon display; gradients use 256-sample lookup atlases. Soft radial opacity fades remain continuous. The tip stretches without the PNG's incompatible slice settings. No PNG was deleted. Plus/restart and the other unused PNGs have no Theme/UXML/runtime UI references.
+
+Existing v2 procedural 1×64 colour lookup ramps remain unchanged; they are shading data rather than source artwork. SVG gradient rendering also uses importer-generated lookup textures. Painted bevels/highlights are approximations; native SVG contour aliasing and shading differences remain visible in the 3× comparisons.
+
+### Asen decides — PNG retained
+
+Alpha was thresholded at **240/255** before tracing straight-alpha source RGB, excluding soft shadows rather than turning them into opaque fills. Canvas proportions are preserved. Vtracer uses stacked colour/spline paths; exact simplification settings are in `TraceSettings.json`. The hand candidate replaces coarse shading fills with smooth gradients. All three candidates still lose visible painted detail at their display size, so the original PNG references remain.
+
+| Candidate | Paths | Imported triangles | Remaining quality loss |
+| --- | ---: | ---: | --- |
+| Logo | 528 | 37,274 | Quantized shading and sticker-edge aliasing |
+| Coin pile | 293 | 28,635 | Faceted gold shading and raised emblem detail |
+| Tap hand | 12 | 1,316 | Glove volume, knuckle shading and contour smoothness |
+
+`Asen-Decides-*.png` and `AssetPairs/*-3x.png` show each source/candidate side by side. Candidate SVGs and importer settings are archived in `v3/Candidates/`, outside Assets. These are the only remaining non-background UI PNG references.
+
+### Performance and verification
+
+Imported SVG triangles visible at the captured state, followed by native whole-panel draw triangles across all nine resolutions:
+
+| Screen | Visible SVG triangles | Whole-panel triangles |
+| --- | ---: | ---: |
+| Start | 2,638 | 6,597–6,599 |
+| HUD | 2,317 | 5,651 |
+| Settings | 3,108 | 9,270–9,302 |
+| Complete | 1,963 | 15,495–15,505 |
+| Fail | 1,653 | 3,751–3,769 |
+| NoLives | 3,058 | 7,361–7,365 |
+| LevelEditor | 756 | 4,316–4,688 |
+
+Complete coin flight peaks at **14,931 visible SVG triangles**; native whole-panel totals are **15,495–15,505**, including transparent pooled meshes, text and USS geometry. Tutorial: **3,202 / 6,847**; broken-heart Fail: **1,275 / 3,383–3,401**. Full per-screen totals and per-asset path/primitive/triangle counts are in `ScreenTotals.json` and `AssetMetrics.tsv`.
+
+Game retains **337 elements**, including the eight tutorial dots omitted from v2's 329-element preview; editor retains **203**. After 20 warm-up and 50 open/close cycles: Game **337→337**, callbacks **336→336**; editor **203→203**, callbacks **679→679**. Managed heap did not grow. Sixty native animation warm-up frames followed by **120 samples** produced **zero new/updated mesh allocations and zero visual rebuilds**; imported mesh data stayed unchanged. Dynamic-transform hints cover pooled effects and tutorial/ray elements. The retained hand PNG has no vector tessellation. These are editor measurements, not device frame-time results.
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/v3/`. `ContactSheet-v3.png` covers the same **9 resolutions × 7 screens**; `After/` has **162 captures**, adding tutorial, confetti/coin flight and broken-heart states. `AssetPairs/` has **32 native PNG/SVG comparisons at display size and 3×**. All **954** comparable v2 control bounds match; all **24 protected files**, including both spriteatlases and backgrounds, match their starting byte hashes. Luma's committed fix still matches exactly. Binding, click/toggle, animation and retention evidence is preserved alongside the temporary harness source.
+
+Final compilation clean, Console **0 entries**; active Game scene clean, temporary harness and review objects removed. Implementation: `4e31d8b`, `9bf5ab5`, `bafcdfa`, `0ea81b7`, in addition to the two binding commits above. No push.
