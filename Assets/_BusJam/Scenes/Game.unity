@@ -16135,7 +16135,7 @@ MonoBehaviour:
   treeVariants:
   - {fileID: 6574624263958814792, guid: a4e533a03a87dc543ab2b7461d3d73c0, type: 3}
   - {fileID: -9184255990154128663, guid: a4e533a03a87dc543ab2b7461d3d73c0, type: 3}
-  scrollSpeed: 0.9
+  scrollSpeed: 4.5
   scenerySpacing: 12
   sideOffsets: {x: 6.4, y: 6.4}
   busPositionOffset: {x: 0, y: 0, z: 0}

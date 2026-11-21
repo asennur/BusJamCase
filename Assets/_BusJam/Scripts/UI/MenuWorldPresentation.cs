@@ -48,7 +48,7 @@ namespace BusJam.UI
         public Mesh[] treeVariants = Array.Empty<Mesh>();
         [Header("Driving World")]
         [Tooltip("World units per second toward the camera along the road (+Z). Zero stops the road and scenery.")]
-        [Min(0)] public float scrollSpeed = .9f;
+        [Min(0)] public float scrollSpeed = 4.5f;
         [Tooltip("Distance between house rows. Smaller values make the world denser. Pool size stays fixed.")]
         [Range(10, 18)] public float scenerySpacing = 12;
         [Tooltip("Left and right house distances from the road centre. Trees extend farther out.")]
@@ -155,6 +155,9 @@ namespace BusJam.UI
         public void SampleMotion(double seconds)
         {
             if (!menuActive || !isActiveAndEnabled) return;
+            // The imported Drive includes both wheel rotation and exhaust emission.
+            float driveSpeed = scrollSpeed / .9f;
+            if (busAnimator != null) busAnimator.speed = driveSpeed;
             double travel = Math.Max(0, seconds) * scrollSpeed;
             if (menuWorld != null) Shader.SetGlobalVector(Motion, new Vector4((float)(travel % 3000), menuWorld.transform.position.x, menuWorld.transform.position.z, 0));
             int houses = scenery.Length / 3;
@@ -193,7 +196,7 @@ namespace BusJam.UI
             {
                 busAnimator.enabled = true;
                 float duration = driveClip != null ? driveClip.length : 1;
-                busAnimator.Play(Drive, 0, (float)((seconds / duration) % 1));
+                busAnimator.Play(Drive, 0, (float)((seconds * driveSpeed / duration) % 1));
                 busAnimator.Update(0);
                 busAnimator.enabled = false;
             }
