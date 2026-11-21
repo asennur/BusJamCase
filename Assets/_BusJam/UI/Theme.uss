@@ -57,7 +57,8 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
     width: 338px; max-width: 100%; height: 146px; min-height: 110px;
     flex-shrink: 0; font-size: 46px;
 }
-.start-button { width: 594px; height: 190px; font-size: 76px; }
+.start-button { width: 338px; height: 158px; font-size: 76px; }
+.start-button > .vector-caption { font-size: 52px; }
 .level-badge {
     width: 106px; height: 110px; flex-shrink: 0; justify-content: center;
 }
@@ -249,7 +250,7 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 /* Slice margins contain each complete corner, rim and shadow before stretching. */
 .raster-button-art { left: 0; right: 0; top: 0; bottom: 0; -unity-background-scale-mode: stretch-to-fill;
     -unity-slice-left: 280; -unity-slice-right: 280;
-    -unity-slice-top: 310; -unity-slice-bottom: 310; -unity-slice-scale: .18;
+    -unity-slice-top: 310; -unity-slice-bottom: 310; -unity-slice-scale: .22;
 }
 .editor-button > .raster-button-art { -unity-slice-scale: .1; }
 .raster-button-art.vector-green { background-image: url("Vector/button_green_normal.svg"); }
@@ -261,6 +262,9 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .art-button:active .raster-button-art.vector-green, .editor-button:active .raster-button-art.vector-green { background-image: url("Vector/button_green_pressed.svg"); }
 .art-button:active .raster-button-art.vector-red, .editor-button:active .raster-button-art.vector-red { background-image: url("Vector/button_red_pressed.svg"); }
 .art-button:active .raster-button-art.vector-yellow, .editor-button:active .raster-button-art.vector-yellow { background-image: url("Vector/button_yellow_pressed.svg"); }
+.start-button .raster-button-art.vector-green { background-image: url("Vector/button_start_normal.svg"); }
+.start-button:hover .raster-button-art.vector-green { background-image: url("Vector/button_start_hover.svg"); }
+.start-button:active .raster-button-art.vector-green { background-image: url("Vector/button_start_pressed.svg"); }
 .raster-panel-art { -unity-background-scale-mode: stretch-to-fill; }
 .raster-panel-art.vector-white { left: 6px; right: 7px; top: 9px; bottom: 10px; background-image: url("Vector/surface_white.svg"); }
 .raster-panel-art.vector-header { left: 5px; right: 5px; top: 13px; bottom: 13px; background-image: url("Vector/surface_header.svg"); }
