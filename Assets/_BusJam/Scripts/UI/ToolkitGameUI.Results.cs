@@ -327,7 +327,7 @@ namespace BusJam.UI
             if (resultTransitionDone) return;
             resultTransitionDone = true;
             collection?.Pause(); failureExit?.Pause();
-            if (Application.isPlaying) { if (retry) gameManager.Retry(); else gameManager.LoadNext(); }
+            if (Application.isPlaying) BeginTransition(retry ? FadeAction.Retry : FadeAction.Next);
         }
 
         private void ShowFailure(FailReason reason, int level)

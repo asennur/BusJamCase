@@ -73,6 +73,7 @@ namespace BusJam.UI
         private void Update()
         {
             RefreshResultTimeline();
+            UpdateFadeHold();
             if (waitingForTree && document.rootVisualElement?.Q("ui-root") != null) OnEnable();
             if (Application.isPlaying) celebrationBus?.Resize(Screen.width, Screen.height);
         }
@@ -103,6 +104,7 @@ namespace BusJam.UI
             livesCount = root.Q<Label>("lives-count"); lifeCountdown = root.Q<Label>("life-countdown"); coinCount = root.Q<Label>("coin-count");
             readyPrompt = root.Q<Label>("ready-prompt"); confirmText = root.Q<Label>("confirm-text"); soundToggle = root.Q<Toggle>("sound-toggle");
             CacheResults();
+            if (Application.isPlaying) CreateFadeOverlay();
             return true;
         }
 
@@ -146,6 +148,7 @@ namespace BusJam.UI
                 gameManager.PlayBlockedNoLives -= ShowNoLives;
                 subscribed = false;
             }
+            StopTransition();
             CloseSettings(); ClosePause();
             startPulse?.Rewind(); readyPulse?.Rewind(); urgentPulse?.Rewind(); coinPulse?.Rewind();
         }
@@ -154,6 +157,7 @@ namespace BusJam.UI
 
         private void BuildTweens()
         {
+            BuildFadeTweens();
             if (startPulse != null) return;
             startPulse = Reusable(DOTween.To(GetStartScale, SetStartScale, 1.04f, 1.1f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo));
             readyPulse = Reusable(DOTween.To(GetReadyPulse, SetReadyPulse, .65f, .85f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo));
@@ -179,6 +183,7 @@ namespace BusJam.UI
             startPulse?.Kill(); readyPulse?.Kill(); urgentPulse?.Kill(); coinPulse?.Kill();
             startPulse = readyPulse = urgentPulse = coinPulse = null;
             KillResultTweens();
+            StopTransition(); KillFadeTweens();
         }
 
         private static void Show(VisualElement element, bool visible) => element.EnableInClassList("hidden", !visible);
@@ -282,7 +287,14 @@ namespace BusJam.UI
             startBar.style.top = height * Mathf.Max(0, startTopInset - (1f - safe.yMax));
         }
 
-        private void PrepareLevel() { if (Application.isPlaying) gameManager.PrepareLevel(); }
+        // Without lives Play stays instant so the existing warning shows; otherwise it fades into Ready.
+        private void PrepareLevel()
+        {
+            if (!Application.isPlaying || shownState != GameState.Start) return;
+            livesSystem.Refresh();
+            if (livesSystem.Lives == 0) gameManager.PrepareLevel();
+            else BeginTransition(FadeAction.Prepare);
+        }
         private void OnButtonSound(ClickEvent evt)
         {
             for (VisualElement element = evt.target as VisualElement; element != null && element != root; element = element.parent)
@@ -325,10 +337,10 @@ namespace BusJam.UI
         private void ConfirmPause()
         {
             if (!Application.isPlaying || pending == PendingAction.None || shownState != GameState.Playing) return;
+            // The game stays paused under the fade; Restart and QuitToMenu unpause it.
             PendingAction action = pending;
-            ClosePause();
-            if (action == PendingAction.Restart) gameManager.Restart();
-            else gameManager.QuitToMenu();
+            CancelPause(); Show(pause, false);
+            BeginTransition(action == PendingAction.Restart ? FadeAction.Restart : FadeAction.MainMenu);
         }
     }
 }

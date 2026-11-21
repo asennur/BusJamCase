@@ -26,6 +26,8 @@ namespace BusJam.Core
         public FailReason FailReason { get; private set; }
         public LevelData CurrentLevel => currentLevel;
         public int CurrentLevelNumber { get; private set; }
+        /// <summary>True during a UI level transition: screen taps cannot start play.</summary>
+        public bool InputLocked { get; private set; }
 
         public event Action<GameState> StateChanged;
         public event Action PlayingStarted;
@@ -118,8 +120,15 @@ namespace BusJam.Core
 
         private void OnScreenTapped()
         {
-            if (Time.frameCount > readyFrame)
+            if (!InputLocked && Time.frameCount > readyFrame)
                 StartPlaying();
+        }
+
+        // Unlocking also ignores a tap in the same frame.
+        public void SetInputLocked(bool locked)
+        {
+            InputLocked = locked;
+            if (!locked) readyFrame = Time.frameCount;
         }
 
         public void StartPlaying()
