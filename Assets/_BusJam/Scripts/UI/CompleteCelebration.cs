@@ -23,20 +23,12 @@ namespace BusJam.UI
         private readonly Light key;
         private readonly Image image;
         private readonly Transform bus;
-        private readonly Transform[] riders = new Transform[3];
-        private readonly GameObject[] waveRoots = new GameObject[3];
-        private readonly Vector3[] riderScales = new Vector3[3];
-        private readonly Quaternion[] riderRotations = new Quaternion[3];
-        private readonly Transform[] upperArms = new Transform[3], lowerArms = new Transform[3], heads = new Transform[3], thighs = new Transform[3];
-        private readonly Transform[] clipUpperArms = new Transform[3], clipLowerArms = new Transform[3];
-        private readonly Quaternion[] waveCenters = new Quaternion[3];
-        private readonly float[] waveRaises = new float[3];
-        private readonly float[] riderHeights = new float[3];
-        private readonly Transform[] feet = new Transform[3];
-        private readonly Vector3[] footSoles = new Vector3[3], deckPositions = new Vector3[3];
-        private readonly Renderer[] riderBodies = new Renderer[3];
+        private readonly Transform[] riders;
+        private readonly GameObject[] waveRoots;
+        private readonly Renderer[] riderBodies;
         private readonly Renderer busBody;
         private readonly Material[] busMaterials;
+        private readonly float modelScale;
         private RenderTexture target;
         private int width, height;
         private float halfWidth, halfHeight, radius;
@@ -55,46 +47,31 @@ namespace BusJam.UI
             stage.transform.position = new Vector3(10000, 10000, 10000);
             stage.SetActive(false);
             cast = new GameObject("Celebration Cast"); cast.transform.SetParent(stage.transform, false);
-            Bus vehicle = Object.Instantiate(settings.busPrefab, cast.transform);
-            vehicle.enabled = false; bus = vehicle.transform;
-            bus.name = "Celebration Bus";
-            busBody = vehicle.PresentationBody; busMaterials = busBody.sharedMaterials;
-            driveRoot = vehicle.GetComponentInChildren<Animator>(true).gameObject;
-            bus.localRotation = Quaternion.identity;
-            for (int i = 0; i < riders.Length; i++)
+            CelebrationVehicle vehicle = Object.Instantiate(settings.busPrefab, cast.transform);
+            bus = vehicle.transform; bus.name = "Celebration Bus";
+            busBody = vehicle.body; busMaterials = busBody.sharedMaterials;
+            // Keep the previous 8.44-unit bus silhouette width under Asen's authored Bus Scale.
+            modelScale = 8.44f / busBody.bounds.size.x;
+            driveRoot = vehicle.model.gameObject;
+            int count = Mathf.Clamp(settings.riderCount, 1, 2);
+            riders = new Transform[count]; waveRoots = new GameObject[count]; riderBodies = new Renderer[count];
+            for (int i = 0; i < count; i++)
             {
                 Passenger passenger = Object.Instantiate(settings.passengerPrefab, cast.transform);
                 passenger.enabled = false; passenger.PrepareCelebration();
                 riders[i] = passenger.transform;
-                Vector3 worldScale = riders[i].lossyScale;
-                riders[i].SetParent(vehicle.PresentationSeat(i), false);
-                riders[i].rotation = Quaternion.Euler(0, 180 + (i - 1) * 10, 0);
-                riderRotations[i] = riders[i].localRotation;
-                Vector3 stretch = riders[i].lossyScale;
-                riderScales[i] = new Vector3(worldScale.x / stretch.x, worldScale.y / stretch.y, worldScale.z / stretch.z) * 1.65f;
-                riders[i].localScale = riderScales[i];
+                riders[i].SetParent(i == 0 ? vehicle.frontSeat : vehicle.rearSeat, false);
+                // Preserve the existing standing passenger size despite the imported bus scale.
+                Vector3 parentScale = riders[i].parent.lossyScale;
+                riders[i].localScale = new Vector3(1 / parentScale.x, 1 / parentScale.y, 1 / parentScale.z);
+                riders[i].localRotation = Quaternion.Euler(0, 180, 0);
                 riderBodies[i] = passenger.PresentationBody;
                 waveRoots[i] = passenger.PresentationAnimator.gameObject;
-                Transform spine = waveRoots[i].transform.Find("YolcuRig/Root/Hips/Spine");
-                clipUpperArms[i] = spine.Find("UpperArm.R"); clipLowerArms[i] = clipUpperArms[i].Find("LowerArm.R");
-                upperArms[i] = spine.Find(i % 2 == 0 ? "UpperArm.R" : "UpperArm.L");
-                lowerArms[i] = upperArms[i].GetChild(0);
-                heads[i] = spine.Find("Head"); thighs[i] = spine.parent.Find("Thigh.R");
-                feet[i] = spine.parent.Find("Thigh.L/Shin.L/Foot.L");
-                settings.wave.SampleAnimation(waveRoots[i], settings.wave.length * .125f);
-                waveCenters[i] = clipLowerArms[i].localRotation;
-                Vector3 direction = spine.InverseTransformDirection(clipUpperArms[i].up);
-                waveRaises[i] = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
                 settings.idle.SampleAnimation(waveRoots[i], 0);
-                footSoles[i] = FindSole((SkinnedMeshRenderer)riderBodies[i], feet[i]);
-                riderHeights[i] = StandingHeight((SkinnedMeshRenderer)riderBodies[i], heads[i], feet[i].TransformPoint(footSoles[i]));
-                deckPositions[i] = bus.InverseTransformPoint(riders[i].parent.position);
-                // Feet stand on the existing deck, in front of the seat backs and inside the rail.
-                deckPositions[i] += new Vector3(.3f, 0, .2f);
-                deckPositions[i].y = 2.04f;
+                riders[i].localPosition = Vector3.zero;
+                GroundOnSeat((SkinnedMeshRenderer)riderBodies[i], riders[i]);
                 Destroy(passenger);
             }
-            // Remove gameplay scripts before the inactive clones can Awake or create their own tweens.
             Destroy(vehicle);
             foreach (var animator in cast.GetComponentsInChildren<Animator>(true)) animator.enabled = false;
             foreach (var collider in cast.GetComponentsInChildren<Collider>(true)) collider.enabled = false;
@@ -135,38 +112,23 @@ namespace BusJam.UI
             for (int i = 0; i < node.childCount; i++) SetLayer(node.GetChild(i), layer);
         }
 
-        // Use the posed bones directly: a newly cloned inactive skin can return stale BakeMesh data.
-        private static float StandingHeight(SkinnedMeshRenderer body, Transform head, Vector3 sole)
+        // Align the rest-pose sole once. Imported cheer clips own all subsequent body motion.
+        private static void GroundOnSeat(SkinnedMeshRenderer body, Transform rider)
         {
-            Mesh mesh = body.sharedMesh;
-            int bone = Array.IndexOf(body.bones, head);
-            Matrix4x4 bind = mesh.bindposes[bone];
-            Vector3[] vertices = mesh.vertices; BoneWeight[] weights = mesh.boneWeights;
-            float top = float.NegativeInfinity;
-            for (int i = 0; i < vertices.Length; i++)
-                if (weights[i].boneIndex0 == bone && weights[i].weight0 > .99f)
-                    top = Mathf.Max(top, head.TransformPoint(bind.MultiplyPoint3x4(vertices[i])).y);
-            return top - sole.y;
-        }
-
-        // Cache one supporting sole from the existing foot vertices; no mesh reads in Sample.
-        private static Vector3 FindSole(SkinnedMeshRenderer body, Transform foot)
-        {
-            Mesh mesh = body.sharedMesh;
-            int bone = Array.IndexOf(body.bones, foot);
-            Matrix4x4 bind = mesh.bindposes[bone];
-            Vector3[] vertices = mesh.vertices;
-            BoneWeight[] weights = mesh.boneWeights;
-            Vector3 sole = Vector3.zero;
-            float lowest = float.PositiveInfinity;
+            var mesh = body.sharedMesh;
+            var vertices = mesh.vertices; var weights = mesh.boneWeights;
+            var bones = body.bones; var binds = mesh.bindposes;
+            float bottom = float.PositiveInfinity;
             for (int i = 0; i < vertices.Length; i++)
             {
-                if (weights[i].boneIndex0 != bone || weights[i].weight0 < .99f) continue;
-                Vector3 point = bind.MultiplyPoint3x4(vertices[i]);
-                float y = foot.TransformPoint(point).y;
-                if (y < lowest) { lowest = y; sole = point; }
+                var w = weights[i];
+                Vector3 point = bones[w.boneIndex0].TransformPoint(binds[w.boneIndex0].MultiplyPoint3x4(vertices[i])) * w.weight0;
+                if (w.weight1 > 0) point += bones[w.boneIndex1].TransformPoint(binds[w.boneIndex1].MultiplyPoint3x4(vertices[i])) * w.weight1;
+                if (w.weight2 > 0) point += bones[w.boneIndex2].TransformPoint(binds[w.boneIndex2].MultiplyPoint3x4(vertices[i])) * w.weight2;
+                if (w.weight3 > 0) point += bones[w.boneIndex3].TransformPoint(binds[w.boneIndex3].MultiplyPoint3x4(vertices[i])) * w.weight3;
+                bottom = Mathf.Min(bottom, rider.InverseTransformPoint(point).y);
             }
-            return sole;
+            rider.localPosition = new Vector3(0, -bottom * rider.localScale.y, 0);
         }
 
         public void Prepare(LevelData level)
@@ -199,7 +161,7 @@ namespace BusJam.UI
             halfHeight = Mathf.Tan(motion.cameraFov * .5f * Mathf.Deg2Rad) * motion.cameraDistance;
             halfWidth = halfHeight * camera.aspect;
             float referenceHeight = Mathf.Tan(35 * .5f * Mathf.Deg2Rad) * 18;
-            float scale = Mathf.Min(referenceHeight * .15f, referenceHeight * camera.aspect * .24f) * motion.busScale;
+            float scale = Mathf.Min(referenceHeight * .15f, referenceHeight * camera.aspect * .24f) * motion.busScale * modelScale;
             cast.transform.localScale = Vector3.one * scale;
             radius = scale * 7;
         }
@@ -270,38 +232,25 @@ namespace BusJam.UI
             cast.transform.position = origin + camera.transform.right * point.x + camera.transform.up * point.y;
             float tilt = arc ? Mathf.Clamp(Mathf.Atan2(-tangent.y, Mathf.Abs(tangent.x)) * Mathf.Rad2Deg, -motion.pathTilt, motion.pathTilt) * moving : 0;
             cast.transform.rotation = Quaternion.AngleAxis(tilt, camera.transform.forward);
-            // Freeze the driving pose during the stop; exhaust and riders keep their own clocks.
-            float driveTime = entering ? elapsed : holding ? motion.enterDuration : elapsed - motion.holdDuration;
-            settings.drive.SampleAnimation(driveRoot, driveTime % settings.drive.length);
-            settings.exhaust.SampleAnimation(driveRoot, elapsed % settings.exhaust.length);
-            float holdTime = Mathf.Clamp(elapsed - motion.enterDuration, 0, motion.holdDuration);
+            float holdTime = elapsed - motion.enterDuration;
+            float exitTime = holdTime - motion.holdDuration;
+            // Drive owns wheel motion; the phase clip overlays suspension and seat bones.
+            // Arrive covers the final part of entry, Leave the first part of departure.
+            float arriveDuration = Mathf.Min(motion.enterDuration, settings.celebrateArrive.length);
+            bool arriving = entering && elapsed >= motion.enterDuration - arriveDuration;
+            bool leaving = !entering && !holding && exitTime < settings.celebrateLeave.length;
+            if (entering || !holding)
+                settings.drive.SampleAnimation(driveRoot, Mathf.Repeat(elapsed, settings.drive.length));
+            if (arriving)
+                settings.celebrateArrive.SampleAnimation(driveRoot, elapsed - motion.enterDuration + arriveDuration);
+            else if (holding)
+                settings.celebrateHold.SampleAnimation(driveRoot, Mathf.Repeat(holdTime, settings.celebrateHold.length));
+            else if (leaving)
+                settings.celebrateLeave.SampleAnimation(driveRoot, exitTime);
             for (int i = 0; i < riders.Length; i++)
             {
-                float riderTime = Mathf.Max(0, holdTime - i * motion.riderHopStagger);
-                settings.wave.SampleAnimation(waveRoots[i], riderTime * motion.waveSpeed % settings.wave.length);
-                Quaternion upper = Quaternion.AngleAxis(motion.waveArmRaise - waveRaises[i], Vector3.forward) * clipUpperArms[i].localRotation;
-                Quaternion lower = Quaternion.SlerpUnclamped(waveCenters[i], clipLowerArms[i].localRotation, motion.waveAmplitude / 25);
-                settings.idle.SampleAnimation(waveRoots[i], riderTime % settings.idle.length);
-                if (i % 2 != 0)
-                {
-                    upper = new Quaternion(upper.x, -upper.y, -upper.z, upper.w);
-                    lower = new Quaternion(lower.x, -lower.y, -lower.z, lower.w);
-                }
-                upperArms[i].localRotation = upper; lowerArms[i].localRotation = lower;
-                float cycle = Mathf.Repeat(riderTime * motion.riderHopFrequency, 1);
-                float passengerHeight = riderHeights[i] * cast.transform.localScale.y;
-                // Smooth takeoff/landing and a grounded interval; envelope grounds both hold boundaries.
-                float envelope = holding ? Mathf.SmoothStep(0, 1, Mathf.Clamp01(holdTime * 10))
-                    * Mathf.SmoothStep(0, 1, Mathf.Clamp01((motion.holdDuration - holdTime) * 10)) : 0;
-                float lift = cycle < .36f ? Mathf.Pow(Mathf.Sin(cycle / .36f * Mathf.PI), 2) : 0;
-                float hop = lift * passengerHeight * motion.riderHopHeight * envelope;
-                float squash = holding && cycle >= .36f && cycle < .5f ? Mathf.Sin((cycle - .36f) / .14f * Mathf.PI) * .07f * envelope : 0;
-                riders[i].localRotation = riderRotations[i] * Quaternion.Euler(holding ? Mathf.Sin(cycle * Mathf.PI * 2) * 5 * envelope : 0, 0, 0);
-                riders[i].localScale = Vector3.Scale(riderScales[i], new Vector3(1 + squash * .5f, 1 - squash, 1 + squash * .5f));
-                thighs[i].localRotation *= Quaternion.Euler(-hop / passengerHeight * 65, 0, 0);
-                riders[i].position = bus.TransformPoint(deckPositions[i]);
-                float soleHeight = Vector3.Dot(feet[i].TransformPoint(footSoles[i]) - riders[i].position, bus.up);
-                riders[i].position += bus.up * (hop - soleHeight);
+                AnimationClip clip = i == 0 ? settings.cheerJump : settings.rearRiderWaves ? settings.cheerWave : settings.cheerLean;
+                clip.SampleAnimation(waveRoots[i], Mathf.Repeat(elapsed, clip.length));
             }
         }
 

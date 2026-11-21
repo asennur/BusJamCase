@@ -11,21 +11,29 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b6a1a1f992d4e05459f0fd3479b9117b, type: 3}
   m_Name: CelebrationSettings
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   resultTimeline: {fileID: 11400000, guid: 1580845937b3dbd40bbe0b809262bbda, type: 2}
-  busPrefab: {fileID: 5860804732000749083, guid: e89cf9e0441e5424a9e03672836fc99f, type: 3}
+  busPrefab: {fileID: 8940994559524833716, guid: 6c15446a437f32848a5ed0e830596be4, type: 3}
   passengerPrefab: {fileID: 2193731836056189059, guid: 3e2ab979d65836442b9cb5a7766e53d8, type: 3}
-  drive: {fileID: -4698200198064148922, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}
+  drive: {fileID: -4698200198064148922, guid: d6960471188d6c6498a29afa91e863fb, type: 3}
   exhaust: {fileID: 7400000, guid: 956e57130732d9a46ad12391f79ba96a, type: 2}
-  wave: {fileID: -57793324751458776, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
   idle: {fileID: -3100369314251171874, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
+  wave: {fileID: -57793324751458776, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
+  cheerJump: {fileID: 2948011000578428252, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
+  cheerLean: {fileID: 1692995007192351101, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
+  cheerWave: {fileID: -1235613125577050657, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
+  celebrateArrive: {fileID: 9033492671769970238, guid: d6960471188d6c6498a29afa91e863fb, type: 3}
+  celebrateHold: {fileID: 116179091005079126, guid: d6960471188d6c6498a29afa91e863fb, type: 3}
+  celebrateLeave: {fileID: 3198224896099527575, guid: d6960471188d6c6498a29afa91e863fb, type: 3}
+  riderCount: 2
+  rearRiderWaves: 0
   colors:
-  - {fileID: 2100000, guid: 8704c296d4af58c4396adb0a4e87ce9c, type: 2}
-  - {fileID: 2100000, guid: 78ca3a4aed7b08c4f93012ada5fcc88c, type: 2}
-  - {fileID: 2100000, guid: 8a6356f6252d1e84b8e90163ed037e3e, type: 2}
-  - {fileID: 2100000, guid: d6eb81ed9f539b14ebcc50e7acfa024d, type: 2}
-  - {fileID: 2100000, guid: affd5ada359936549a8a712185dfce9c, type: 2}
-  - {fileID: 2100000, guid: a6f899608bbd6894c91c04e136da1c79, type: 2}
-  - {fileID: 2100000, guid: 8b0665dba53bd5247adffc0e89b986ce, type: 2}
+  - {fileID: 2100000, guid: eb792c8e8e8377f4a8745ed9d5454d38, type: 2}
+  - {fileID: 2100000, guid: b8a39108f39b86540bc77a9f19661ce3, type: 2}
+  - {fileID: 2100000, guid: 04c21d6d7fe821344a160ec51a474b10, type: 2}
+  - {fileID: 2100000, guid: 66a47d6ab7105654aa1527786355bcdf, type: 2}
+  - {fileID: 2100000, guid: 0da6ca96a10955248bc3b33e3d78010f, type: 2}
+  - {fileID: 2100000, guid: ef05a39c68ee21149a4cc930ca004e61, type: 2}
+  - {fileID: 2100000, guid: fe46769f372a6664dbcb8bdc94e0ef7c, type: 2}
   keyColor: {r: 1, g: 0.94, b: 0.86, a: 1}
   keyIntensity: 0.75
