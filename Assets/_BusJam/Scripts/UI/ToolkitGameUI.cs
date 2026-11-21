@@ -23,7 +23,7 @@ namespace BusJam.UI
         private VisualElement settings, resetConfirmation, pause, pauseConfirmation;
         private Button startButton, startSettings, pauseSettings, settingsClose, resetButton, resetYes, resetNo;
         private Button pauseClose, restartButton, menuButton, confirmYes, confirmNo;
-        private Label levelNumber, timerText, livesCount, lifeCountdown, coinCount, readyPrompt, confirmText;
+        private Label levelNumber, timerLevel, timerText, livesCount, lifeCountdown, coinCount, readyPrompt, confirmText;
         private Toggle soundToggle;
         private readonly StringBuilder textBuffer = new StringBuilder(32);
         private Tween startPulse, readyPulse, urgentPulse, coinPulse;
@@ -96,7 +96,7 @@ namespace BusJam.UI
             resetButton = root.Q<Button>("reset-button"); resetYes = root.Q<Button>("reset-yes"); resetNo = root.Q<Button>("reset-no");
             pauseClose = root.Q<Button>("pause-close"); restartButton = root.Q<Button>("restart-button"); menuButton = root.Q<Button>("menu-button");
             confirmYes = root.Q<Button>("confirm-yes"); confirmNo = root.Q<Button>("confirm-no");
-            levelNumber = root.Q<Label>("level-number"); timerText = root.Q<Label>("timer-text");
+            levelNumber = root.Q<Label>("level-number"); timerLevel = root.Q<Label>("timer-level"); timerText = root.Q<Label>("timer-text");
             livesCount = root.Q<Label>("lives-count"); lifeCountdown = root.Q<Label>("life-countdown"); coinCount = root.Q<Label>("coin-count");
             readyPrompt = root.Q<Label>("ready-prompt"); confirmText = root.Q<Label>("confirm-text"); soundToggle = root.Q<Toggle>("sound-toggle");
             CacheResults();
@@ -204,6 +204,7 @@ namespace BusJam.UI
         {
             textBuffer.Clear().Append("Level ").Append(number);
             startButton.text = textBuffer.ToString();
+            timerLevel.text = startButton.text;
             startButton.style.fontSize = Mathf.Min(76f, 720f / textBuffer.Length);
             textBuffer.Clear().Append(number);
             levelNumber.text = textBuffer.ToString();

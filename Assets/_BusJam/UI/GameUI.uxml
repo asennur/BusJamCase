@@ -27,6 +27,7 @@
                     <ui:Label name="level-number" text="1" class="level-number" picking-mode="Ignore" />
                 </ui:VisualElement>
                 <ui:VisualElement class="timer-counter" picking-mode="Ignore">
+                    <ui:Label name="timer-level" text="Level 1" class="timer-level" picking-mode="Ignore" />
                     <ui:VisualElement class="clock-icon" picking-mode="Ignore" />
                     <ui:Label name="timer-text" text="0:30" class="timer-text" picking-mode="Ignore" />
                 </ui:VisualElement>
