@@ -108,3 +108,14 @@ Final series contact sheets: `../final-contact-sheets/all-screens-{580x1250,1080
 Implementation commits: `7842f20` (modals/toggle), `8b75d84` (No Lives), `dd196ec` (tutorial). No Play, vault write, scene save, progress write or push.
 
 Protected verification records three external ArtSource changes during the run: EnvPalette.png, EnvironmentKit.blend and EnvironmentKit.blend1. Every other manifest file, including Game.unity, ResultTimeline.asset, runtime UI code/UXML, protected materials/data/models, atlases, logo and menu background, stayed byte-identical (`protected-verification.json`). This task never wrote or staged those three files; existing user changes and new art exports remain unstaged.
+
+
+## ZHUD-2 — HUD review follow-up — 21 November 2026
+
+Shared UI-28 plates now have **40% dark navy interiors**, including Start lives/coins, HUD timer and No Lives countdown. Rim contours/colours/gloss and opaque live text remain. Backing layers have reversed-winding interior cutouts; imported center alpha is 102/255. A real white Fredoka **Level N** caption sits above the timer at 60% of its digit size, sharing ShowLevel's event binding. Timer updates retain the same caption string. All four requested sizes pass viewport, centering and badge/gear collision checks; the existing badge is retained.
+
+FailOverlay already works: alpha .36 at 0.7s and .72 from 0.8s through 10s, with native entry/end captures showing the board dimmed. No Fail code or timeline values changed.
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/hud2/`: **28 native captures** across four sizes (Start, HUD, Fail mid/end, No Lives, busy Start/HUD), 3x plate crops, reference t0030/t0060, layout/collision/texture/binding checks and final Console/protected manifests. Fullscreen readbacks are unmodified; only detail crops are vertically corrected. A disposable additive Level_01 board and native world-camera stress grid supply backgrounds; panel targetTexture stays null. `Review.md` explains fixtures and the retained failed importer candidate. Unity 2022.3.19f1, Edit mode only; no Play, device/notch test, vault access, progress write, scene save or push.
+
+Final cleanup: compile complete, **Console 0**, Game scene clean, one open scene, native panel target null, temporary harness absent and zero active tweens. Protected manifest: **78/81 byte-identical**; MenuKit.blend, MenuKit.blend1 and MenuPalette.png changed externally during the run. This task did not write or stage them; Game.unity, timeline, protected models/materials/data and atlases stayed identical. Implementation: `71d0761`, `0febe26`.
