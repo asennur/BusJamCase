@@ -5,6 +5,7 @@ Shader "BusJam/Toon"
     Properties
     {
         [MainColor] _BaseColor ("Color", Color) = (1, 1, 1, 1)
+        [MainTexture] _BaseMap ("Palette (optional)", 2D) = "white" {}
         _ShadeColor ("Shade Tint", Color) = (0.72, 0.7, 0.88, 1)
         _RampThreshold ("Ramp Threshold", Range(0, 1)) = 0.45
         _RampSmooth ("Ramp Smooth", Range(0.001, 0.5)) = 0.06
@@ -32,6 +33,8 @@ Shader "BusJam/Toon"
             #pragma multi_compile_instancing
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
+            TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
+
             CBUFFER_START(UnityPerMaterial)
                 half4 _BaseColor;
                 half4 _ShadeColor;
@@ -50,6 +53,7 @@ Shader "BusJam/Toon"
             {
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
+                float2 uv : TEXCOORD0;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -59,6 +63,7 @@ Shader "BusJam/Toon"
                 half3 normalWS : TEXCOORD0;
                 half3 viewWS : TEXCOORD1;
                 half3 ambient : TEXCOORD2;
+                float2 uv : TEXCOORD3;
             };
 
             Varyings vert(Attributes input)
@@ -70,6 +75,7 @@ Shader "BusJam/Toon"
                 output.normalWS = TransformObjectToWorldNormal(input.normalOS);
                 output.viewWS = GetWorldSpaceViewDir(positionWS);
                 output.ambient = SampleSH(output.normalWS) * _AmbientStrength;
+                output.uv = input.uv;
                 return output;
             }
 
@@ -82,7 +88,9 @@ Shader "BusJam/Toon"
                 // Yarım Lambert'i tek basamakla iki tona böler.
                 half ndl = dot(n, light.direction) * 0.5h + 0.5h;
                 half lit = smoothstep(_RampThreshold - _RampSmooth, _RampThreshold + _RampSmooth, ndl);
-                half3 color = _BaseColor.rgb * (lerp(_ShadeColor.rgb, 1.0h, lit) * light.color + input.ambient);
+                // Dekor paleti _BaseMap'ten gelir; doku atanmamışsa beyaz, renk yalnız _BaseColor.
+                half3 albedo = _BaseColor.rgb * SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
+                half3 color = albedo * (lerp(_ShadeColor.rgb, 1.0h, lit) * light.color + input.ambient);
 
                 // Sert kenarlı Blinn noktası; yalnız aydınlık tarafta. Tam yukarı bakan düz yüzeyler
                 // (otobüs tabanı gibi) maskelenir, yoksa tüm yüz beyaza boyanır.

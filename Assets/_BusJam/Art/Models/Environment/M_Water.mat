@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: M_Water
-  m_Shader: {fileID: 4800000, guid: 69a7a00328da5074fb5514860c96eba6, type: 3}
+  m_Shader: {fileID: 4800000, guid: cce8d6ce9c9c10f4190872a8a7ee9950, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -28,8 +28,21 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _AmbientStrength: 0.25
+    - _EdgeStrength: 0
+    - _EdgeThreshold: 0.78
+    - _RampSmooth: 0.06
+    - _RampThreshold: 0.45
+    - _RimStrength: 0.35
+    - _RimThreshold: 0.62
+    - _SpecSize: 0.06
+    - _SpecStrength: 0.55
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _EdgeColor: {r: 0.45, g: 0.4, b: 0.5, a: 1}
+    - _RimColor: {r: 1, g: 1, b: 1, a: 1}
     - _ScrollSpeed: {r: 0.015, g: 0.025, b: 0, a: 0}
+    - _ShadeColor: {r: 0.72, g: 0.7, b: 0.88, a: 1}
+    - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
