@@ -19,6 +19,7 @@ Shader "BusJam/Modular Ground"
             #pragma fragment Frag
             #pragma multi_compile_instancing
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "../../../Shaders/BackgroundTone.hlsl"
             struct Attributes { float4 positionOS:POSITION; float2 band:TEXCOORD1; UNITY_VERTEX_INPUT_INSTANCE_ID };
             struct Varyings { float4 positionCS:SV_POSITION; float2 ground:TEXCOORD0; float band:TEXCOORD1; UNITY_VERTEX_INPUT_INSTANCE_ID };
             CBUFFER_START(UnityPerMaterial)
@@ -70,7 +71,7 @@ Shader "BusJam/Modular Ground"
                 }
                 else if(input.band<3.5) color=_Grass.rgb;
                 else color=half3(.96,.96,1);
-                return half4(color,1);
+                return half4(MuteBackground(color),1);
             }
             ENDHLSL
         }

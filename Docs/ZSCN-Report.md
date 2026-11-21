@@ -179,3 +179,42 @@ Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/lens/`. Native Ga
 - **35 protected file hashes remain unchanged**, including Asen's uncommitted Global Volume Profile.asset (LensDistortion active: 0), ResultTimeline, ArtSource, sprite atlases, M_Purple, M_Yellow, LevelDatabase and Level_26. The new effect references only MenuVolumeProfile; the existing global profile is neither modified nor staged.
 
 The capture fixture compiled successfully and the first Console check returned **0 errors, 0 warnings, 0 logs**. After the temporary fixture was removed, the final compilation request stalled and MCP stopped answering its editor ping. The editor log records MCP WebSocket disconnect warnings; final compilation completion and a fresh empty Console are pending. Windows automation recovery was rejected by automatic approval review ("Computer Use was not approved to use unity"); approval to inspect the window or user focus/recovery is required. Changes are staged; commit is pending that final verification. No Play or push.
+
+# ZBGTONE - Gameplay background muting
+
+21 November 2026. Unity **2022.3.19f1**, pinned `BusJamCase@c4dcbf17c52e6f1b`, main baseline `938eea6`. The initial live editor ping succeeded. **Edit mode only; never Play.** No AsenOS write or push.
+
+Tune **Assets/_BusJam/Settings/BackgroundStyle.asset** in the Inspector: **Desaturation 0.30**, **Lift 0.20**, **Contrast Reduction 0.05**, **Haze sRGB (0.90, 0.85, 0.91)**. `Background > BackgroundStyleBinding` references this asset and applies its shader globals on enable; Inspector edits apply immediately. There is no Update loop, material instantiation, texture copy or per-frame managed allocation. The haze is converted to the project's working colour space. Zeroing all three sliders restores the original shader output.
+
+`BackgroundTone.hlsl` desaturates toward Rec.709 luminance, reduces contrast toward 0.5 in working colour space, then blends toward the haze. Only the three gameplay-background shaders consume these globals. The small `Background Simple Lit` variant reuses URP 14's Simple Lit input, vertex, lighting and fragment functions, with the treatment after lighting; the stock depth passes are reused. `M_Environment` uses this variant for the EnvironmentKit trees, bushes, flowers, rocks, grass tufts, pond surround and planter. ModularGround applies the same treatment to the outer floor, sidewalk, road/markings and grass band. ScrollingWater applies it after the existing texture sample; **UV speed remains (0.015, 0.025)** and time-driven scrolling remains intact.
+
+The sidewalk curb material is retained unchanged. Board tiles, board rim/frame, slots, tunnels, obstacles, passengers, buses, celebration, UI and the 3D menu retain their materials and shader paths. The environment material has **zero scene renderer users outside Background**. No geometry, transforms, camera framing, light or post-processing setting was changed. All background materials retain GPU instancing. Unity's SRP Batcher compatibility code is **0 (compatible)** for all three affected shaders; shader diagnostics are empty.
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/bgtone/`. Primary **before-<size>.png**, **after-<size>.png** and saved-scene **saved-after-<size>.png** are untouched native GameView final RenderTexture readbacks at **580x1250, 1080x1920, 2560x1080**. Their `-view.png` derivatives correct GPU readback orientation; `comparison-<size>.png` provides labelled side-by-side previews. No screenshot was reconstructed from a camera-only render.
+
+The temporary external `ZBgToneReview.cs` fixture uses the existing `BoardView.Build` with **Level_05**, instantiates **three existing bus prefabs** at the authored queue positions, freezes their poses, and displays the normal Playing HUD with Level 5 / 1:15. This is a populated **Edit-mode presentation**, not a running game or gameplay-flow test. No PlayerPrefs are written. Temporary objects are DontSave and removed; the fixture is not shipped in Assets.
+
+Measurements use fixed top-left-origin native-pixel rectangles: foliage, grass, road, sidewalk and outer floor for background; bus surfaces and passenger heads for gameplay. **Mean linear sRGB luminance** uses Rec.709 weights; **mean HSV saturation** uses encoded sRGB. Aggregate means are weighted by sampled pixel count, not whole-image semantic segmentation. Animated water and object boundaries are excluded. `regions.json`, annotated `regions-<size>.png`, `measure.py` and per-region `measurements.tsv` make the selection and calculation reviewable.
+
+| Native size | Region | Mean linear luminance before / after | Mean HSV saturation before / after |
+| --- | --- | --- | --- |
+| 580x1250 | Background | 0.2815 / 0.3276 | 0.3098 / 0.1765 |
+| 580x1250 | Gameplay | 0.2139 / 0.2139 | 0.6547 / 0.6547 |
+| 1080x1920 | Background | 0.2990 / 0.3417 | 0.2979 / 0.1694 |
+| 1080x1920 | Gameplay | 0.2208 / 0.2208 | 0.6752 / 0.6752 |
+| 2560x1080 | Background | 0.2645 / 0.3101 | 0.4148 / 0.2321 |
+| 2560x1080 | Gameplay | 0.2183 / 0.2183 | 0.6575 / 0.6575 |
+
+Background sample saturation falls **43-44%**. Sampled passenger pixels are identical at 1080x1920 and 2560x1080; final post-processed bus/passenger samples differ by at most **1/255 at 580x1250**, **0 at 1080x1920**, **2/255 at 2560x1080**. These tiny final-output differences do not imply gameplay material changes. Bright grass luminance can decrease slightly toward the warm/lilac haze; the aggregate background and dark floor become lighter.
+
+| Native size | Draw calls before / after | Triangles before / after | Batches before / after | SetPass before / after |
+| --- | --- | --- | --- | --- |
+| 580x1250 | 126 / 126 | 162904 / 162904 | 126 / 126 | 11 / 14 |
+| 1080x1920 | 128 / 128 | 163080 / 163080 | 128 / 128 | 11 / 14 |
+| 2560x1080 | 157 / 157 | 188378 / 188378 | 157 / 157 | 9 / 10 |
+
+**Zero added draw calls or triangles.** The separate background shader increases shader-state switches (SetPass) while preserving batching and existing render submissions. These are populated Edit-mode GameView totals, not device performance measurements. The muting adds a few scalar/vector arithmetic operations per background pixel, no texture fetches or additional rendered pass.
+
+The saved-scene audit retains every original serialized block. Only Background's component list changes, plus one new binding block; an automatically serialized unrelated UI timeline reference was removed from the diff. Asen's light block remains identical to the initial working snapshot (**0.75**). Its existing 0.5-to-0.75 hunk is excluded from the commit. All **35 protected file hashes** match the initial snapshot, including Global Volume Profile.asset, ResultTimeline, ArtSource, sprite atlases, M_Purple, M_Yellow, LevelDatabase and Level_26. No protected asset is staged.
+
+Final verification after removing the temporary fixture: compilation finished, editor not compiling/updating, Edit mode, scene clean, exactly one style binding, no review objects/type, style globals restored to defaults, light 0.75. **Console: 0 errors, 0 warnings, 0 logs.** The live MCP editor ping succeeded after final compilation. All 1,252 original scene blocks are retained; saved-scene native captures also pass the populated-view check. See final-editor.json, final-console.json, shader-audit.json and saved-audit.json in the evidence folder.
