@@ -19,7 +19,7 @@ namespace BusJam.UI
         [SerializeField] private LevelTimer levelTimer;
         [SerializeField] private LayoutModeController layoutMode;
 
-        private VisualElement documentRoot, root, background, start, hud, ready, readyDim;
+        private VisualElement documentRoot, root, start, hud, ready, readyDim;
         private VisualElement settings, resetConfirmation, pause, pauseConfirmation;
         private Button startButton, startSettings, pauseSettings, settingsClose, resetButton, resetYes, resetNo;
         private Button pauseClose, restartButton, menuButton, confirmYes, confirmNo;
@@ -86,7 +86,6 @@ namespace BusJam.UI
             documentRoot.pickingMode = PickingMode.Ignore;
             root = documentRoot.Q("ui-root");
             VectorArt.Apply(root);
-            background = root.Q("menu-background");
             start = root.Q("start-screen"); hud = root.Q("hud");
             ready = root.Q("ready-overlay"); readyDim = root.Q("ready-dim");
             settings = root.Q("settings-overlay"); resetConfirmation = root.Q("reset-confirmation");
@@ -187,7 +186,7 @@ namespace BusJam.UI
             CloseSettings(); ClosePause();
             bool isStart = state == GameState.Start;
             bool isReady = state == GameState.Ready;
-            Show(background, isStart); Show(start, isStart);
+            Show(start, isStart);
             Show(hud, isReady || state == GameState.Playing || state == GameState.Complete || state == GameState.Fail);
             hud.EnableInClassList("fail-hud", state == GameState.Fail);
             Show(ready, isReady); Show(readyDim, isReady);

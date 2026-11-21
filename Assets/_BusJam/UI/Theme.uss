@@ -13,10 +13,6 @@
 .art-comparison { -unity-background-scale-mode: scale-to-fit; }
 .safe-area { flex-grow: 1; }
 .start-screen { justify-content: flex-start; }
-.menu-background {
-    background-image: url("../Art/Textures/bg_menu.png");
-    -unity-background-scale-mode: scale-and-crop;
-}
 .ready-dim { background-color: rgba(10, 15, 31, 0.22); }
 .top-bar {
     flex-direction: row;

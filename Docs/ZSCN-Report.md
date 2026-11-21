@@ -97,3 +97,66 @@ All **124 original serialized scene blocks remain**. Camera, Light and original 
 - Tile colours use deterministic per-cell hashes and subtle bevel shading; they reproduce the tile style and dimensions, not each original tile's painted colour. Yellow lines and band boundaries align geometrically; minor painterly edge variation is replaced by clean lines.
 - Only the grass band's seeded additions are aspect-gated. The two authored floor clusters remain world-locked and naturally crop out of narrow portrait views, as in the old quad.
 - The budget above includes the scenery and existing curb in the saved Edit-mode scene. It does not establish a <50k-triangle limit for a runtime level populated with passengers/buses or for Complete celebration. Play and device profiling were excluded by the task.
+
+# ZSCN-3 — 3D Start menu
+
+21 November 2026. Unity **2022.3.19f1**, pinned `BusJamCase@c4dcbf17c52e6f1b`, main. **Edit mode only**. No Play, push, Blender source save or AsenOS write. The approved exports and import settings were already tracked by ZSCN-1; this package adds their scene placement and presentation.
+
+Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/scn/zscn-3/`. Open `comparison-1080x1920.png`, the other three `comparison-<size>.png` sheets, and `comparison-M1.png` through `comparison-M3.png`. The final native readbacks are **`delivery-*.png`**, including UI, and **`delivery-world-*.png`**, with UI temporarily hidden. Raw readbacks are untouched; only derived comparison crops correct vertical readback. Other capture labels are provisional iterations, retained for traceability.
+
+## Run 1 — Baseline and source extraction
+
+Captured the existing Start screen at 580x1250, 1080x1920, 2560x1080 and 1080x1080 (`before-*`). Reopened MenuKit.blend headlessly with Blender 5.1 without saving it. `extract_menu.py` writes all **33** `Onizleme_Yerlesim` instances, mesh names, world matrices, Unity positions/quaternions/scales, bounds and camera data to `MenuKit-layout.json`. The bridge, preview bus/rig and ground are outside that collection; their source transforms are extracted separately.
+
+Verified the exact FBX conversion **(-X, Z, -Y)** against Menu_Bridge: **1,194 source vertices** match **1,660 seam-split imported vertices**, with maximum nearest distance **0.000005275 units**. The source camera is vertical sensor fit, **52 degrees vertical**, pitch **41 degrees**, distance **32**. Its Unity target is **(0, 3.298896, -16.5)**, two metres along the road from the preview bus origin **(0, 3.298896, -14.5)**. The crest probe at **(0,4.2,-21)** projects to **39.30% from the top** in portrait.
+
+## Run 2 — Menu world and camera routing
+
+Added `MenuWorld` at **(1000,0,1000)**, retaining all extracted relative transforms. Menu_Bridge uses its three imported palette/asphalt/walk materials. The imported OtobusMenu is placed at the preview bus pose; a **1/1.3** model-parent scale cancels the established bus import scale to retain Blender dimensions. Its Animator defaults to looping Idle, including the imported Smoke_0/1/2 animation. `Menu Presentation` exposes the blue body colour **(0.035,0.59,0.86)** through a reusable material-property block on body slot 0; trim/glass/lights remain separate.
+
+`MenuSky Background` is a camera-child quad **200 units** away, within a **250-unit** far plane, using URP Unlit and MenuSky.png. Cover-fit expands its geometry around the optical axis while retaining the image aspect; the entire camera frustum is covered at all four sizes. The old `menu-background` UXML element, its stylesheet image rule and obsolete ToolkitGameUI lookup were removed. **bg_menu.png remains on disk.** Counters, gear, level button and logo keep their existing UI hierarchy and layout.
+
+`MenuWorldPresentation` subscribes to `GameManager.StateChanged` and the existing layout event. Start activates the menu root/camera; Ready, Playing, Complete and Fail deactivate them and restore gameplay rendering. Existing startup indicator/celebration code discovers `Camera.main`, so the gameplay camera stays enabled as an **unstacked URP Overlay** in Start; URP skips its rendering. Every other state restores its original **Base** type. Its transform, projection, culling mask, Inspector references and game-flow code are preserved. `rendered-cameras.txt` records the actual URP Game-camera callbacks for Start and Ready.
+
+The first provisional captures (`after-1`) exposed an overextended floor hiding the skyline. `after-2` restores the distant floor edge and adds a **menu-only warm fill light**, intensity **0.85**, pitch **35**, yaw **180**, no shadows. Asen's original directional light stays exactly **0.75**. Existing global grading is retained.
+
+## Run 3 — Aspect composition, batching and final captures
+
+Scenery uses **two shared combined side meshes**; the named source transforms/meshes remain with redundant renderers disabled. Bridge, combined scenery and ground are marked batching-static, and shared materials enable GPU instancing. The bus, camera and backdrop remain dynamic. No scenery colliders or shadows were added. MenuPalette is Point/Clamp/no mipmaps/sRGB; MenuAsphalt/MenuWalk remain Repeat/Trilinear/mipmaps/sRGB. An sRGB GPU readback compared **65,536 MenuPalette texels**, with **zero changed texels** and zero maximum channel error.
+
+`after-3`, `after-final` and `world-final` measure the combined geometry with the provisional wider/farther lenses. `aspect-refined` tightens square and landscape framing to keep the bridge approach off-screen. `final`/`final-world` and `verified`/`verified-world` expose and correct the floor's transparent queue and winding. **`delivery`/`delivery-world` supersede all of them.** The preview floor retains Y **-7**, extends sideways, and fades from Z **-20 to -32** into the skyline, removing the straight green horizon visible on wide screens. Its small shader uses the main light/ambient, vertex alpha and no textures or per-frame updates.
+
+| Aspect band | Range | Vertical FOV | Target distance | Camera pitch |
+| --- | --- | --- | --- | --- |
+| Portrait | aspect < 0.8 | 52 degrees | 32 units | 41 degrees |
+| Square | 0.8 through 1.25 | 54 degrees | 30 units | 41 degrees |
+| Landscape | aspect > 1.25 | 58 degrees | 24 units | 41 degrees |
+
+The final comparison sheets include the supplied portrait reference, baseline, new Start view, and unobstructed 3D world for each native size. The reference remains its supplied portrait image; separate landscape/square reference captures were not supplied. M1/M2/M3 sheets retain their original comparison images beside the Unity world crop.
+
+UnityStats was sampled after **40 settled editor repaints** per capture, from the normal Game View final target at verified native dimensions, with UI included. These are complete **Edit-mode Start-view totals**. The baseline still renders gameplay scenery underneath its opaque UI background; it contains no old 3D menu. Small draw-call variation comes from editor/UI repaints. The two combined chunks submit their complete meshes, increasing triangles while reducing draw calls.
+
+| Native size | Draw calls before → after | Triangles before → after | Batches before → after | SetPass before → after |
+| --- | --- | --- | --- | --- |
+| 580x1250 | 24 → 21 | 23,812 → 59,396 | 21 → 19 | 6 → 10 |
+| 1080x1920 | 24 → 19 | 23,808 → 59,394 | 21 → 19 | 6 → 10 |
+| 2560x1080 | 24 → 19 | 23,810 → 59,394 | 21 → 19 | 6 → 10 |
+| 1080x1080 | 24 → 19 | 23,808 → 59,394 | 21 → 19 | 6 → 10 |
+
+The final UI-hidden views measure **18 draw calls / 59,268 triangles / 18 batches** at all four sizes. `budget.tsv` and `stats.tsv` retain the full numbers. This package has no requested 50k-triangle cap; it does not claim the ZSCN-2 background's <50k total for this menu.
+
+## Run 4 — Saved-scene verification and protection audit
+
+**107 Edit-mode checks pass after reloading the saved scene**: unique root, every extracted instance transform, state-event routing, Camera.main identity, unchanged gameplay camera pose/projection, all aspect lenses, crest location, sky coverage/aspect, UI preservation, ground winding/queue, static flags/material instancing, texture sampling settings, default/looping Idle, actual Animator-driven exhaust and exposed bus colour. **2,000 warmed camera/sky fits allocate zero managed bytes.** Fifty menu returns retain the same transform count; ten disable/enable cycles keep event subscription counts stable. The presentation has no Update loop, per-frame spawning or per-frame material creation.
+
+All **1,007 original serialized scene blocks remain**. Only two existing blocks change: the gameplay camera's URP render type in Start and the scene root list. The gameplay camera's exact original on-disk pose was restored before saving. An automatically serialized existing UI timeline default was excluded from the scene diff. Scene reload was guarded by `isDirty=false` so no unsaved editor work was discarded.
+
+**35 protected file hashes are unchanged**: Blender sources, sprite atlases, ResultTimeline.asset, M_Purple, M_Yellow, LevelDatabase, Level_26 and bg_menu.png. Asen's directional light intensity remains exactly **0.75 on disk**; the existing **0.5 → 0.75** change is excluded from the staged scene and remains uncommitted. Final Console: **0 errors, 0 warnings, 0 logs** after clearing a transient MCP WebSocket reconnect warning from compilation/domain reload. No source-model reimport was needed, so no new FBX import warning was introduced.
+
+## Remaining differences and limits
+
+- The approved Blender preview itself differs from menu_4.0: smaller/narrower bus, larger block buildings, a denser and higher distant tree line, faceted foliage and simplified roofs/windows. Exact source placement preserves those differences. The M1–M3 comparisons make them visible.
+- Existing warm grading and the menu fill produce different lighting/colour from Blender's preview and the painted reference. The bus reads cyan-blue; roof/glass/tail details and puff shapes differ from the reference. The supplied MenuSky skyline is simpler and its cover-fit crop becomes much larger on square/wide views.
+- The retained logo overlaps the crest and part of the bus in portrait/square, as its existing UI placement dictates. Landscape keeps the current logo-left/button-right layout. The reference's tabs, profile and No Ads controls are outside the existing UI scope.
+- Wider aspects expose additional world area and the soft ground transition. They retain the approved instance layout rather than adding new buildings/trees. The square/landscape lens change occurs at the existing aspect-band boundaries.
+- State events, URP camera callbacks and Animator evaluation were tested in Edit mode. Play-mode user interactions, device performance and long-running runtime profiling were excluded by the explicit no-Play instruction.

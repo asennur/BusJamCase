@@ -1,7 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:art="BusJam.UI">
     <ui:Style src="Theme.uss" />
     <ui:VisualElement name="ui-root" class="ui-root portrait" picking-mode="Ignore">
-        <ui:VisualElement name="menu-background" class="fill menu-background" picking-mode="Ignore" />
         <ui:VisualElement name="ready-dim" class="fill ready-dim hidden" picking-mode="Ignore" />
         <ui:VisualElement name="safe-area" class="safe-area" picking-mode="Ignore">
             <ui:VisualElement name="start-screen" class="fill start-screen" picking-mode="Ignore">
