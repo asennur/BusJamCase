@@ -1,102 +1,41 @@
-# ZCELEB-4 - Tunable celebration choreography
+# ZCELEB-5 - Arc path and natural side wave
 
-21 November 2026. Implementation: `ae09b91`. Unity **2022.3.19f1**, MCP pinned to **BusJamCase@c4dcbf17c52e6f1b**. Edit mode only; never Play. No scene save, push or AsenOS access.
+21 November 2026. Baseline **db881ae**, implementation **269c21e**, branch **main**. Unity **2022.3.19f1**, MCP pinned to **BusJamCase@c4dcbf17c52e6f1b**. Edit mode only; never Play. No scene save, push or AsenOS access.
 
-The existing open-top bus now shows its side profile under a camera pitched down 10 degrees. It enters from the right at **1.05 s**, decelerates over **0.55 s**, stops at normalized **(0.5, 0.2)** for **1.2 s**, then accelerates downward over **0.65 s**. It hides at **3.45 s**. The hold freezes the driving pose and bus position; exhaust continues. Three matching riders Wave, hop with 0.2-second spacing, and return to the deck before exit. Default hop height is **0.25 of standing head-to-sole height**, capped at **0.4**.
+## Result
 
-## Asen's controls
+Quadratic screen-space arcs bring the bus from bottom-right to Asen's existing stop, then take it toward bottom-left. Enter/exit duration, stop, hold, camera, scale, suspension, hop controls and all named-step values are unchanged. The ResultTimeline asset diff adds only nine new fields. A Path Mode enum defaults to Arc; Straight keeps the legacy Enter Side/Exit Direction behavior. Path Tilt is a small camera-axis roll following the projected tangent, settling flat during the hold. The isolated Result Timeline Preview can overlay the entry/exit paths in cyan/yellow.
 
-Select `Assets/_BusJam/Data/ResultTimeline.asset` and expand **Celebration**. Every requested field has an English tooltip: start time; enter duration/side; normalized stop position; hold duration; exit duration/direction; camera yaw/pitch/distance/FOV; bus scale; rider hop height/frequency/stagger; enter/exit AnimationCurves; bus bounce amplitude. Duplicate camera settings were removed from CelebrationSettings. The named CelebrationBus step retains Enabled, with derived Start/Duration. The Complete length follows the phase sum.
+Asen's saved exit curve descends from approximately 0.995 to 0.007. Arc sampling normalizes the curve's authored endpoint values to forward progress, preserving every key, tangent and weight while avoiding an exit-start teleport. Straight retains the previous sampling. Existing moving suspension bounce is added after path evaluation.
 
-Open **Bus Jam > Result Timeline Preview**, play Complete, pause, or scrub Time. Inspector edits resample the current paused time. Camera changes apply without resizing. Other result steps retain independent timings; rewards and Continue can be delayed separately for a longer hold. Last-bus colour, shared materials, existing Drive/Exhaust/Idle/Wave clips, pooled cast, transparent 2x MSAA RenderTexture and tap-to-skip remain in use.
+The imported Yolcu.fbx Wave was inspected before implementation: its upper arm points outward (about 24 degrees above horizontal) and its bent forearm oscillates upward beside the head. That existing clip supplies the wave rotations. Idle supplies the standing/relaxed pose; the active arm alternates right/left/right via mirrored rotations. Wave Arm Raise, Wave Speed and Wave Amplitude have English tooltips. The forced overhead alignment and all arm/head bone-scale overrides are removed. Existing whole-rider size, hop root squash, timing and deck anchoring remain.
 
-Standing height is cached from the existing head vertices transformed by the posed bone, minus the supporting sole. This avoids stale BakeMesh data from inactive clones. Mesh reads happen only during pool construction.
+Saved timing: entry **1.05-1.60 s**, hold **1.60-2.25 s**, exit **2.25-2.90 s**; Complete still ends at **3.45 s**. Stop **(0.5, 0.2)**, camera **0/10/18/35**, Bus Scale **0.8**, hop **0.25 / 1.666667 / 0.2**, bounce **0.0973**.
 
 ## Evidence
 
-Folder: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/celeb4/`.
+Folder: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/celeb5/`.
 
-- Twelve raw `enter/stop/hold/exit-<resolution>.png` files at **580x1250, 1080x1920 and 2560x1080**; upright copies in `upright/`, contact sheet `phase-contact.jpg`.
-- `default.mp4`: default choreography, **1080x1920, 30 fps, 108 frames / 3.60 s**.
-- `tuned.mp4`: **135 frames / 4.50 s**, after changing exactly **Enter Side: Right to Left**, **Hold Duration: 1.2 to 2.1 s**, **Exit Direction: Down to Right** in the saved asset. Defaults are restored afterward.
-- `default-asset.json`, `tuned-asset.json`, `restored-asset.json`: serialized snapshots. `evidence-verification.json` records restoration, frame counts, video metadata and protected-file comparison.
-
-Captures use the visible native Game View's normal repaint and final render target, with the actual screen UIDocument (`PanelSettings.targetTexture == null`) and ZAA's imported raster SVG artwork. Only the existing bus compositor uses its own RenderTexture. `native-path.tsv` records the path. No offscreen UI fixture supplies the videos or phase captures. As in ZAA, the native Edit-mode readback vertically inverts the overlay; raw PNGs remain intact and upright review PNGs/MP4s apply a vertical flip. These are deterministic Edit-mode presentation recordings, not Play or device touch/GPU measurements.
-
-## Verification
-
-- `validation.txt`: **3,603 hold samples across three resolutions**, **zero bus drift**, default peak **0.2501 standing heights** including numerical tolerance, maximum **two riders airborne**. An independent posed head-to-sole measurement checks the cache. Deck footprint, 0.4 maximum, zero hop/frequency/durations, start/length edits, normalized stop, both entry sides, all three exits, camera controls, scale and tooltips pass.
-- **20 warmup cycles plus 50 Complete/disable/enable cycles:** zero retained growth; 119 transforms, 302 UI elements, zero Edit-mode tween clocks, same render-target identity and stable loaded texture/material counts.
-- **400 warmed production sampler frames: 0 managed bytes.** All seven last-bus colours, three matching rider materials, pointer skip/release, Fail/disable cleanup and unchanged saved coins pass.
-- `parameter-validation.txt`: independent projected-pose checks confirm enter/exit curves, moving bounce, camera distance/FOV apparent size, hop frequency and stagger.
-- `preview-validation.txt`: twelve open/sample/reverse-scrub/resize/close cycles after warmup, all four tracks at three sizes, zero owned target/object/preview-scene growth. Cloned timeline and paused live stop/hold edits drive the preview.
-
-The editor/MCP closed during the work. Recovery used the same pinned Unity version with normal licensing access, no forced stop and no scene save. Final compiled Edit-mode/Console state is in `final-unity.json`. Console was cleared after an MCP reconnect warning and rechecked at **0 entries**; no project compile errors or warnings. All **17 protected files** remain SHA-256 identical to the initial snapshot (`protected-before.json` / `protected-after.json`), including Asen's uncommitted Game.unity, both materials, database, Level_26, ArtSource, Otobus Materials and spriteatlases. Existing unrelated changes remain unstaged.
-
----
-
-The ZCELEB-3 report below is historical; its continuous pass and framing values are superseded above.
-
-# ZCELEB-3 — Final celebration tuning
-
-21 November 2026. Implementation: **`10440bd`**, following `c97d47f` / `ad4ad1e`. Unity **2022.3.19f1**, MCP pinned to **BusJamCase@c4dcbf17c52e6f1b** throughout.
-
-**Edit mode only; never Play.** No scene save, build or push. No AsenOS vault access; the previously extracted reference frames were reused. All **17 protected files**, including Asen's uncommitted `Game.unity`, remain SHA-256 identical to this session's initial snapshot. Existing unrelated changes remain unstaged.
-
-## Changes
-
-- Each rider now has a cached supporting sole from the existing foot's skinned vertices. After posing, its height is anchored to the existing bus deck at bus-local Y **2.04**, inside the rail and forward of the seat back. Lean and landing squash retain foot contact instead of raising the rider from the seat anchor. Mesh reads occur once during initialization.
-- Hops use a **0.60 s cycle**, with one-third-cycle spacing. Air time is **36%**, grounded time **64%**. The dense 600-sample check measured **64.17% grounded** per rider and at most **two airborne**. Portrait hop peaks are **0.40 times cached standing height**; landscape peaks are **0.24** to keep heads below the title. A separate sole-to-head mesh measurement puts the portrait peak at **0.438 times actual standing body height**, below the 0.50 limit.
-- Raised waving arms remain; the two upright riders lean forward slightly, and the front rider leans **38 degrees toward the camera** over the railing. Existing Idle/Wave, Drive and ExhaustLoop assets remain in use.
-- Framing now scales by screen height. Camera pitch is **-7 degrees**, FOV remains **35**. Bus yaw is **115 degrees**, easing to **105** on narrow portrait viewports so the larger bus fits. The pass sits lower; landscape is slightly lower again for title clearance. Title layout and assets are unchanged.
-- The existing **1.05 s right-to-left pass** remains at **1.05–2.10 s after Complete**, overlapping the unchanged **1.75–2.05 s** title reveal. Pooling, last-bus colour, shared materials, skip and transition cleanup remain unchanged.
-
-## Measured framing
-
-Evidence folder: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/celeb3/`.
-
-The table uses the mid-pass sample at **1.725 s after Complete**. Height is the projected **roof rail top to wheel bottom**, measured from the animated mesh vertices; seats and exhaust are excluded. This corrects the earlier report's bus-alpha measurement, which included seat backs. Wheel clearance is measured upward from the bottom edge.
-
-| Resolution | Bus height | Wheel clearance |
-| --- | ---: | ---: |
-| 1080×1920 | 33.45% | 3.27% |
-| 1080×2400 | 33.51% | 3.49% |
-| 1170×2532 | 33.52% | 3.46% |
-| 1536×2048 | 33.47% | 3.27% |
-| 1080×1080 | 33.47% | 3.27% |
-| 1768×2208 | 33.46% | 3.27% |
-| 2208×1768 | 38.90% | 2.09% |
-| 1920×1080 | 38.90% | 2.10% |
-| 2560×1080 | 38.90% | 2.09% |
-
-`framing-metrics.json` contains the unrounded values and transparent bus-mask bounds. `mid-nine-resolutions.jpg` shows all nine captures. `overlap-nine-resolutions.jpg` adds the same nine at **1.95 s**, when bus and title are both visible. All **27 head/title checks pass**, with a minimum **15.63 px** gap between head mesh tops and the conservative full heading rectangle. The title was not moved.
-
-## Timeline and foot heights
-
-`timeline-reference-vs-ours.png` compares **0, 0.3, 0.6, 0.9 and 1.2 s after overlay onset**, in 1080×1920 cells. `timeline-preview.jpg` is the smaller review copy. Original reference aspect and letterboxing are preserved; the source reference frames remain 83.05/83.35/83.65/83.95/84.25 s.
-
-Foot lifts below are measured along the bus's up axis above the deck, in world units; parentheses give the fraction of cached standing height H. Riders are **R0 rear, R1 middle, R2 front/leaning**. Grounded residuals below 0.0004 units are floating-point precision at the isolated stage's distant origin.
-
-| Offset | Bus height | R0 foot lift | R1 foot lift | R2 foot lift |
-| --- | ---: | ---: | ---: | ---: |
-| 0.0 s | Offscreen | — | — | — |
-| 0.3 s | 34.36% | 0.000 (0H) | 0.000 (0H) | 1.105 (0.397H) |
-| 0.6 s | 33.35% | 0.000 (0H) | 0.256 (0.092H) | 0.000 (0H) |
-| 0.9 s | 34.51% | 0.000 (0H) | 0.000 (0H) | 1.106 (0.397H) |
-| 1.2 s | Pass finished | — | — | — |
-
-`pose-measurements.tsv` also records each supporting sole's screen Y, deck Y and head top in pixels. At +0.3 s the sole screen Ys are **1315.61 / 1306.89 / 1081.81 px**; at +0.6 s **1299.15 / 1260.82 / 1312.80 px**; at +0.9 s **1320.83 / 1311.95 / 1086.86 px** (origin at screen top).
-
-`complete-edit-mode.mp4` is a new **1080×1920, 30 fps, 3.53 s** Complete intro encoded from **106 final Unity-rendered frames**. Originals remain in `frames/`; `video-metadata.json` records the encoded stream. The supplied models differ from the reference artwork; no new model, animation or material assets were introduced.
+- 24 raw Game-view PNGs: enter, arc-mid, stop, hold, exit-arc-mid, exit, plus early/late hold at **580x1250, 1080x1920, 2560x1080**.
+- `phase-strip-<resolution>.jpg`: six phases side by side at each resolution.
+- `upright/riders-3x-hold*.png`: exact 3x crops of native hold captures, at three hold times per resolution. No rerender, altered rig or camera zoom supplies the close-ups.
+- `arc.mp4`: **1080x1920, 30 fps, 108 frames / 3.60 s**. `arc-frames/` retains the native source frames.
+- `native-path.tsv`: every capture uses normal visible GameView repaint and its final native render target, with the actual screen UIDocument (`PanelSettings.targetTexture == null`). Existing imported raster artwork and the normal transparent 2x MSAA bus compositor are used. No isolated offscreen UI fixture supplies visual evidence.
+- Native Edit-mode readback vertically inverts the overlay, as in earlier reviews. Raw PNGs remain intact; `upright/`, strips and MP4 apply a vertical flip. These are deterministic Edit-mode presentation recordings, not device/Play performance measurements.
+- `arc-asset.json`, `timeline-before.asset`, `protected-before.json`, `evidence-verification.json`: settings and file-integrity evidence.
 
 ## Verification
 
-- `validation.txt`: **20 Complete runs**, then **50 Complete/disable/enable cycles**. Pool transforms **119→119**, UI elements **351→351**, DOTween handles **5→5**, owned render targets **1→1**, loaded shared materials **209→209**, same target identity. **Zero retained growth**.
-- **0 managed bytes over 200 warmed active production-sampler frames**. `lifecycle.txt` separately records **0 bytes over 200 warmed Prepare/Sample/Hide runs** and the standing-mesh height measurement. Final cleanup leaves **zero celebration stages**.
-- All seven last-bus colours and all three matching rider materials pass. Pointer skip/release, mid-pass disable, Fail cleanup, target destruction on resize and unchanged saved coins pass.
-- `motion-validation.txt`: full cycle sampled every millisecond; **64.17% grounded**, peak **0.4001H** including numerical tolerance, maximum **two airborne**.
-- `endpoint-start.png` / `endpoint-exit.png`: **zero visible pixels** at both active-pass endpoints.
-- `evidence-verification.json`: **27 resolution captures**, **106 video frames**, **27 title/head checks**, and **17 protected files hash-identical**. Before/after hashes are retained separately.
-- Compilation succeeded. Final **Console: 0 entries**, no project errors or warnings. An MCP WebSocket reconnect warning was recorded in `console-before-clear.json`, then cleared before the final zero-entry check. `final-unity.json` records the final compiled Edit-mode state and unchanged scene state.
+`CelebrationArcReview.Verify()` uses an isolated UI fixture and a cloned timeline; it never saves the scene or source timeline.
 
-These are deterministic Edit-mode presentation/lifetime checks, not Play-mode gameplay or device GPU measurements. The existing one-target ARGB32 / 2× MSAA / 16-bit-depth compositor and **14 mesh draws** remain unchanged; the larger framing does not add render targets or draws.
+- **1,953 hold samples** across three resolutions: zero bus drift, maximum local bone-position/scale error **2.98e-8** against the grid passenger at the same Idle phase. No celebration bone scaling.
+- `bone-lengths.tsv`: upper-arm length **0.2275** and forearm mesh extent **0.1625418** in rider units match the grid reference for all three riders/resolutions. Measurements use rig-local matrices to avoid float cancellation at the remote pooled stage.
+- Every sampled waving hand stays below the head top; minimum clearance **0.3210841 rider units**. Shoulder stays sideward, forearm points upward with a bent elbow, R/L/R arms alternate. Native 3x crops show the result.
+- Peak hop **0.2499524 standing heights**, at most two riders airborne. Supporting feet stay in the deck footprint, never below it beyond numerical tolerance, and land at hold boundaries.
+- Entry/exit are measurably curved, reach normalized endpoints with the full cast offscreen, preserve the stop and have continuous exit-start progress. Tilt off/on, wave raise/speed/amplitude controls, legacy straight entry/exit and English tooltips pass.
+- **20 warmup plus 50 Complete/disable/enable cycles:** zero retained growth; 119 transforms, 302 UI elements, stable texture/material/tween counts, same render-target identity.
+- **400 warmed production sampler frames: 0 managed bytes.** Source timeline and saved coins are unchanged.
+- `preview-validation.txt`: twelve open/sample/reverse-scrub/resize/close cycles, all four tracks and three sizes; zero owned texture/object/preview-scene growth. Paused preview opens and draws the new path overlay without Console errors.
+- Final compilation/Console and protected-file comparisons are recorded in `evidence-verification.json`. Existing protected changes remain uncommitted. Game.unity is never saved or committed.
+
+A transient MCP WebSocket warning occurred during compilation reload. After clearing it and sampling/repainting the paused preview, the final Console contains 0 errors, 0 warnings and 0 logs.

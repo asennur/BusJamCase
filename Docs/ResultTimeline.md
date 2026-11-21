@@ -20,29 +20,24 @@ Asset edits apply on the next runtime frame, preserving elapsed seconds and resu
 Validation: 650 Edit-mode assertions cover default poses, custom ordering, disabled steps, zero duration, BoardHold and live retiming. Fifty result cycles and twelve preview lifecycle cycles showed zero retained growth; 200 warmed result-sampler frames allocated 0 bytes. Play was not entered. Evidence: `BusJamCase_ZVEC_Review/aa/timeline-validation.txt`, `raster-validation.txt`, `preview-lifecycle.txt` and `timeline-*.png`.
 
 
-The celebration defaults show the existing open-top bus in side profile, with a 10-degree downward camera angle. It enters from the right at 1.05 s, slows to a full stop at 1.60 s, holds until 2.80 s while the three riders Wave and hop on the deck, then accelerates downward and disappears at 3.45 s. Feet return to the deck before exit. Existing last-bus colours, clips, pooled cast, transparent 2x MSAA RenderTexture and tap-to-skip remain in use.
+The saved celebration keeps Asen's `db881ae` tuning: entry starts at **1.05 s**, takes **0.55 s**, stops at normalized **(0.5, 0.2)** until **2.25 s** (a **0.65 s** hold), then exits over **0.65 s**, hiding at **2.90 s**. Other result steps, including the **3.45 s** Complete track, are unchanged. Camera yaw/pitch/distance/FOV remain **0 / 10 / 18 / 35**, Bus Scale **0.8**, hop height/frequency/stagger **0.25 / 1.666667 / 0.2**, and moving bounce **0.0973**. All existing ease keys and step values are preserved.
 
-| Celebration field | Default | Meaning |
+The bus enters along a quadratic Bezier arc from offscreen bottom-right, settles flat at the same stop, and leaves along another arc toward offscreen bottom-left. Coordinates use bottom-left (0,0), top-right (1,1); values outside that range place the origin offscreen. The preview's **Show celebration path** toggle overlays cyan entry and yellow exit lines without changing the captured image or scene.
+
+| New Celebration field | Saved default | Meaning |
 | --- | --- | --- |
-| Start Time | 1.05 s | Time after Complete before entry starts |
-| Enter Duration | 0.55 s | Travel and deceleration to the stop |
-| Enter Side | Right | Left or right screen edge |
-| Stop Position | (0.5, 0.2) | Bus origin in normalized screen coordinates: bottom-left (0,0), top-right (1,1) |
-| Hold Duration | 1.2 s | Stationary celebration interval |
-| Exit Duration | 0.65 s | Acceleration from stop to offscreen |
-| Exit Direction | Down | Down, Left or Right in screen space |
-| Camera Yaw | 0 degrees | Orbit around the side profile |
-| Camera Pitch | 10 degrees | Positive tilts downward to reveal the deck |
-| Camera Distance | 18 | Camera distance in world units; increasing it makes the bus smaller |
-| Camera Fov | 35 degrees | Vertical field of view; increasing it makes the bus smaller |
-| Bus Scale | 1 | Multiplies the aspect-fitted bus and riders |
-| Rider Hop Height | 0.25 | Fraction of measured standing body height; clamped to 0–0.4 |
-| Rider Hop Frequency | 1.666667 Hz | Hop cycles per second; zero disables hops |
-| Rider Hop Stagger | 0.2 s | Delay between neighbouring riders' hop cycles |
-| Enter Ease | OutCubic curve | Normalized entry progress, ending at rest |
-| Exit Ease | InCubic curve | Normalized exit progress, starting at rest |
-| Bus Bounce Amplitude | 0.04 | Suspension travel in unscaled bus units while moving; hold stays still |
+| Path Mode | Arc | Curved entry/exit; Straight retains legacy Enter Side and Exit Direction |
+| Enter Start | (1.15, -0.35) | Entry origin just beyond bottom-right |
+| Enter Arc Control | (0.85, 0.2) | Upward entry curve, flattening toward the stop |
+| Exit End | (-0.15, -0.35) | Destination beyond bottom-left |
+| Exit Arc Control | (0.15, 0.2) | Exit starts horizontally, then curves downward |
+| Path Tilt | 5 degrees | Maximum roll toward the screen-space tangent, fading to zero at the stop; 0 disables it |
+| Wave Arm Raise | 24 degrees | Upper-arm elevation above the sideward shoulder line; range 0-30 |
+| Wave Speed | 1 | Existing Wave clip playback multiplier; 0 freezes it |
+| Wave Amplitude | 25 degrees | Forearm swing around its bent midpoint; 0 holds it still |
 
-The phase sum determines CelebrationBus duration and extends the Complete track when needed. Other result steps retain their independent timings. To delay rewards or buttons after a longer celebration, edit their named steps too. Curves are sampled without allocations; endpoints are fixed at 0/1 and intermediate values are clamped to 0–1. Empty curves fall back to linear. Keep flat entry-end and exit-start tangents for a smooth stop.
+Enter Ease and Exit Ease control travel along the curve. Arc mode maps each curve's authored values at time 0 and 1 to progress 0 and 1, so Asen's descending exit curve traverses forward without changing any keys. Endpoints are fixed, intermediate progress is clamped, empty or equal-endpoint curves use linear progress. Straight mode retains the previous curve sampling and side/direction behavior. Keep flat entry-end and exit-start tangents for a smooth stop. Moving suspension bounce remains independent of the path and disappears during the hold.
 
-Use **Bus Jam > Result Timeline Preview**, **Play Complete**, **Pause** and **Time** to inspect any pose in Edit mode. Change the asset in the Inspector while the preview is paused: its current time is sampled again without restarting. Camera controls apply on the next sample, including at unchanged viewport dimensions. Preview uses a disposable scene and never saves Game.unity. ZCELEB-4 verification and native Game View evidence are recorded in `ZCELEB-Report.md`.
+The original imported Wave already bends the forearm upward beside the head. Celebration uses its arm rotations over the standing Idle pose, mirrors the arm rotations for alternating **right / left / right** riders, and leaves the other arm relaxed. There are no celebration bone-scale overrides: arm and head proportions match the grid passenger. Existing overall rider size, hop timing, root squash and supporting-foot placement remain intact; feet return to the deck before exit. Last-bus colours, pooled cast, transparent 2x MSAA compositor and tap-to-skip remain in use.
+
+The phase sum determines CelebrationBus duration and extends Complete when necessary. Other result steps keep independent timings. Changes in the Inspector resample a paused preview immediately, including camera changes at unchanged viewport size. No scene rebinding is required. ZCELEB-5 native Game-view evidence and verification are recorded in `ZCELEB-Report.md`.
