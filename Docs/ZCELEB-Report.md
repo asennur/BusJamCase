@@ -1,44 +1,63 @@
-# ZCELEB-2 — Complete celebration framing and motion
+# ZCELEB-3 — Final celebration tuning
 
-21 November 2026. Branch `main`, Unity **2022.3.19f1**, MCP pinned to **BusJamCase@c4dcbf17c52e6f1b**. This replaces the framing and passenger presentation from `965a72c` / `057237f`.
+21 November 2026. Implementation: **`10440bd`**, following `c97d47f` / `ad4ad1e`. Unity **2022.3.19f1**, MCP pinned to **BusJamCase@c4dcbf17c52e6f1b** throughout.
 
-All rendering and verification used **Edit mode**. No Play, scene save, build or push. No AsenOS vault files were accessed in this revision; the existing extracted reference frames were reused. Protected files, including Asen's uncommitted `Game.unity`, remain byte-identical to the initial snapshot.
+**Edit mode only; never Play.** No scene save, build or push. No AsenOS vault access; the previously extracted reference frames were reused. All **17 protected files**, including Asen's uncommitted `Game.unity`, remain SHA-256 identical to this session's initial snapshot. Existing unrelated changes remain unstaged.
 
-Implementation: **`c97d47f` — Fix celebration framing and standing passenger motion**.
+## Changes
 
-## Presentation
+- Each rider now has a cached supporting sole from the existing foot's skinned vertices. After posing, its height is anchored to the existing bus deck at bus-local Y **2.04**, inside the rail and forward of the seat back. Lean and landing squash retain foot contact instead of raising the rider from the seat anchor. Mesh reads occur once during initialization.
+- Hops use a **0.60 s cycle**, with one-third-cycle spacing. Air time is **36%**, grounded time **64%**. The dense 600-sample check measured **64.17% grounded** per rider and at most **two airborne**. Portrait hop peaks are **0.40 times cached standing height**; landscape peaks are **0.24** to keep heads below the title. A separate sole-to-head mesh measurement puts the portrait peak at **0.438 times actual standing body height**, below the 0.50 limit.
+- Raised waving arms remain; the two upright riders lean forward slightly, and the front rider leans **38 degrees toward the camera** over the railing. Existing Idle/Wave, Drive and ExhaustLoop assets remain in use.
+- Framing now scales by screen height. Camera pitch is **-7 degrees**, FOV remains **35**. Bus yaw is **115 degrees**, easing to **105** on narrow portrait viewports so the larger bus fits. The pass sits lower; landscape is slightly lower again for title clearance. Title layout and assets are unchanged.
+- The existing **1.05 s right-to-left pass** remains at **1.05–2.10 s after Complete**, overlapping the unchanged **1.75–2.05 s** title reveal. Pooling, last-bus colour, shared materials, skip and transition cleanup remain unchanged.
 
-- **Low front-side perspective:** bus yaw 135 degrees, camera FOV 35 and pitch -5 degrees. The upward camera pitch compensates for the cast's lower-screen position, keeping the effective viewpoint near roof height instead of looking down into the seats. Portrait scale follows screen width; wider viewports cap scale by screen height.
-- **Readable standing riders:** three pooled passengers, 1.65 times the previous celebration scale, turned toward the viewer. Existing **Idle** supplies the standing body; the existing **Wave** supplies the raised right arm. No Sit sampling, new clips, models or material assets. Procedural arm lift/extension and a 0.85 head scale make the raised arm visible above the existing model's large head. The front rider leans 38 degrees over the railing; the others tilt with their staggered hops and bend one knee.
-- **Hops:** 0.43-second cycles, phase-offset by 0.24 cycle per rider, peaking at half the cached standing height after cast scaling. Landings squash vertically by up to 14%, with compensating width/depth stretch. Hops follow the bus's up axis and retain their height ratio across resolutions.
-- **Suspension:** a small 0.06-unit bob before cast scaling, plus a 3.5-degree roll. Existing Drive and ExhaustLoop continue to animate the vehicle.
-- **Timing:** the 1.05-second right-to-left pass now starts with the overlay at **1.05 s after Complete**, reaches the central framing quickly, drifts through the readable portion, then accelerates fully off the left edge. It ends at **2.10 s after Complete**, overlapping the unchanged **1.75–2.05 s** title reveal. This puts the bus centrally in the reference's +0.3/+0.6 s frames and farther left at +0.9 s.
+## Measured framing
 
-The last colour still comes from the completed level's final `busOrder` entry, and all three passengers use its existing shared material. The existing RenderTexture/UITK compositing path, reusable result clock, pooled objects, skip-on-tap and transition cleanup remain in use. Bone references and standing heights are cached at initialization; the active sampler creates no objects or collections.
+Evidence folder: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/celeb3/`.
 
-## Framing evidence
+The table uses the mid-pass sample at **1.725 s after Complete**. Height is the projected **roof rail top to wheel bottom**, measured from the animated mesh vertices; seats and exhaust are excluded. This corrects the earlier report's bus-alpha measurement, which included seat backs. Wheel clearance is measured upward from the bottom edge.
 
-Evidence: `C:/Users/Kullanici/Documents/BusJamCase_ZVEC_Review/celeb2/`.
+| Resolution | Bus height | Wheel clearance |
+| --- | ---: | ---: |
+| 1080×1920 | 33.45% | 3.27% |
+| 1080×2400 | 33.51% | 3.49% |
+| 1170×2532 | 33.52% | 3.46% |
+| 1536×2048 | 33.47% | 3.27% |
+| 1080×1080 | 33.47% | 3.27% |
+| 1768×2208 | 33.46% | 3.27% |
+| 2208×1768 | 38.90% | 2.09% |
+| 1920×1080 | 38.90% | 2.10% |
+| 2560×1080 | 38.90% | 2.09% |
 
-- `timeline-reference-vs-ours.png`: reference versus the final production sampler at **0, 0.3, 0.6, 0.9 and 1.2 seconds after overlay onset**, in 1080×1920 cells. The original reference aspect is preserved and letterboxed, exactly as in the previous comparison. `timeline-preview.jpg` is the smaller review copy. The reference frames remain those extracted from 83.05/83.35/83.65/83.95/84.25 seconds of the supplied recording.
-- `mid-nine-resolutions.jpg` / `ours/mid-*`: final mid-pass captures at **1080×1920, 1080×2400, 1170×2532, 1536×2048, 1080×1080, 1768×2208, 2208×1768, 1920×1080 and 2560×1080**. Settled Complete captures and a second contact sheet are also included.
-- `ours/bus-mask-*` and `framing-metrics.json`: transparent bus-only renders at the same nine mid-pass samples. The alpha bounds measure bus size and wheel-bottom position independently of the passengers and background. Width at 1080×1920 is **63.9%**; landscape bus height is **31.4%**; wheel bottoms are at **84–85%** of screen height. These are measured bounding boxes, including seats/wheels and existing exhaust, rather than estimates from the UI screenshot.
-- `complete-edit-mode.mp4`: a new full **1080×1920**, 30 fps, 3.53-second Complete intro, encoded from **106** final Unity-rendered frames. Originals remain in `frames/`.
+`framing-metrics.json` contains the unrounded values and transparent bus-mask bounds. `mid-nine-resolutions.jpg` shows all nine captures. `overlap-nine-resolutions.jpg` adds the same nine at **1.95 s**, when bus and title are both visible. All **27 head/title checks pass**, with a minimum **15.63 px** gap between head mesh tops and the conservative full heading rectangle. The title was not moved.
 
-The supplied assets have different body/window/seat proportions from the reference. The comparison matches the requested size, lower-screen placement, front-side perspective and celebration motion within those existing assets; it does not claim identical artwork.
+## Timeline and foot heights
+
+`timeline-reference-vs-ours.png` compares **0, 0.3, 0.6, 0.9 and 1.2 s after overlay onset**, in 1080×1920 cells. `timeline-preview.jpg` is the smaller review copy. Original reference aspect and letterboxing are preserved; the source reference frames remain 83.05/83.35/83.65/83.95/84.25 s.
+
+Foot lifts below are measured along the bus's up axis above the deck, in world units; parentheses give the fraction of cached standing height H. Riders are **R0 rear, R1 middle, R2 front/leaning**. Grounded residuals below 0.0004 units are floating-point precision at the isolated stage's distant origin.
+
+| Offset | Bus height | R0 foot lift | R1 foot lift | R2 foot lift |
+| --- | ---: | ---: | ---: | ---: |
+| 0.0 s | Offscreen | — | — | — |
+| 0.3 s | 34.36% | 0.000 (0H) | 0.000 (0H) | 1.105 (0.397H) |
+| 0.6 s | 33.35% | 0.000 (0H) | 0.256 (0.092H) | 0.000 (0H) |
+| 0.9 s | 34.51% | 0.000 (0H) | 0.000 (0H) | 1.106 (0.397H) |
+| 1.2 s | Pass finished | — | — | — |
+
+`pose-measurements.tsv` also records each supporting sole's screen Y, deck Y and head top in pixels. At +0.3 s the sole screen Ys are **1315.61 / 1306.89 / 1081.81 px**; at +0.6 s **1299.15 / 1260.82 / 1312.80 px**; at +0.9 s **1320.83 / 1311.95 / 1086.86 px** (origin at screen top).
+
+`complete-edit-mode.mp4` is a new **1080×1920, 30 fps, 3.53 s** Complete intro encoded from **106 final Unity-rendered frames**. Originals remain in `frames/`; `video-metadata.json` records the encoded stream. The supplied models differ from the reference artwork; no new model, animation or material assets were introduced.
 
 ## Verification
 
-`CelebrationReview` drives the production sampler inside the existing isolated preview-scene/UI fixture. It reads the source world's camera for the background and never saves the Game scene.
+- `validation.txt`: **20 Complete runs**, then **50 Complete/disable/enable cycles**. Pool transforms **119→119**, UI elements **351→351**, DOTween handles **5→5**, owned render targets **1→1**, loaded shared materials **209→209**, same target identity. **Zero retained growth**.
+- **0 managed bytes over 200 warmed active production-sampler frames**. `lifecycle.txt` separately records **0 bytes over 200 warmed Prepare/Sample/Hide runs** and the standing-mesh height measurement. Final cleanup leaves **zero celebration stages**.
+- All seven last-bus colours and all three matching rider materials pass. Pointer skip/release, mid-pass disable, Fail cleanup, target destruction on resize and unchanged saved coins pass.
+- `motion-validation.txt`: full cycle sampled every millisecond; **64.17% grounded**, peak **0.4001H** including numerical tolerance, maximum **two airborne**.
+- `endpoint-start.png` / `endpoint-exit.png`: **zero visible pixels** at both active-pass endpoints.
+- `evidence-verification.json`: **27 resolution captures**, **106 video frames**, **27 title/head checks**, and **17 protected files hash-identical**. Before/after hashes are retained separately.
+- Compilation succeeded. Final **Console: 0 entries**, no project errors or warnings. An MCP WebSocket reconnect warning was recorded in `console-before-clear.json`, then cleared before the final zero-entry check. `final-unity.json` records the final compiled Edit-mode state and unchanged scene state.
 
-- `validation.txt`: **20 Complete runs**, followed by **50 Complete/disable/enable cycles**. Pool transforms **119→119**, UI elements **351→351**, active DOTween handles **5→5**, owned render targets **1→1**, and shared material counts unchanged. The same RenderTexture survives repeated runs.
-- **0 managed bytes over 200 warmed active sampler frames.** `lifecycle.txt` separately checks **0 bytes over 200 warmed Prepare/Sample/Hide runs**, and confirms destruction of the target and pool.
-- All seven last-bus colours and three matching passenger materials pass. Actual pointer skip/release, mid-pass disable, Fail cleanup and old-target destruction on resolution changes pass. Saved coins remain unchanged.
-- `endpoint-start.png` / `endpoint-exit.png`: transparent target checks at the active pass's first and last sampled instants; **zero visible pixels** verify that the cast starts and finishes completely beyond the viewport.
-- `evidence-verification.json`: dimensions/nonblank checks for 18 resolution captures, 106 video frames, and **17 protected files hash-identical**. `final-unity.json` records compilation, Console and final Edit-mode state. One MCP WebSocket reconnect warning may be retained in the Console; no project compilation or presentation errors were found.
-
-These are deterministic Edit-mode presentation and lifetime checks. No Play-mode gameplay or device GPU timing is claimed.
-
-## Rendering cost
-
-The presentation retains one screen-sized ARGB32 RenderTexture with **2× MSAA / 16-bit depth**, a transparent URP camera without post processing or shadows, one warm key and one UITK Image. The visible cast still submits the bus's 11 existing submeshes plus three passenger meshes: **14 mesh draws**. Outside the pass its camera is disabled. The prior measured retained target footprint at 1080×1920 was approximately **31.6 MiB**; this revision does not change the target format, resolution policy or draw count. Sampling standing Idle adds three existing-clip samples per active frame; no device GPU milliseconds are asserted.
+These are deterministic Edit-mode presentation/lifetime checks, not Play-mode gameplay or device GPU measurements. The existing one-target ARGB32 / 2× MSAA / 16-bit-depth compositor and **14 mesh draws** remain unchanged; the larger framing does not add render targets or draws.
