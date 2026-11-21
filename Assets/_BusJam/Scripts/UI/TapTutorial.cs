@@ -37,7 +37,11 @@ namespace BusJam.UI
         }
         private void OnEnable()
         {
-            CacheHand();
+            if (document == null || gameManager == null || gameplay == null || busStation == null) return;
+            if (!CacheHand()) { waitingForTree = true; return; }
+            waitingForTree = false;
+            if (bound) return;
+            bound = true;
             gameManager.PlayingStarted += Show;
             gameManager.StateChanged += OnState;
             gameplay.TapAccepted += Accepted;
@@ -46,6 +50,9 @@ namespace BusJam.UI
         }
         private void OnDisable()
         {
+            waitingForTree = false;
+            if (!bound) return;
+            bound = false;
             gameManager.PlayingStarted -= Show;
             gameManager.StateChanged -= OnState;
             gameplay.TapAccepted -= Accepted;

@@ -26,6 +26,7 @@ namespace BusJam.LevelEditor
         private ChipRow buses, tunnelQueue;
         private Vector2Int passengerCell, tunnelCell;
         private bool bound;
+        private bool waitingForTree;
         private PaletteEntry dragging;
 
         public bool TunnelIsOpen => tunnelOverlay != null && !tunnelOverlay.ClassListContains("hidden");
@@ -34,8 +35,9 @@ namespace BusJam.LevelEditor
         private void OnEnable()
         {
             if (document == null || layoutMode == null || database == null) return;
-            CacheToolkit();
-            if (uiRoot == null || bound) return;
+            if (!CacheToolkit()) { waitingForTree = true; return; }
+            waitingForTree = false;
+            if (bound) return;
             bound = true;
             documentRoot.RegisterCallback<AttachToPanelEvent>(OnPanelAttached);
             ApplyPanelTheme(documentRoot.panel);
@@ -55,6 +57,7 @@ namespace BusJam.LevelEditor
 
         private void OnDisable()
         {
+            waitingForTree = false;
             if (!bound) return;
             bound = false; CancelDrag();
             documentRoot.UnregisterCallback<AttachToPanelEvent>(OnPanelAttached);
@@ -72,13 +75,20 @@ namespace BusJam.LevelEditor
             buses.Bind(false); tunnelQueue.Bind(false);
         }
 
-        private void CacheToolkit()
+        private void Update()
         {
-            if (documentRoot == document.rootVisualElement) return;
-            documentRoot = document.rootVisualElement;
+            if (waitingForTree && document.rootVisualElement?.Q("editor-root") != null) OnEnable();
+        }
+
+        // UIDocument may enable after this component; only cache a populated tree.
+        private bool CacheToolkit()
+        {
+            var current = document.rootVisualElement;
+            if (current == null || current.Q("editor-root") == null) return false;
+            if (documentRoot == current && uiRoot != null) return true;
+            documentRoot = current;
             documentRoot.pickingMode = PickingMode.Ignore;
             uiRoot = documentRoot.Q("editor-root");
-            if (uiRoot == null) return;
             BusJam.UI.VectorArt.Apply(uiRoot);
             levelList = uiRoot.Q<DropdownField>("level-list");
             width = uiRoot.Q<TextField>("width"); height = uiRoot.Q<TextField>("height"); seconds = uiRoot.Q<TextField>("seconds");
@@ -97,6 +107,7 @@ namespace BusJam.LevelEditor
             var container = uiRoot.Q<ScrollView>("palette");
             palette = new PaletteEntry[Colors.Length];
             for (int i = 0; i < Colors.Length; i++) { palette[i] = new PaletteEntry(this, Colors[i]); container.Add(palette[i].Element); }
+            return true;
         }
 
         private void SaveDraft() => Save();

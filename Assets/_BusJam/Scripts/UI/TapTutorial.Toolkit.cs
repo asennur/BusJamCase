@@ -12,12 +12,21 @@ namespace BusJam.UI
         private Tween tapping, handTravel;
         private Vector2 desiredPosition, handPosition, travelStart;
         private bool handVisible, travelling, farTravel;
+        private bool waitingForTree, bound;
 
-        private void CacheHand()
+        private void Update()
         {
-            if (document == null || tutorialDocumentRoot == document.rootVisualElement) return;
+            if (waitingForTree && document.rootVisualElement?.Q("tutorial-overlay") != null) OnEnable();
+        }
+
+        // Do not remember an empty document root before UIDocument has built its tree.
+        private bool CacheHand()
+        {
+            var current = document != null ? document.rootVisualElement : null;
+            if (current == null || current.Q("tutorial-overlay") == null) return false;
+            if (tutorialDocumentRoot == current && overlay != null) return true;
             tapping?.Kill(); handTravel?.Kill();
-            tutorialDocumentRoot = document.rootVisualElement;
+            tutorialDocumentRoot = current;
             overlay = tutorialDocumentRoot.Q("tutorial-overlay"); pointer = overlay.Q("tutorial-pointer");
             hand = overlay.Q("tutorial-hand"); ring = overlay.Q("tutorial-ring");
             tip = overlay.Q("tutorial-tip"); hint = overlay.Q<Label>("tutorial-hint");
@@ -32,6 +41,7 @@ namespace BusJam.UI
             handTravel = DOTween.To(HandZero, AnimateTravel, .85f, .85f).SetEase(Ease.Linear).SetUpdate(true).SetAutoKill(false).Pause();
             handTravel.OnComplete(ArriveAtTarget);
             HideHand();
+            return true;
         }
 
         private static float HandZero() => 0;
