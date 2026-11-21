@@ -69,6 +69,7 @@ namespace BusJam.UI
 
         private void Update()
         {
+            RefreshResultTimeline();
             if (waitingForTree && document.rootVisualElement?.Q("ui-root") != null) OnEnable();
             if (Application.isPlaying) celebrationBus?.Resize(Screen.width, Screen.height);
         }

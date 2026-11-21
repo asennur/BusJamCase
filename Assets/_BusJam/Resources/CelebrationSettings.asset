@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6a1a1f992d4e05459f0fd3479b9117b, type: 3}
   m_Name: CelebrationSettings
   m_EditorClassIdentifier:
+  resultTimeline: {fileID: 11400000, guid: 1580845937b3dbd40bbe0b809262bbda, type: 2}
   busPrefab: {fileID: 5860804732000749083, guid: e89cf9e0441e5424a9e03672836fc99f, type: 3}
   passengerPrefab: {fileID: 2193731836056189059, guid: 3e2ab979d65836442b9cb5a7766e53d8, type: 3}
   drive: {fileID: -4698200198064148922, guid: a1fc5f68d0fa0ca488d7bd8a0b3f3674, type: 3}

@@ -7,6 +7,7 @@ namespace BusJam.UI
     [CreateAssetMenu(menuName = "BusJam/Celebration Settings")]
     public sealed class CelebrationSettings : ScriptableObject
     {
+        public ResultTimeline resultTimeline;
         public Bus busPrefab;
         public Passenger passengerPrefab;
         public AnimationClip drive, exhaust, idle, wave;
