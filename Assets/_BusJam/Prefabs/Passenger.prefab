@@ -1260,7 +1260,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   body: {fileID: 3034598000754497773}
   visualRoot: {fileID: 6667866540320770700}
-  standingVisualScale: 1.4
+  standingVisualScale: 1.61
   animator: {fileID: 6662207638835868148}
   crossFade: 0.1
   outline: {fileID: 6377905882817113867}
@@ -1283,6 +1283,7 @@ MonoBehaviour:
   waveAngle: 32
   halfWave: 0.14
   seatRotation: {x: 270.01978, y: 179.99998, z: 0}
+  seatedScale: 1
 --- !u!1001 &945332770017905765
 PrefabInstance:
   m_ObjectHideFlags: 0

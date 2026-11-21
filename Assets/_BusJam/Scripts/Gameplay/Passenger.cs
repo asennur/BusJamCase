@@ -45,8 +45,8 @@ namespace BusJam.Gameplay
         [SerializeField, Min(0.01f)] private float halfWave = 0.14f;
         [Tooltip("Local rotation correction when parented to a seat bone.")]
         [SerializeField] private Vector3 seatRotation;
-        [Tooltip("Seated size relative to the grid size (buses are scaled up, so seated passengers match them).")]
-        [SerializeField, Min(0.1f)] private float seatedScale = 1.3f;
+        [Tooltip("Seated size relative to the grid size; 1 keeps the same size on the grid and in the bus.")]
+        [SerializeField, Min(0.1f)] private float seatedScale = 1f;
         [Tooltip("VisualRoot local height while seated; the grid lift (0.1) would make passengers float above the seat.")]
         [SerializeField] private float seatedVisualHeight = 0f;
 
@@ -63,6 +63,7 @@ namespace BusJam.Gameplay
         private Tween cloakTween;
         private bool isReachable;
         private Vector3 standingWorldScale;
+        private Vector3 seatedLocalScale;
 
         public PassengerColor Color { get; private set; }
         public Vector2Int Cell { get; private set; }
@@ -272,18 +273,20 @@ namespace BusJam.Gameplay
             transform.SetParent(seatPoint, false);
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.Euler(seatRotation);
-            transform.localScale = LocalScaleFor(seatedScale);
+            seatedLocalScale = LocalScaleFor(seatedScale);
+            transform.localScale = seatedLocalScale;
             if (visualRoot != null) visualRoot.localPosition = new Vector3(visualRestPosition.x, seatedVisualHeight, visualRestPosition.z);
             Play(SitHash);
         }
 
-        // Keep the size established on the grid, including under scaled seat bones.
+        // Measure the parent's stretch along the passenger's rotated axes, not the seat's axes.
         private Vector3 LocalScaleFor(float factor = 1f)
         {
-            Vector3 parentScale = transform.parent != null ? transform.parent.lossyScale : Vector3.one;
-            return new Vector3(standingWorldScale.x * factor / Mathf.Max(Mathf.Abs(parentScale.x), 0.0001f),
-                standingWorldScale.y * factor / Mathf.Max(Mathf.Abs(parentScale.y), 0.0001f),
-                standingWorldScale.z * factor / Mathf.Max(Mathf.Abs(parentScale.z), 0.0001f));
+            Matrix4x4 parentToWorld = transform.parent != null ? transform.parent.localToWorldMatrix : Matrix4x4.identity;
+            Quaternion rotation = transform.localRotation;
+            return new Vector3(standingWorldScale.x * factor / Mathf.Max(parentToWorld.MultiplyVector(rotation * Vector3.right).magnitude, 0.0001f),
+                standingWorldScale.y * factor / Mathf.Max(parentToWorld.MultiplyVector(rotation * Vector3.up).magnitude, 0.0001f),
+                standingWorldScale.z * factor / Mathf.Max(parentToWorld.MultiplyVector(rotation * Vector3.forward).magnitude, 0.0001f));
         }
 
         /// <summary>Shrinks through the door, then grows to full seated size before reporting arrival.</summary>
@@ -298,13 +301,13 @@ namespace BusJam.Gameplay
                 {
                     body.enabled = false;
                     SetSeated(seatPoint);
-                    transform.localScale = LocalScaleFor(0.05f * seatedScale);
+                    transform.localScale = seatedLocalScale * 0.05f;
                 })
                 .AppendInterval(0.02f)
                 .AppendCallback(() => body.enabled = true)
                 .Append(DOVirtual.Float(0.05f, 1f, 0.2f, scale =>
                 {
-                    transform.localScale = LocalScaleFor(scale * seatedScale);
+                    transform.localScale = seatedLocalScale * scale;
                 }).SetEase(Ease.OutBack))
                 .OnComplete(onSeated);
         }
