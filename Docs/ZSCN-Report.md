@@ -30,6 +30,10 @@ Native Game-view captures cover before, entry, stop, hold, leaving and exit at *
 
 Frame Debugger captured the same Complete hold UI with celebration hidden and visible: **21→40 draw calls, 1,566→17,247 triangles, 18→32 batches**. Events explicitly include CelebrationCamera and the existing UI RenderTexture composite; see `frame-debugger-before.json` and `frame-debugger-after.json`. This is the incremental celebration cost, not a benchmark against a restored legacy implementation. `stats.tsv` also records UnityStats for each native capture; Editor/UI repaint differences affect totals.
 
+## Run 4 — Final asset audit
+
+Removed internal `__preview__` clips accidentally exposed by Unity's asset enumeration and excluded them from setup. Final base-layer state counts are Yolcu **8**, Otobus **8**, OtobusKutlama **6**, OtobusMenu **3**, all defaulting to Idle. Added states have no transitions. The full pose/allocation/reuse validation passes again; see `animator-audit.txt` and `validation.txt`.
+
 ## Remaining differences and limits
 
 - **Zero compiler/runtime errors; warning-free import is not achieved.** The supplied bus exports produce two distinct FBX warnings: 102/4,104 and 92/4,134 source vertices lack bone weights; Unity assigns them to bone 0. Reimports repeat these warnings. Source FBX bytes and read-only Blender sources were not rewritten to conceal or repair them. A transient MCP reconnect warning also occurred during domain reload.

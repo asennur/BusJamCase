@@ -53,7 +53,9 @@ public static class ZScnImport
         var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
         if (controller == null) controller = AnimatorController.CreateAnimatorControllerAtPath(path);
         var machine = controller.layers[0].stateMachine;
-        foreach (var clip in AssetDatabase.LoadAllAssetsAtPath(Models + model + ".fbx").OfType<AnimationClip>())
+        foreach(var child in machine.states)
+            if(child.state.name.StartsWith("__preview__")) machine.RemoveState(child.state);
+        foreach (var clip in AssetDatabase.LoadAllAssetsAtPath(Models + model + ".fbx").OfType<AnimationClip>().Where(c=>!c.name.StartsWith("__preview__")))
         {
             var state = machine.states.Select(s => s.state).FirstOrDefault(s => s.name == clip.name);
             if (state != null) continue;
@@ -61,6 +63,7 @@ public static class ZScnImport
             state.speed = clip.name == "Brake" ? 2 : 1;
             if (clip.name == "Idle" && !existing) machine.defaultState = state;
         }
+        if(!existing) machine.defaultState=machine.states.Single(s=>s.state.name=="Idle").state;
         EditorUtility.SetDirty(controller); AssetDatabase.SaveAssetIfDirty(controller);
     }
     private static void Texture(string path, bool palette, System.Text.StringBuilder report)
