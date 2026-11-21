@@ -1,4 +1,4 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:art="BusJam.UI">
     <ui:Style src="Theme.uss" />
     <ui:VisualElement name="ui-root" class="ui-root portrait" picking-mode="Ignore">
         <ui:VisualElement name="menu-background" class="fill menu-background" picking-mode="Ignore" />
@@ -18,7 +18,7 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="start-body" picking-mode="Ignore">
                     <ui:VisualElement name="logo" class="logo" picking-mode="Ignore" />
-                    <ui:Button name="start-button" text="Level 1" class="art-button green start-button" />
+                    <art:VectorButton name="start-button" text="Level 1" class="art-button green start-button" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="hud" class="top-bar hud hidden" picking-mode="Ignore">
@@ -64,7 +64,7 @@
                             <ui:VisualElement name="reward-pile" class="reward-pile" picking-mode="Ignore" />
                             <ui:Label name="reward-label" text="+25" class="reward-label" picking-mode="Ignore" />
                         </ui:VisualElement>
-                        <ui:Button name="continue-button" text="Continue" class="art-button green" />
+                        <art:VectorButton name="continue-button" text="Continue" class="art-button green" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="celebration-effects" class="fill" picking-mode="Ignore" />
@@ -81,7 +81,7 @@
                         <ui:Label name="life-cost" text="-1" class="life-cost" picking-mode="Ignore" />
                     </ui:VisualElement>
                     <ui:Label name="fail-reason" text="No space left!" class="question fail-reason" picking-mode="Ignore" />
-                    <ui:Button name="retry-button" text="Try Again" class="art-button green" />
+                    <art:VectorButton name="retry-button" text="Try Again" class="art-button green" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="no-lives-overlay" class="fill modal-overlay hidden" picking-mode="Ignore">
@@ -100,12 +100,12 @@
                         <ui:Label text="Settings" class="modal-title" />
                         <ui:Button name="settings-close" class="close-button" tooltip="Close" />
                     </ui:VisualElement>
-                    <ui:Button name="reset-button" text="Reset Progress" class="art-button red" />
+                    <art:VectorButton name="reset-button" text="Reset Progress" class="art-button red" />
                     <ui:VisualElement name="reset-confirmation" class="confirmation hidden">
                         <ui:Label text="Are you sure?" class="question" />
                         <ui:VisualElement class="button-row">
-                            <ui:Button name="reset-yes" text="Yes" class="art-button red" />
-                            <ui:Button name="reset-no" text="No" class="art-button green" />
+                            <art:VectorButton name="reset-yes" text="Yes" class="art-button red" />
+                            <art:VectorButton name="reset-no" text="No" class="art-button green" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -117,16 +117,16 @@
                         <ui:Button name="pause-close" class="close-button" tooltip="Close" />
                     </ui:VisualElement>
                     <ui:Toggle name="sound-toggle" class="sound-toggle" label="Sound: ON" value="true" />
-                    <ui:Button name="restart-button" text="Restart" class="art-button green" />
-                    <ui:Button name="menu-button" text="Main Menu" class="art-button yellow" />
+                    <art:VectorButton name="restart-button" text="Restart" class="art-button green" />
+                    <art:VectorButton name="menu-button" text="Main Menu" class="art-button yellow" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="pause-confirmation" class="fill modal-overlay hidden">
                 <ui:VisualElement class="modal confirm-modal">
                     <ui:Label name="confirm-text" text="Restart this level?&#10;You will lose a life." class="question" />
                     <ui:VisualElement class="button-row">
-                        <ui:Button name="confirm-yes" text="Yes" class="art-button red" />
-                        <ui:Button name="confirm-no" text="No" class="art-button green" />
+                        <art:VectorButton name="confirm-yes" text="Yes" class="art-button red" />
+                        <art:VectorButton name="confirm-no" text="No" class="art-button green" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>

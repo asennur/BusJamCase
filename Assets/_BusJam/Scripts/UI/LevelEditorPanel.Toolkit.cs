@@ -79,6 +79,7 @@ namespace BusJam.LevelEditor
             documentRoot.pickingMode = PickingMode.Ignore;
             uiRoot = documentRoot.Q("editor-root");
             if (uiRoot == null) return;
+            BusJam.UI.VectorArt.Apply(uiRoot);
             levelList = uiRoot.Q<DropdownField>("level-list");
             width = uiRoot.Q<TextField>("width"); height = uiRoot.Q<TextField>("height"); seconds = uiRoot.Q<TextField>("seconds");
             status = uiRoot.Q<Label>("status"); solverResult = uiRoot.Q<Label>("solver-result"); busSummary = uiRoot.Q<Label>("bus-summary");

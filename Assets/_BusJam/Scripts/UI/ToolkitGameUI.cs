@@ -70,6 +70,7 @@ namespace BusJam.UI
             documentRoot = document.rootVisualElement;
             documentRoot.pickingMode = PickingMode.Ignore;
             root = documentRoot.Q("ui-root");
+            VectorArt.Apply(root);
             background = root.Q("menu-background");
             start = root.Q("start-screen"); hud = root.Q("hud");
             ready = root.Q("ready-overlay"); readyDim = root.Q("ready-dim");
