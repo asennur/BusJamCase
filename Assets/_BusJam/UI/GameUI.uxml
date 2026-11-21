@@ -16,7 +16,6 @@
                     <ui:Button name="start-settings" class="gear" tooltip="Settings" />
                 </ui:VisualElement>
                 <ui:VisualElement class="start-body" picking-mode="Ignore">
-                    <ui:VisualElement name="logo" class="logo" picking-mode="Ignore" />
                     <art:VectorButton name="start-button" text="Level 1" class="art-button green start-button" />
                 </ui:VisualElement>
             </ui:VisualElement>
