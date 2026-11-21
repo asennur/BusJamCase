@@ -5,7 +5,7 @@ using UnityEditor.AssetImporters;
 using UnityEngine;
 
 /// <summary>Opt-in SVG raster output, retaining the SVG source and the package's edge dilation.</summary>
-[ScriptedImporter(1, new string[0], new[] { "svg" })]
+[ScriptedImporter(2, new string[0], new[] { "svg" })]
 public sealed class AntialiasedSvgImporter : SVGImporter
 {
     public override void OnImportAsset(AssetImportContext context)
@@ -26,7 +26,21 @@ public sealed class AntialiasedSvgImporter : SVGImporter
         var texture = (Texture2D)context.mainObject;
         var pixels = texture.GetPixels32();
         texture.Reinitialize(texture.width, texture.height, TextureFormat.RGBA32, true);
-        texture.SetPixels32(pixels); texture.Apply(true, true);
+        texture.SetPixels32(pixels); texture.Apply(true, false);
+        // RGBA32 + mip ≈ 184 MB of resident UI art; block compression cuts it about 4x without resizing.
+        TextureFormat format = CompressedFormat(context.selectedBuildTarget, texture);
+        if (format != TextureFormat.RGBA32) EditorUtility.CompressTexture(texture, format, TextureCompressionQuality.Best);
+        texture.Apply(false, true);
+    }
+
+    // ASTC 4x4 on mobile (8 bpp, no size limit); BC7 on desktop only when both sides are multiples of 4.
+    private static TextureFormat CompressedFormat(BuildTarget target, Texture2D texture)
+    {
+        if (target == BuildTarget.Android || target == BuildTarget.iOS) return TextureFormat.ASTC_4x4;
+        bool blockAligned = texture.width % 4 == 0 && texture.height % 4 == 0;
+        if (blockAligned && (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64
+            || target == BuildTarget.StandaloneOSX || target == BuildTarget.StandaloneLinux64)) return TextureFormat.BC7;
+        return TextureFormat.RGBA32;
     }
 
     private static int RasterSize(string name)
