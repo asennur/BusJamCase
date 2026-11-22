@@ -57,7 +57,7 @@ namespace BusJam.Gameplay
         /// <summary>Oyun ekranı yerine ekranın bu normalize bölgesine (ör. editörün board alanı) güvenli alansız bir telefon ekranı gibi çizer.</summary>
         public void SetScreenArea(Rect area)
         {
-            if (area.width <= 0 || area.height <= 0) area = new Rect(0, 0, 1, 1);
+            if (!(area.width > 0 && area.height > 0)) area = new Rect(0, 0, 1, 1); // NaN (yerleşim öncesi) dahil
             if (area == screenArea) return;
             screenArea = area;
             Fit();
@@ -71,6 +71,7 @@ namespace BusJam.Gameplay
             if (targetCamera == null || targetCamera.orthographic || board == null) return;
             bool fullScreen = screenArea == new Rect(0, 0, 1, 1);
             float aspect = targetCamera.aspect * screenArea.width / screenArea.height;
+            if (!(aspect > 0 && aspect < 100f)) return; // pencere boyutu henüz 0 (Game view yeniden boyutlanırken)
             Rect safe = fullScreen && layout != null ? layout.SafeViewport : new Rect(0, 0, 1, 1);
             float unit = ScreenLayout.Unit(aspect);
             float hudShift = ScreenLayout.HudTopFraction(safe, aspect) - ScreenLayout.HudTop * unit;

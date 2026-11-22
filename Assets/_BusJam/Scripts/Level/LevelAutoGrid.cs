@@ -33,7 +33,7 @@ namespace BusJam.Level
                 level.cells = cells;
                 level.tunnels = tunnels;
                 message = $"Generated a {w} x {h} grid ({CountEmpty(cells, tunnels, w)} free tiles"
-                    + (tunnels.Count > 0 ? ", 1 tunnel" : "") + "). Add buses, then Auto Fill.";
+                    + (tunnels.Count > 0 ? ", 1 tunnel" : "") + (level.busOrder.Count > 0 ? "). Now Auto Fill." : "). Add buses, then Auto Fill.");
                 return true;
             }
 

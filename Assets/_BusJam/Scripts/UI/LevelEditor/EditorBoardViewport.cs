@@ -42,7 +42,7 @@ namespace BusJam.LevelEditor
                 if (space != null) space.RegisterCallback<GeometryChangedEvent>(OnGeometry);
             }
             Rect full = root.worldBound;
-            if (space == null || full.width <= 0 || full.height <= 0) return;
+            if (space == null || !(full.width > 0 && full.height > 0)) return;
             Rect area = space.worldBound;
             fitter.SetScreenArea(new Rect((area.xMin - full.xMin) / full.width, 1f - (area.yMax - full.yMin) / full.height,
                 area.width / full.width, area.height / full.height));

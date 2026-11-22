@@ -49,19 +49,19 @@ namespace BusJam.Level
         {
             if (cells == null || cells.Length != CellCount)
             {
-                error = $"Hücre sayısı {cells?.Length ?? 0}, beklenen {CellCount}";
+                error = $"Cell count is {cells?.Length ?? 0}, expected {CellCount}";
                 return false;
             }
 
             if (busOrder == null || busOrder.Count == 0)
             {
-                error = "Otobüs sırası boş";
+                error = "Add at least one bus";
                 return false;
             }
 
             if (width > GameRules.MaxWidth || height > GameRules.MaxHeight)
             {
-                error = $"Grid {width}x{height}, izin verilen en fazla {GameRules.MaxWidth}x{GameRules.MaxHeight}";
+                error = $"Grid is {width} x {height}, the maximum is {GameRules.MaxWidth} x {GameRules.MaxHeight}";
                 return false;
             }
 
@@ -77,9 +77,9 @@ namespace BusJam.Level
                 if (cell.cloak == Cloak.None)
                     continue;
 
-                string reason = cell.cloak > Cloak.StartsClosed ? "Geçersiz pelerin değeri"
-                    : cell.type != CellType.Passenger ? "Pelerin yalnız Passenger hücresinde olabilir"
-                    : cell.hidden ? "Pelerin ve gizli yolcu (hidden) birlikte kullanılamaz" : null;
+                string reason = cell.cloak > Cloak.StartsClosed ? "invalid cloak value"
+                    : cell.type != CellType.Passenger ? "only passengers can wear a cloak"
+                    : cell.hidden ? "a passenger cannot be both cloaked and hidden" : null;
                 if (reason != null)
                 {
                     error = $"({i % width},{i / width}) {reason}";
@@ -104,7 +104,7 @@ namespace BusJam.Level
                 int y = i / width;
                 if (cell.type != CellType.Passenger)
                 {
-                    error = $"({x},{y}) ip yalnız Passenger hücresinde olabilir";
+                    error = $"({x},{y}) only passengers can have ropes";
                     return false;
                 }
 
@@ -112,7 +112,7 @@ namespace BusJam.Level
                     + (CanVacate(x, y - 1) ? 1 : 0) + (CanVacate(x, y + 1) ? 1 : 0);
                 if (cell.ropes > neighbors)
                 {
-                    error = $"({x},{y}) ipli yolcu hiç çözülemez: {cell.ropes} ip, {neighbors} dolu komşu";
+                    error = $"({x},{y}) can never be untied: {cell.ropes} ropes, {neighbors} neighbours that can leave";
                     return false;
                 }
             }
@@ -160,7 +160,7 @@ namespace BusJam.Level
             {
                 if (passengers[i] != seats[i])
                 {
-                    error = $"{(PassengerColor)i}: {passengers[i]} yolcu, {seats[i]} koltuk";
+                    error = $"{(PassengerColor)i}: {passengers[i]} passengers for {seats[i]} bus seats";
                     return false;
                 }
             }
@@ -177,14 +177,14 @@ namespace BusJam.Level
                 Vector2Int mouth = tunnel.MouthCell;
                 if (mouth.x < 0 || mouth.x >= width || mouth.y < 0 || mouth.y >= height)
                 {
-                    error = $"Tünel ({tunnel.cell.x}, {tunnel.cell.y}) ağzı grid dışında";
+                    error = $"Tunnel ({tunnel.cell.x}, {tunnel.cell.y}) faces outside the grid";
                     return false;
                 }
 
                 CellData mouthCell = GetCell(mouth.x, mouth.y);
                 if (!mouthCell.IsWalkable)
                 {
-                    error = $"Tünel ({tunnel.cell.x}, {tunnel.cell.y}) ağzı geçersiz hücrede ({mouth.x}, {mouth.y})";
+                    error = $"Tunnel ({tunnel.cell.x}, {tunnel.cell.y}) faces a hole or tunnel at ({mouth.x}, {mouth.y})";
                     return false;
                 }
             }
@@ -210,7 +210,7 @@ namespace BusJam.Level
 
             if (queue.Count == 0)
             {
-                error = "Çıkış satırında (y = 0) yürünebilir hücre yok";
+                error = "The exit row (top row) has no walkable tile";
                 return false;
             }
 
@@ -229,7 +229,7 @@ namespace BusJam.Level
             {
                 if (cells[i].IsWalkable && !visited[i])
                 {
-                    error = $"Hücre ({i % width}, {i / width}) çıkışa bağlı değil";
+                    error = $"Tile ({i % width}, {i / width}) is not connected to the exit";
                     return false;
                 }
             }

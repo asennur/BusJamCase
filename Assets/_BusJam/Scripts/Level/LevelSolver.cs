@@ -19,12 +19,12 @@ namespace BusJam.Level
             public string Error;
             public readonly List<int[]> Solutions = new List<int[]>();
             public int[] LosingSequence;
-            public string Label => Error != null ? Error : SolutionCount >= 2 ? "≥2 çözüm"
-                : Limited ? "Sınır aşıldı (belirsiz)" : SolutionCount == 1 ? "Tek çözüm" : "Çözülemez";
+            public string Label => Error != null ? Error : SolutionCount >= 2 ? "2+ solutions"
+                : Limited ? "Search limit reached (unknown)" : SolutionCount == 1 ? "1 solution" : "Unsolvable";
 
             public string Describe(int width)
             {
-                string text = $"{Label} · {States} durum";
+                string text = $"{Label} · {States} states";
                 if (Solutions.Count > 0)
                     text += "\n" + Format(Solutions[0], width);
                 return text;
@@ -98,7 +98,7 @@ namespace BusJam.Level
         public static Result Solve(Level.LevelData level, int levelNumber, int stateLimit = 200000,
             double milliseconds = 5000, bool findLosingSequence = false, int maxSolutions = 3)
         {
-            if (!level.Validate(out string error)) return new Result { Error = "Geçersiz: " + error };
+            if (!level.Validate(out string error)) return new Result { Error = "Invalid: " + error };
             var solver = new LevelSolver(level, levelNumber, stateLimit, milliseconds, findLosingSequence, maxSolutions);
             var start = new State
             {
@@ -117,7 +117,7 @@ namespace BusJam.Level
         public static string SolveAll()
         {
             var db = UnityEditor.AssetDatabase.LoadAssetAtPath<Level.LevelDatabase>("Assets/_BusJam/Data/LevelDatabase.asset");
-            var text = new StringBuilder("| Level | Sonuç | Durum | İlk çözüm (x,y) |\n| --- | --- | --- | --- |\n");
+            var text = new StringBuilder("| Level | Result | States | First solution (x,y) |\n| --- | --- | --- | --- |\n");
             for (int i = 0; i < db.Count; i++)
             {
                 var level = db.Get(i);
@@ -146,12 +146,12 @@ namespace BusJam.Level
             foreach (int tap in sequence)
             {
                 Settle();
-                if (state.Bus == level.busOrder.Count) return "Complete sonrası dokunuş";
+                if (state.Bus == level.busOrder.Count) return "Tap after completion";
                 if (Array.IndexOf(state.Slots, 0) < 0) return "NoSpace";
-                if (tap < 0 || tap >= state.Cells.Length) return "Grid dışında";
+                if (tap < 0 || tap >= state.Cells.Length) return "Outside the grid";
                 var cell = state.Cells[tap];
                 if (cell.type != CellType.Passenger || cell.ropes > 0 || cell.cloak == Cloak.StartsClosed
-                    || !solver.Reachable(state)[tap] || !solver.Tap(state, tap)) return "Reddedilen dokunuş";
+                    || !solver.Reachable(state)[tap] || !solver.Tap(state, tap)) return "Rejected tap";
             }
             Settle();
             if (state.Bus == level.busOrder.Count) return "Complete";
