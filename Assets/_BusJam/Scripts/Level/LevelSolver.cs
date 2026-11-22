@@ -4,10 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using BusJam.Core;
-using BusJam.Level;
 using UnityEngine;
 
-namespace BusJam.LevelEditor
+namespace BusJam.Level
 {
     /// <summary>Editöre özel, süre sınırı hariç mantıksal olaylarla DFS. Animasyonlar yerine varış olayları ilerletilir.</summary>
     public sealed class LevelSolver
