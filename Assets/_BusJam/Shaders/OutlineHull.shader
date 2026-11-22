@@ -7,6 +7,7 @@ Shader "BusJam/OutlineHull"
         _BaseColor ("Color", Color) = (0.137, 0.106, 0.11, 1)
         _Width ("Width (world)", Range(0, 0.2)) = 0.085
         _MinPixels ("Min Width (px @1920)", Range(0, 10)) = 2.5
+        _DepthBias ("Depth Bias (world, toward camera)", Range(0, 0.2)) = 0
     }
     SubShader
     {
@@ -27,6 +28,7 @@ Shader "BusJam/OutlineHull"
                 half4 _BaseColor;
                 float _Width;
                 float _MinPixels;
+                float _DepthBias;
             CBUFFER_END
 
             struct Attributes
@@ -43,7 +45,10 @@ Shader "BusJam/OutlineHull"
             Varyings vert(Attributes input)
             {
                 Varyings output;
-                float4 positionCS = TransformObjectToHClip(input.positionOS.xyz);
+                // Hull kameraya _DepthBias kadar çekilir: ayak tabanı altındaki kontur karonun derinliğinde kesilmesin.
+                float3 positionVS = TransformWorldToView(TransformObjectToWorld(input.positionOS.xyz));
+                positionVS.z += _DepthBias;
+                float4 positionCS = TransformWViewToHClip(positionVS);
                 float2 dir = mul((float3x3)UNITY_MATRIX_VP, TransformObjectToWorldNormal(input.normalOS)).xy;
                 dir *= rsqrt(max(dot(dir, dir), 1e-8));
 

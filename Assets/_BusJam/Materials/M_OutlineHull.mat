@@ -25,6 +25,7 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _DepthBias: 0.06
     - _MinPixels: 2.5
     - _Width: 0.085
     m_Colors:

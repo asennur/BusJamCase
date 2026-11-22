@@ -24,6 +24,8 @@ namespace BusJam.Gameplay
 
         [SerializeField] private Renderer body;
         [SerializeField] private Transform visualRoot;
+        [Tooltip("Ayak altındaki temas gölgesi (kökün çocuğu, zeminde kalır); otururken kapalı.")]
+        [SerializeField] private GameObject contactShadow;
         [SerializeField, Min(1f)] private float standingVisualScale = 1.4f;
         [SerializeField] private Animator animator;
         [SerializeField, Min(0f)] private float crossFade = 0.1f;
@@ -87,6 +89,7 @@ namespace BusJam.Gameplay
             SetRopes(0);
             // CompleteCelebration grounds the rider on its own seat.
             if (visualRoot != null) visualRoot.localPosition = Vector3.zero;
+            if (contactShadow != null) contactShadow.SetActive(false);
         }
         public Vector2Int Cell { get; private set; }
         public bool IsHidden { get; private set; }
@@ -167,6 +170,7 @@ namespace BusJam.Gameplay
             outlined = false;
             SetBodyMaterial(CloakOpen ? material : cloakMaterial);
             body.enabled = true;
+            if (contactShadow != null) contactShadow.SetActive(true);
             angryIcon.gameObject.SetActive(false);
             hiddenMark.SetActive(hidden);
             runTween?.Kill();
@@ -343,6 +347,7 @@ namespace BusJam.Gameplay
             seatedLocalScale = LocalScaleFor(seatedScale);
             transform.localScale = seatedLocalScale;
             if (visualRoot != null) visualRoot.localPosition = seatedVisualOffset;
+            if (contactShadow != null) contactShadow.SetActive(false);
             Play(SitHash);
         }
 
