@@ -20,9 +20,6 @@ namespace BusJam.UI
         [Tooltip("Exit destination in normalized screen coordinates, just beyond the bottom-left corner by default.")] public Vector2 exitEnd = new Vector2(-.15f, -.35f);
         [Tooltip("Quadratic exit arc control in normalized screen coordinates. Keep it near stop height for a smooth downward exit.")] public Vector2 exitArcControl = new Vector2(.15f, .2f);
         [Tooltip("Maximum bus roll in degrees toward the arc tangent. Settles flat at the stop. Zero disables tilt."), Range(0, 15)] public float pathTilt = 5;
-        [Tooltip("Obsolete: imported Cheer clips now own rider motion. Retained for serialized compatibility."), Range(0, 30)] public float waveArmRaise = 24;
-        [Tooltip("Obsolete: imported Cheer clips now own rider motion. Retained for serialized compatibility."), Range(0, 3)] public float waveSpeed = 1;
-        [Tooltip("Obsolete: imported Cheer clips now own rider motion. Retained for serialized compatibility."), Range(0, 30)] public float waveAmplitude = 25;
         [Tooltip("Seconds after Complete before the bus enters."), Min(0)] public float startTime = 1.05f;
         [Tooltip("Seconds spent slowing from the entry edge to the stop."), Min(0)] public float enterDuration = .55f;
         [Tooltip("Screen edge from which the bus enters.")] public CelebrationEnterSide enterSide = CelebrationEnterSide.Right;
@@ -35,9 +32,6 @@ namespace BusJam.UI
         [Tooltip("Camera distance from the stage in world units."), Range(8, 40)] public float cameraDistance = 18;
         [Tooltip("Vertical camera field of view in degrees."), Range(20, 60)] public float cameraFov = 35;
         [Tooltip("Bus and rider size multiplier. One fits the side profile inside each preview aspect."), Range(.2f, 2)] public float busScale = 1;
-        [Tooltip("Obsolete: imported Cheer clips now own rider motion. Retained for serialized compatibility."), Range(0, .4f)] public float riderHopHeight = .25f;
-        [Tooltip("Obsolete: imported Cheer clips now own rider motion. Retained for serialized compatibility."), Range(0, 5)] public float riderHopFrequency = 1.666667f;
-        [Tooltip("Obsolete: imported Cheer clips now own rider motion. Retained for serialized compatibility."), Min(0)] public float riderHopStagger = .2f;
         [Tooltip("Entry progress curve. Default slows smoothly to a complete stop.")] public AnimationCurve enterEase = new AnimationCurve(new Keyframe(0, 0, 3, 3), new Keyframe(1, 1, 0, 0));
         [Tooltip("Exit progress curve. Default accelerates smoothly from rest.")] public AnimationCurve exitEase = new AnimationCurve(new Keyframe(0, 0, 0, 0), new Keyframe(1, 1, 3, 3));
         [Tooltip("Suspension bounce in unscaled bus units while moving; the hold stays stationary."), Range(0, .2f)] public float busBounceAmplitude = .04f;
@@ -50,13 +44,11 @@ namespace BusJam.UI
             stopPosition = new Vector2(Mathf.Clamp01(Clean(stopPosition.x)), Mathf.Clamp01(Clean(stopPosition.y)));
             cameraYaw = Mathf.Clamp(Signed(cameraYaw), -180, 180); cameraPitch = Mathf.Clamp(Signed(cameraPitch), -15, 60);
             cameraDistance = Mathf.Clamp(Clean(cameraDistance), 8, 40); cameraFov = Mathf.Clamp(Clean(cameraFov), 20, 60);
-            busScale = Mathf.Clamp(Clean(busScale), .2f, 2); riderHopHeight = Mathf.Clamp(Clean(riderHopHeight), 0, .4f);
-            riderHopFrequency = Mathf.Clamp(Clean(riderHopFrequency), 0, 5); riderHopStagger = Clean(riderHopStagger);
+            busScale = Mathf.Clamp(Clean(busScale), .2f, 2);
             busBounceAmplitude = Mathf.Clamp(Clean(busBounceAmplitude), 0, .2f);
             enterStart = FinitePoint(enterStart); enterArcControl = FinitePoint(enterArcControl);
             exitEnd = FinitePoint(exitEnd); exitArcControl = FinitePoint(exitArcControl);
-            pathTilt = Mathf.Clamp(Clean(pathTilt), 0, 15); waveArmRaise = Mathf.Clamp(Clean(waveArmRaise), 0, 30);
-            waveSpeed = Mathf.Clamp(Clean(waveSpeed), 0, 3); waveAmplitude = Mathf.Clamp(Clean(waveAmplitude), 0, 30);
+            pathTilt = Mathf.Clamp(Clean(pathTilt), 0, 15);
         }
         private static Vector2 FinitePoint(Vector2 value) => new Vector2(Signed(value.x), Signed(value.y));
 

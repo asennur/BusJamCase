@@ -49,13 +49,11 @@ public sealed class AntialiasedSvgImporter : SVGImporter
     {
         if (name.StartsWith("button_")) return 768;
         if (name == "surface_lives_modal") return 1536;
-        if (name == "surface_modal" || name == "surface_result_modal") return 1024;
-        if (name == "surface_white" || name == "surface_result_inner") return 512;
-        if (name == "surface_header" || name == "surface_result_header") return 512;
+        if (name == "surface_result_modal") return 1024;
+        if (name == "surface_result_inner" || name == "surface_result_header") return 512;
         if (name == "panel_tip" || name == "hud_counter") return 512; // hud_counter: USS slices 85/88 texels
-        if (name == "result_rays" || name == "glow_rays") return 1024;
-        if (name.StartsWith("title_") || name == "ribbon_purple" || name == "coin_pile") return 1536;
-        if (name.StartsWith("logo")) return 2048;
+        if (name == "result_rays") return 1024;
+        if (name == "title_complete" || name == "ribbon_purple" || name == "coin_pile") return 1536;
         if (name == "fx_tap_hand" || name == "glow_soft" || name.StartsWith("icon_heart")) return 512;
         return 256;
     }
