@@ -174,7 +174,7 @@ namespace BusJam.UI
             var busStep = Step(ResultStepId.CelebrationBus);
             if (busStep.enabled) celebrationBus?.Sample(time);
             else celebrationBus?.Hide();
-            complete.style.backgroundColor = new Color(.10f, .015f, .18f, .88f * Step(ResultStepId.Overlay).Evaluate(time));
+            complete.style.backgroundColor = new Color(.12f, 0, .19f, .9f * Step(ResultStepId.Overlay).Evaluate(time));
             resultCoinPlate.style.opacity = Step(ResultStepId.CoinPlate).Evaluate(time);
             var title = Step(ResultStepId.Title);
             resultHeader.style.opacity = title.Visible(time) ? 1 : 0;
@@ -347,9 +347,9 @@ namespace BusJam.UI
             var overlay = Step(ResultStepId.FailOverlay);
             var panel = Step(ResultStepId.Panel);
             var loss = Step(ResultStepId.LifeLoss);
-            fail.style.backgroundColor = new Color(.06f, .03f, .16f, .72f * overlay.Evaluate(time));
+            fail.style.backgroundColor = new Color(.02f, .02f, .05f, .8f * overlay.Evaluate(time));
             failPanel.style.opacity = panel.Phase(time);
-            ScaleElement(failPanel, .86f + .14f * panel.Evaluate(time));
+            ScaleElement(failPanel, refScale * (.86f + .14f * panel.Evaluate(time)));
             retryButton.SetEnabled(time >= RetryReadyAt && !retrying); failClose.SetEnabled(time >= RetryReadyAt && !retrying);
             failLives.text = !loss.enabled || loss.Visible(time) ? lifeAfterLossText : lifeBeforeLossText;
             failCountdown.text = !loss.enabled || loss.Visible(time) ? lifeAfterLossTime : lifeBeforeLossTime;
@@ -385,6 +385,7 @@ namespace BusJam.UI
         {
             if (shownState != GameState.Start) return;
             noLivesHideAt = Time.unscaledTime + noLivesDuration;
+            if (noLives.ClassListContains("hidden")) PopIn(noLives);
             Show(noLives, true); noLivesTimer.Resume();
         }
 
@@ -394,7 +395,7 @@ namespace BusJam.UI
         {
             if (noLivesCount == null) return;
             noLivesCount.text = livesCount.text;
-            noLivesCountdown.text = count >= livesSystem.MaxLives ? "" : "Next life in " + Clock(seconds, true);
+            noLivesCountdown.text = count >= livesSystem.MaxLives ? "FULL" : lifeCountdown.text;
             lifeAfterLossText = livesCount.text; lifeAfterLossTime = lifeCountdown.text;
             if (shownState == GameState.Fail && (!Step(ResultStepId.LifeLoss).enabled || Step(ResultStepId.LifeLoss).Visible(failureTime)))
             { failLives.text = lifeAfterLossText; failCountdown.text = lifeAfterLossTime; }

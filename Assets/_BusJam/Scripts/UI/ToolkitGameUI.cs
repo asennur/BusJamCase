@@ -28,7 +28,8 @@ namespace BusJam.UI
         private Label levelNumber, timerLevel, timerText, livesCount, lifeCountdown, coinCount, readyPrompt, confirmText;
         private Toggle soundToggle;
         private readonly StringBuilder textBuffer = new StringBuilder(32);
-        private Tween startPulse, readyPulse, urgentPulse, coinPulse;
+        private Tween startPulse, readyPulse, urgentPulse, coinPulse, popupPop;
+        private VisualElement popTarget;
         private GameState shownState;
         private enum PendingAction { None, Restart, MainMenu }
         private PendingAction pending;
@@ -163,6 +164,7 @@ namespace BusJam.UI
             readyPulse = Reusable(DOTween.To(GetReadyPulse, SetReadyPulse, .65f, .85f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo));
             urgentPulse = Reusable(DOTween.To(GetTimerScale, SetTimerScale, 1.16f, .15f).SetLoops(2, LoopType.Yoyo));
             coinPulse = Reusable(DOTween.To(GetCoinScale, SetCoinScale, 1.12f, .09f).SetLoops(2, LoopType.Yoyo));
+            popupPop = Reusable(DOTween.To(GetTimelineStart, SetPopup, 1f, .22f).SetEase(Ease.OutBack));
         }
 
         private static Tween Reusable(Tween tween) => tween.SetUpdate(true).SetAutoKill(false).Pause();
@@ -178,10 +180,18 @@ namespace BusJam.UI
         }
         private void SetTimerScale(float value) => ScaleElement(timerText, value);
         private void SetCoinScale(float value) => ScaleElement(coinCount, value);
+        private void SetPopup(float value) { if (popTarget != null) ScaleElement(popTarget, refScale * (.8f + .2f * value)); }
+
+        // Popups open with a short overshooting scale, like the reference panels.
+        private void PopIn(VisualElement overlay)
+        {
+            popTarget = overlay.Q(className: "modal");
+            SetPopup(0); popupPop?.Restart();
+        }
         private void KillTweens()
         {
-            startPulse?.Kill(); readyPulse?.Kill(); urgentPulse?.Kill(); coinPulse?.Kill();
-            startPulse = readyPulse = urgentPulse = coinPulse = null;
+            startPulse?.Kill(); readyPulse?.Kill(); urgentPulse?.Kill(); coinPulse?.Kill(); popupPop?.Kill();
+            startPulse = readyPulse = urgentPulse = coinPulse = popupPop = null;
             KillResultTweens();
             StopTransition(); KillFadeTweens();
         }
@@ -301,7 +311,7 @@ namespace BusJam.UI
             for (VisualElement element = evt.target as VisualElement; element != null && element != root; element = element.parent)
                 if (element is Button) { if (Application.isPlaying) AudioManager.Play(Sfx.Button); return; }
         }
-        private void OpenSettings() { if (shownState != GameState.Start) return; CancelReset(); Show(settings, true); }
+        private void OpenSettings() { if (shownState != GameState.Start) return; CancelReset(); Show(settings, true); PopIn(settings); }
         private void CloseSettings() => Show(settings, false);
         private void AskReset() { Show(resetButton, false); Show(resetConfirmation, true); }
         private void CancelReset() { Show(resetButton, true); Show(resetConfirmation, false); }
@@ -315,7 +325,7 @@ namespace BusJam.UI
             if (shownState != GameState.Playing) return;
             if (Application.isPlaying) gameManager.SetPaused(true);
             soundToggle.SetValueWithoutNotify(!AudioManager.Muted);
-            RefreshSoundLabel(); CancelPause(); Show(pause, true);
+            RefreshSoundLabel(); CancelPause(); Show(pause, true); PopIn(pause);
         }
         private void ClosePause()
         {
@@ -332,7 +342,7 @@ namespace BusJam.UI
         private void AskMainMenu() => Ask(PendingAction.MainMenu, "Return to the main menu?\nYou will lose a life.");
         private void Ask(PendingAction action, string question)
         {
-            pending = action; confirmText.text = question; Show(pauseConfirmation, true);
+            pending = action; confirmText.text = question; Show(pauseConfirmation, true); PopIn(pauseConfirmation);
         }
         private void CancelPause() { pending = PendingAction.None; Show(pauseConfirmation, false); }
         private void ConfirmPause()
