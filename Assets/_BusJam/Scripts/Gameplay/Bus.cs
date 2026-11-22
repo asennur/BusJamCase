@@ -32,6 +32,10 @@ namespace BusJam.Gameplay
         [SerializeField] private Transform[] wheels;
         [SerializeField, Min(0.01f)] private float wheelRadius = 0.24f;
         [SerializeField, Range(2f, 4f)] private float motionPitch = 3f;
+        [Tooltip("Kalkışta burun kalkışı (derece); referansta gövde yola paralel kalır.")]
+        [SerializeField, Range(0f, 4f)] private float departurePitch = 0.6f;
+        [Tooltip("Kalkış öncesi kısa ezilme oranı.")]
+        [SerializeField, Range(0f, 0.05f)] private float departureSquash = 0.015f;
         [SerializeField, Min(0f)] private float idleShakeHeight = 0.0012f;
         [SerializeField, Min(0f)] private float idleShakeRoll = 0.04f;
         [SerializeField, Range(4f, 15f)] private float idleShakeFrequency = 8f;
@@ -47,6 +51,9 @@ namespace BusJam.Gameplay
         [Tooltip("Door entry to seat pop time (Passenger.EnterBus).")]
         [SerializeField, Min(0f)] private float seatFlashDelay = 0.17f;
         [SerializeField] private Vector3 seatFlashOffset = new Vector3(0f, 0.45f, 0f);
+        [Tooltip("Optional: small white bits that fly out of the seat flash.")]
+        [SerializeField] private ParticleSystem seatSparks;
+        [SerializeField, Min(0)] private int seatSparkCount = 4;
 
         private Material[] bodyMaterials;
         private int reservedCount;
@@ -111,7 +118,7 @@ namespace BusJam.Gameplay
             modelRestScale = model.localScale;
             shakePhase = Random.value * Mathf.PI * 2f;
             anticipation = DOTween.Sequence()
-                .Append(model.DOScale(Vector3.Scale(modelRestScale, new Vector3(1.025f, 0.95f, 1.025f)), 0.04f).SetEase(Ease.OutSine))
+                .Append(model.DOScale(Vector3.Scale(modelRestScale, new Vector3(1f + departureSquash * 0.5f, 1f - departureSquash, 1f + departureSquash * 0.5f)), 0.04f).SetEase(Ease.OutSine))
                 .Append(model.DOScale(modelRestScale, 0.04f).SetEase(Ease.InSine))
                 .SetAutoKill(false).Pause();
         }
@@ -142,6 +149,7 @@ namespace BusJam.Gameplay
             for (int i = 0; i < seatFlashTimers.Length; i++)
                 seatFlashTimers[i].Pause();
             seatFlash.Clear();
+            if (seatSparks != null) seatSparks.Clear();
         }
 
         private void FlashSeat(Transform seat)
@@ -152,6 +160,10 @@ namespace BusJam.Gameplay
                 applyShapeToPosition = false
             };
             seatFlash.Emit(flash, 1);
+            if (seatSparks == null) return;
+            flash.position = seatSparks.transform.InverseTransformPoint(seat.position + seatFlashOffset);
+            flash.applyShapeToPosition = true;
+            seatSparks.Emit(flash, seatSparkCount);
         }
 
         private void LateUpdate()
@@ -321,7 +333,7 @@ namespace BusJam.Gameplay
             if (model != null)
             {
                 float pitch = arriving ? -motionPitch * Mathf.Sin(Mathf.InverseLerp(0.45f, 1f, motionTime) * Mathf.PI)
-                    : motionPitch * Mathf.Sin(motionTime * Mathf.PI);
+                    : departurePitch * Mathf.Sin(motionTime * Mathf.PI);
                 float bob = arriving && motionTime > 0.7f
                     ? Mathf.Sin((motionTime - 0.7f) / 0.3f * Mathf.PI * 2f) * 0.025f : 0f;
                 model.localPosition = modelRestPosition + Vector3.up * bob;
