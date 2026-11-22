@@ -26,7 +26,7 @@ Durum: bitti (22.11 ~13:25). Kod commit'i `8db366c`.
   - Yeni level Save → Level_28 oluştu, seçicide göründü; Load (yeni levelde) → "Pick a level from the list first."; kirliyken başka level seçimi uyarır, ikinci seçim yükler; Test Play → Game "Level 28", "Editor" butonu → editörde Level 28 açık.
   - Temizlik: Level_28 silindi, LevelDatabase.asset kopyadan geri (Level_26/27 satırları duruyor, Level_27 LE1'in), PlayerPrefs LevelIndex=9 geri, aktif sahne Game.
 - [x] 5. Görüntüler LE2-shots/: `tunel_once_sonra.jpg`, `once_tunnel_1080x1920.jpg`, `once_yolcu_telefon_tablet.jpg`, `sonra_{main,tunnel,passenger}.jpg` (9:16 | 9:19.5 | 3:4), tek kareler `sonra_*_WxH.jpg`, `testplay_return.jpg`.
-- [ ] 6. Console temiz doğrulaması (kilit bekleniyor)
+- [~] 6. Console: test koşusunda (13:09-13:15) LE2 kodundan hata yok; yalnız 3× `IsMatrixValid(matrix)` assert + 1× `Screen position out of view frustum` (Game view çözünürlüğü değiştirilirken, kamera/boyut kaynaklı). 13:25'te temiz koşu denendi: Unity MCP'ye yanıt vermiyor (LE1 kilidinden sonra meşgul), kilit bırakıldı. Asen/Luma: Console'u bir kez Play'de kontrol etsin.
 
 ## Bilinen / Asen'e
 - `LevelData.Validate` mesajları Türkçe ("Red: 0 yolcu, 3 koltuk" vb.) → editörde İngilizce arayüzün içinde Türkçe görünüyor. Validate LE1/ortak dosya; çevrilmesi önerilir.
