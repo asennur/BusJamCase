@@ -74,6 +74,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - Clock rollback rebases LastRegenUtc once and persists a UTC high-water guard (`LivesUtcHighWater`); returning the clock forward grants no rebound lives. Normal elapsed intervals continue below the guard, and startup preserves valid partial progress even with a future saved guard. Production uses server time.
 - Decision: Preserve the full 1.4x standing passenger world size when seated, including inverse seat-parent scale; loop imported exhaust on a smoke-only Animator layer and shake only the bus model child (ZPAX2, 19 November 2026).
 - Decision: Implement the authorized five-life / 20-minute rule and event-driven start gating (Asen rule, 19 November 2026).
+- Karar (W2, 22 Kasım 2026): Yolcu koltukta `seatedVisualOffset` ile minder üstünde oturur; koltuğa oturunca tek parçacıklık parlama (havuzlu Emit); egzoz sürüş mesafesine bağlı puf, BusStation'daki ortak dünya-uzayı ParticleSystem; kapı yolcu varmadan 0.1 sn önce açılır. Fail zamanlaması değişmedi: slot dolunca anında, panel 0.6 sn sonra (referansla aynı).
 
 ## 4. Veri (`BusJam.Level`)
 
