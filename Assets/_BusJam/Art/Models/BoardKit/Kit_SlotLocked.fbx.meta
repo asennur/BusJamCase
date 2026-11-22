@@ -14,6 +14,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: M_KitLocked
     second: {fileID: 2100000, guid: d13223351b5e3bb4b95cc505d1d9181b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_KitLockedShade
+    second: {fileID: 2100000, guid: d3fae96ff2344722bfdb394246696106, type: 2}
   materials:
     materialImportMode: 1
     materialName: 1
