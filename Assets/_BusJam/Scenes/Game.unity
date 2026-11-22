@@ -31005,6 +31005,7 @@ MonoBehaviour:
   layoutMode: {fileID: 737060414}
   coinReward: 25
   noLivesDuration: 3.5
+  celebrationSettings: {fileID: 11400000, guid: 57d65837100862b4dae6220be93be2bc, type: 2}
 --- !u!114 &1861426746
 MonoBehaviour:
   m_ObjectHideFlags: 0

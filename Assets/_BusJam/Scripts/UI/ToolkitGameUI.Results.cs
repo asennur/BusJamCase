@@ -11,6 +11,7 @@ namespace BusJam.UI
         [SerializeField, Min(0)] private int coinReward = 25;
         [SerializeField, Min(0)] private float noLivesDuration = 3.5f;
         private const int FlyingCoinCount = 14;
+        [SerializeField] private CelebrationSettings celebrationSettings;
         [SerializeField] private ResultTimeline resultTimeline;
         private int timelineRevision;
         private ResultTimeline sampledTimeline;
@@ -46,14 +47,13 @@ namespace BusJam.UI
         private void InitializeCelebrationBus()
         {
             if (celebrationBus != null) return;
-            var assets = Resources.Load<CelebrationSettings>("CelebrationSettings");
-            celebrationBus = new CompleteCelebration(assets, celebrationImage, gameObject.scene, Application.isPlaying ? Camera.main : null, resultTimeline);
+            celebrationBus = new CompleteCelebration(celebrationSettings, celebrationImage, gameObject.scene, Application.isPlaying ? Camera.main : null, resultTimeline);
             celebrationBus.Resize(Screen.width, Screen.height);
         }
 
         private void CacheResults()
         {
-            if (resultTimeline == null) resultTimeline = Resources.Load<CelebrationSettings>("CelebrationSettings").resultTimeline;
+            if (resultTimeline == null) resultTimeline = celebrationSettings.resultTimeline;
             timelineRevision = resultTimeline.Revision;
             sampledTimeline = resultTimeline;
             complete = root.Q("complete-overlay"); completePanel = root.Q("complete-panel");
