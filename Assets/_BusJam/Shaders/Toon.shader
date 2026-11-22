@@ -1,4 +1,4 @@
-// Mobil toon: iki tonlu basamak diffuse + sert specular nokta + üstten rim. Ana ışık + SH ambient, keyword yok.
+// Mobil toon: iki tonlu basamak diffuse (ToonLighting.hlsl) + sert specular nokta + üstten rim. Ana ışık + SH ambient, keyword yok.
 // İsteğe bağlı silüet koyulaştırma (Edge) aynı tonda ince kontur verir.
 // SRP Batcher uyumlu (tüm alanlar UnityPerMaterial'da); instancing açık. Kontur ayrı OutlineHull materyalinde.
 Shader "BusJam/Toon"
@@ -35,7 +35,7 @@ Shader "BusJam/Toon"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            #include "ToonLighting.hlsl"
 
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
 
@@ -92,12 +92,10 @@ Shader "BusJam/Toon"
                 half3 v = normalize(input.viewWS);
                 Light light = GetMainLight();
 
-                // Yarım Lambert'i tek basamakla iki tona böler.
-                half ndl = dot(n, light.direction) * 0.5h + 0.5h;
-                half lit = smoothstep(_RampThreshold - _RampSmooth, _RampThreshold + _RampSmooth, ndl);
+                half lit = ToonStep(n, light.direction, _RampThreshold, _RampSmooth);
                 // Dekor paleti _BaseMap'ten gelir; doku atanmamışsa beyaz, renk yalnız _BaseColor.
                 half3 albedo = _BaseColor.rgb * SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
-                half3 color = albedo * (lerp(_ShadeColor.rgb, 1.0h, lit) * light.color + input.ambient);
+                half3 color = albedo * ToonDiffuse(lit, _ShadeColor.rgb, light.color, input.ambient);
 
                 // Sert kenarlı Blinn noktası; yalnız aydınlık tarafta. Tam yukarı bakan düz yüzeyler
                 // (otobüs tabanı gibi) maskelenir, yoksa tüm yüz beyaza boyanır.
