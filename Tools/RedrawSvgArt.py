@@ -13,8 +13,8 @@ import re,json,sys,subprocess
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'Assets/_BusJam/UI/Vector'
-EVIDENCE=ROOT.parent/'BusJamCase_ZVEC_Review/svgr'
-SOURCE=ROOT/'Assets/_BusJam/Art/UI'
+EVIDENCE=ROOT/'Temp/svgr'  # ara çıktılar (git dışı)
+SOURCE=ROOT/'ArtSource/UI'
 NS='http://www.w3.org/2000/svg'
 ET.register_namespace('',NS)
 
@@ -123,12 +123,7 @@ ASSETS={
  'icon_close':('icon_close',512,72), 'icon_clock':('icon_clock',640,80),
  'icon_heart':('icon_heart',512,64),'icon_heart_broken':('icon_heart_broken',640,72),
  'panel_tip':('panel_tip',1100,64),'title_complete':('title_complete',1200,96),
- 'title_failed':('title_failed',1100,80),'ribbon_purple':('ribbon_purple',1200,96),
- 'logo':('Renkli Bus Jam Oyun Logosu',1300,112),
- 'logo_constructed':('Renkli Bus Jam Oyun Logosu',1300,112),
- 'surface_white':('panel_inner',850,64),
- 'surface_header':('panel_header',1000,80),'surface_modal':('panel_modal',850,96),
- 'surface_badge':('badge_level',720,80),'surface_blue':('btn_round_blue',720,96),
+ 'ribbon_purple':('ribbon_purple',1200,96),
  'button_green_normal':('btn_green',1200,112),'button_red_normal':('btn_red',1200,112),
  'button_yellow_normal':('btn_yellow',1200,112)
 }

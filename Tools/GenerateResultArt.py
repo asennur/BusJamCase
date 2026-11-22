@@ -12,7 +12,7 @@ import json
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'Assets/_BusJam/UI/Vector'
-EVIDENCE = ROOT.parent / 'BusJamCase_ZVEC_Review/win'
+EVIDENCE = ROOT / 'Temp/win'  # ara çıktılar (git dışı)
 FONT = TTFont(ROOT / 'Assets/_BusJam/Art/Fonts/Fredoka-Bold.ttf')
 GLYPHS = FONT.getGlyphSet()
 CMAP = FONT.getBestCmap()
@@ -126,7 +126,7 @@ def legacy():
     # Record representative opaque source colours independently of the vector construction.
     samples={}
     for name in ('title_complete','title_failed','ribbon_purple'):
-        im=Image.open(ROOT/f'Assets/_BusJam/Art/UI/{name}.png').convert('RGBA')
+        im=Image.open(ROOT/f'ArtSource/UI/{name}.png').convert('RGBA')
         colors=im.getcolors(im.width*im.height)
         samples[name]=[{'rgba':c,'pixels':n} for n,c in sorted(colors,reverse=True) if c[3]>240][:16]
     EVIDENCE.mkdir(parents=True,exist_ok=True)
