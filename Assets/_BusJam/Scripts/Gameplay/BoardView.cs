@@ -51,6 +51,13 @@ namespace BusJam.Gameplay
         [SerializeField] private Material sidewalkMaterial;
 
         private Mesh baseMesh;
+        private readonly List<Vector3> baseVertices = new List<Vector3>();
+        private readonly List<int> baseTriangles = new List<int>();
+        // Taban yüksekliği ve Kit_Rim_Outer / Kit_Rim_Inner kavis yarıçapları (hücre birimi, BoardKit.blend ile aynı).
+        private const float BaseHeight = -0.09f;
+        private const float RimOuterFillet = 0.316f;
+        private const float RimInnerFillet = 0.35f;
+        private const int ArcSegments = 6;
         private PassengerLook[] looks;
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         private static readonly int SpecStrengthId = Shader.PropertyToID("_SpecStrength");
@@ -209,8 +216,9 @@ namespace BusJam.Gameplay
             Built?.Invoke(level);
         }
 
-        // Tek mesh zemin hücrelerini ve çıkış kenarı boyunca kaldırıma bağlanan şeridi örter; Void açık kalır.
-        // Shader yüksekliği kaldırıma düzlediği ve lekeleri dünya xz'de çizdiği için kaldırımla bindirme dikişsizdir.
+        // Tek mesh: zemin hücreleri köşe noktası başına çeyrek olarak örtülür. Dış köşede çeyrek kenarlık kavisiyle yuvarlanır,
+        // iç köşede boş hücrenin köşesine kenarlık kavisine kadar dolgu eklenir; kenarlığın içi hep tahta yüzeyidir.
+        // Çıkış kenarı boyunca kaldırıma bağlanan şerit de aynı mesh'te. Shader yüksekliği kaldırıma düzler, bindirme dikişsizdir.
         private void BuildBase(LevelData level)
         {
             if (baseMesh == null)
@@ -225,29 +233,39 @@ namespace BusJam.Gameplay
                 renderer.receiveShadows = false;
             }
 
-            var vertices = new List<Vector3>();
-            var triangles = new List<int>();
+            baseVertices.Clear();
+            baseTriangles.Clear();
             float half = cellSize * 0.5f;
-            for (int y = 0; y < level.height; y++)
+            for (int cy = 0; cy <= level.height; cy++)
             {
-                for (int x = 0; x < level.width; x++)
+                for (int cx = 0; cx <= level.width; cx++)
                 {
-                    if (!IsGround(level, x, y))
+                    // Sınıflama BuildRim ile aynı: çıkış satırının üstü (kaldırım) zemin sayılır ama oraya çeyrek konmaz (şerit örter).
+                    bool ne = cy == 0 || IsGround(level, cx, cy - 1);
+                    bool se = IsGround(level, cx, cy);
+                    bool sw = IsGround(level, cx - 1, cy);
+                    bool nw = cy == 0 || IsGround(level, cx - 1, cy - 1);
+                    int count = (ne ? 1 : 0) + (se ? 1 : 0) + (sw ? 1 : 0) + (nw ? 1 : 0);
+                    if (count == 0)
                         continue;
 
-                    Vector3 center = CellToLocal(new Vector2Int(x, y));
-                    center.y = -0.09f;
-                    int start = vertices.Count;
-                    vertices.Add(center + new Vector3(-half, 0f, half));
-                    vertices.Add(center + new Vector3(half, 0f, half));
-                    vertices.Add(center + new Vector3(half, 0f, -half));
-                    vertices.Add(center + new Vector3(-half, 0f, -half));
-                    triangles.Add(start);
-                    triangles.Add(start + 1);
-                    triangles.Add(start + 2);
-                    triangles.Add(start);
-                    triangles.Add(start + 2);
-                    triangles.Add(start + 3);
+                    bool outer = count == 1 || (count == 2 && ne == sw);
+                    Vector3 corner = CellToLocal(new Vector2Int(cx, cy)) + new Vector3(-half, BaseHeight, half);
+                    for (int q = 0; q < 4; q++)
+                    {
+                        if (cy == 0 && (q == 0 || q == 3))
+                            continue;
+                        bool ground = q == 0 ? ne : q == 1 ? se : q == 2 ? sw : nw;
+                        // Çeyreğin iki ekseni: köşe noktasından hücre içine doğru.
+                        var u = new Vector3(q < 2 ? cellSize : -cellSize, 0f, 0f);
+                        var v = new Vector3(0f, 0f, q == 0 || q == 3 ? cellSize : -cellSize);
+                        if (ground && outer)
+                            AddArcFan(corner + (u + v) * 0.5f, corner, u, v, RimOuterFillet, true);
+                        else if (ground)
+                            AddQuarter(corner, u * 0.5f, v * 0.5f);
+                        else if (count == 3)
+                            AddArcFan(corner, corner, u, v, RimInnerFillet, false);
+                    }
                 }
             }
 
@@ -256,26 +274,55 @@ namespace BusJam.Gameplay
             {
                 float left = CellToLocal(new Vector2Int(-sidewalkEdgeExtraCells, 0)).x - half;
                 float right = CellToLocal(new Vector2Int(level.width - 1 + sidewalkEdgeExtraCells, 0)).x + half;
-                float near = half;
                 float far = half + sidewalkJoinDepth * cellSize;
-                int start = vertices.Count;
-                vertices.Add(new Vector3(left, -0.09f, far));
-                vertices.Add(new Vector3(right, -0.09f, far));
-                vertices.Add(new Vector3(right, -0.09f, near));
-                vertices.Add(new Vector3(left, -0.09f, near));
-                triangles.Add(start);
-                triangles.Add(start + 1);
-                triangles.Add(start + 2);
-                triangles.Add(start);
-                triangles.Add(start + 2);
-                triangles.Add(start + 3);
+                AddQuarter(new Vector3(left, BaseHeight, half), new Vector3(right - left, 0f, 0f), new Vector3(0f, 0f, far - half));
             }
 
             baseMesh.Clear();
-            baseMesh.SetVertices(vertices);
-            baseMesh.SetTriangles(triangles, 0);
+            baseMesh.SetVertices(baseVertices);
+            baseMesh.SetTriangles(baseTriangles, 0);
             baseMesh.RecalculateNormals();
             baseMesh.RecalculateBounds();
+        }
+
+        // origin, origin+u, origin+u+v, origin+v dörtgeni.
+        private void AddQuarter(Vector3 origin, Vector3 u, Vector3 v)
+        {
+            int start = baseVertices.Count;
+            baseVertices.Add(origin);
+            baseVertices.Add(origin + u);
+            baseVertices.Add(origin + u + v);
+            baseVertices.Add(origin + v);
+            AddTriangle(start, start + 1, start + 2);
+            AddTriangle(start, start + 2, start + 3);
+        }
+
+        // Köşe noktasındaki kenarlık kavisi: merkez corner + (u+v)·r, yarıçap r (hücre birimi), kenarlara teğet.
+        // Dış köşede yelpaze hücre çeyreğinin uzak köşesinden kenar ortalarına kadar, iç köşede köşe noktasından yalnız kavise kadar.
+        private void AddArcFan(Vector3 hub, Vector3 corner, Vector3 u, Vector3 v, float r, bool toEdges)
+        {
+            int hubIndex = baseVertices.Count;
+            baseVertices.Add(hub);
+            int first = baseVertices.Count;
+            if (toEdges) baseVertices.Add(corner + v * 0.5f);
+            for (int i = 0; i <= ArcSegments; i++)
+            {
+                float a = i * 0.5f * Mathf.PI / ArcSegments;
+                baseVertices.Add(corner + u * (r * (1f - Mathf.Cos(a))) + v * (r * (1f - Mathf.Sin(a))));
+            }
+            if (toEdges) baseVertices.Add(corner + u * 0.5f);
+            for (int i = first; i < baseVertices.Count - 1; i++)
+                AddTriangle(hubIndex, i, i + 1);
+        }
+
+        // Sarma yönünü yukarı bakacak şekilde düzeltir (çeyreklerin yarısı ayna).
+        private void AddTriangle(int a, int b, int c)
+        {
+            Vector3 pa = baseVertices[a];
+            bool up = Vector3.Cross(baseVertices[b] - pa, baseVertices[c] - pa).y > 0f;
+            baseTriangles.Add(a);
+            baseTriangles.Add(up ? b : c);
+            baseTriangles.Add(up ? c : b);
         }
 
         private void OnDestroy()
