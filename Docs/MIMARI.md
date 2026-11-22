@@ -59,7 +59,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - **Otobüs:** sıra level verisinden. Kapasite 3. Dolunca gider, sıradaki gelir. Gelince slottaki aynı renk yolcular (en fazla boş koltuk kadar) kendiliğinden biner.
 - Gridde yolcu kendiliğinden hareket etmez; yalnız oyuncu dokununca koşar. Kendiliğinden hareket eden tek şey slottakilerin otobüse binişidir.
 - **Gizli yolcu:** erişilemezken gri ve "?" görünür, rengi bilinmez. Erişilebilir olduğu an rengi açılır ve bir daha gizlenmez.
-- **İpli yolcu (Asen kuralı, 19 Kasım):** 0–4 kat ip taşır. İp varken erişilemez, outline göstermez, dokununca kızar ve hücresi dolu kalır. Dört yöndeki her komşu hücre dokunulan yolcu ayrılınca bir kat çözer; aynı tünel ağzının her yeniden boşalması sayılır, ağza yolcu gelişi sayılmaz. Son ip çözülünce erişilebilirlik yeniden hesaplanır. Gizli yolcuyla birlikte kullanılabilir; renk erişilebilir olunca açılır.
+- **İpli yolcu (Asen kuralı, 19 Kasım; üst sınır 22 Kasım):** 0–3 kat ip taşır (`GameRules.MaxRopes`). İp varken erişilemez, outline göstermez, dokununca kızar ve hücresi dolu kalır. Dört yöndeki her komşu hücre dokunulan yolcu ayrılınca bir kat çözer; aynı tünel ağzının her yeniden boşalması sayılır, ağza yolcu gelişi sayılmaz. Son ip çözülünce erişilebilirlik yeniden hesaplanır. Gizli yolcuyla birlikte kullanılabilir; renk erişilebilir olunca açılır.
 - **Gizemli/pelerinli yolcu (Asen kuralı, 19 Kasım):** Her yolcu ayrı açık ya da kapalı başlar. Kapalıyken altın kenarlı koyu gece laciverti kukuleta/pelerin gerçek rengi gizler; dokununca kızar. Açıkken normal yol/ipuçları kuralları geçerlidir; outline yalnız açık ve erişilebilir olanda görünür. Kabul edilen her dokunuşta, yolcu koşmaya başladıktan sonra gridde kalan bütün pelerinliler (yolu kapalı veya ipli olanlar dahil) durumunu tersine çevirir. Otobüs, slot ve dolu slotların arkasına koşma sayılır; reddedilen/yok sayılan dokunuş ve otomatik biniş sayılmaz. Ayrılan yolcu etkilenmez. İple birlikte kullanılabilir, `hidden` ile kullanılamaz. Liste level kurulumunda bir kez toplanır; pelerin geçiş tween'i yolcu başına bir kez kurulur ve iki yönde tekrar kullanılır.
 - **Tünel:** bir hücre kaplar, yürünmez (engel gibi). Bir yöne bakar; baktığı komşu hücre ağzıdır. İçinde levelde tanımlı sıralı yolcu kuyruğu vardır. Ağız hücresi boşaldığı an (oradaki yolcu dokunulup kalktığında) kuyruktaki sıradaki yolcu ağız hücresine çıkar, erişilebilirlik yeniden hesaplanır. Kuyruk bitince tünel engel olarak kalır.
 - **Kazan:** son otobüs dolup gitti.
@@ -67,6 +67,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - **Kaybet (süre):** timer 0.
 - **Kaybet (hamle, Asen kuralı, 19 Kasım; ZM2b):** koşu, otobüs geçişi, bekleyen biniş ve taşma yokken gridde yolcu kalır ama erişilebilir, ipsiz ve açık pelerinli/pelerinsiz hiçbir dokunuş yoksa `NoMoves`; metin "No moves left!".
 - Karar: Hiçbir level çözülemez olamaz; ip veya pelerin içeren level en az iki farklı kazanan dokunuş dizisi taşır. İlk ip Level_06, ilk pelerin Level_08 (Asen, 19 Kasım 2026).
+- Karar (R9, 22 Kasım 2026): İp en çok 3 kat (`GameRules.MaxRopes`; SetRopes, editör, Validate, BatchGenerator). Her kat gövdede ayrı kalın halka (Kit_Rope_1 bel, 2 kalça, 3 göğüs altı) + kameraya bakan krem düğüm; düğüm sayısı = kalan ip sayısı. Halka `M_Rope` (RopePalette dokusu: halat/düğüm rengi) + ince `M_RopeOutline` 2. materyal; pivot halka merkezinde, patlama yerinde şişer. Üretim betiği `ArtSource/BoardKit.blend` içinde `build_rope.py`.
 
 ### Lives (Asen rule, 19 November)
 
@@ -170,7 +171,7 @@ Decision: Ready is an explicit state, and coins use a single update with a pop/p
 - Karar (CAM, 22 Kasım 2026): Editör kamerası level boyutundan bağımsız 9×9 kadrajını kullanır (`CameraFitter.SetMinimumGrid`, `EditorBoardViewport` verir); oyun kadrajı değişmedi. `LayoutModeController` güvenli alanı `UnityEngine.Device.Screen` ölçüsünden `Screen`'e oranla taşır ve ekrana kırpar (editörde Simulator sekmesi açıkken Game view'a cihaz pikselleri geliyordu).
 - Var olan leveli seç/yükle ya da yeni oluştur.
 - Genişlik/yükseklik, hücreye tıklayarak boya: araç = `Void`, `Empty`, renkli yolcu, gizli aç/kapa.
-- Yolcu fırçasında ip sayısı 0–4 seçilir; diğer hücre tipleri ipsiz yazılır (Asen kuralı, 19 Kasım).
+- Yolcu fırçasında ip sayısı 0–3 seçilir; diğer hücre tipleri ipsiz yazılır (Asen kuralı, 19 Kasım).
 - Yolcu fırçasında pelerin: yok / açık başlar / kapalı başlar. `hidden` ile birlikte boyama hata verir; diğer hücre tiplerinde pelerin temizlenir (Asen kuralı, 19 Kasım).
 - Otobüs sırası: renk ekle/sil/sırala. Süre alanı (slot sayısı sabit, editörden ayarlanmaz).
 - Kaydet: `Validate` geçmezse hatayı göster, kaydetme. Geçerse `#if UNITY_EDITOR` ile `EditorUtility.SetDirty` + `AssetDatabase.SaveAssets`; yeni level `AssetDatabase.CreateAsset` + `LevelDatabase.Add`.
