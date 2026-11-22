@@ -107,6 +107,11 @@ namespace BusJam.Level
                     error = $"({x},{y}) only passengers can have ropes";
                     return false;
                 }
+                if (cell.ropes > GameRules.MaxRopes)
+                {
+                    error = $"({x},{y}) has {cell.ropes} ropes, at most {GameRules.MaxRopes} allowed";
+                    return false;
+                }
 
                 int neighbors = (CanVacate(x - 1, y) ? 1 : 0) + (CanVacate(x + 1, y) ? 1 : 0)
                     + (CanVacate(x, y - 1) ? 1 : 0) + (CanVacate(x, y + 1) ? 1 : 0);

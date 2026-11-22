@@ -5,6 +5,9 @@ namespace BusJam.Core
     {
         public const int BusCapacity = 3;
 
+        // İpli yolcu en çok 3 kat ip taşır; her kat gövdede ayrı bir halka (Asen, 22 Kasım).
+        public const int MaxRopes = 3;
+
         // Grid sınırı 9×9 (Asen, 22 Kasım); referanstan (7×8) büyük gridlerde CameraFitter kamerayı geri çeker.
         public const int MaxWidth = 9;
         public const int MaxHeight = 9;

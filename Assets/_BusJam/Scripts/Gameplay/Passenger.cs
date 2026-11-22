@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BusJam.Core;
 using BusJam.Level;
 using DG.Tweening;
 using UnityEngine;
@@ -256,7 +257,7 @@ namespace BusJam.Gameplay
         /// <summary>Resets rope count and visible layers when reusing a passenger.</summary>
         public void SetRopes(int count)
         {
-            RopesLeft = Mathf.Clamp(count, 0, 4);
+            RopesLeft = Mathf.Clamp(count, 0, GameRules.MaxRopes);
             if (ropeLayers != null)
                 for (int i = 0; i < ropeLayers.Length; i++)
                     if (ropeLayers[i] != null)

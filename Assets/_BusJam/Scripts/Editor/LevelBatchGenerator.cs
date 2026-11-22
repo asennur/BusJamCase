@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using BusJam.Core;
 using BusJam.Level;
 using BusJam.LevelEditor;
 using UnityEditor;
@@ -153,7 +154,7 @@ namespace BusJam.EditorTools
                     int free = PassengerNeighbours(level, index);
                     if (free >= 1)
                     {
-                        cell.ropes = (byte)Mathf.Min(free, 1 + random.Next(2));
+                        cell.ropes = (byte)Mathf.Min(Mathf.Min(free, GameRules.MaxRopes), 1 + random.Next(2));
                         level.cells[index] = cell;
                         ropes++;
                         continue;

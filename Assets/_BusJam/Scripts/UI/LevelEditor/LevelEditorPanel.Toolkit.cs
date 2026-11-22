@@ -198,7 +198,7 @@ namespace BusJam.LevelEditor
         private void AddRope()
         {
             int ropes = GetCell(passengerCell).ropes;
-            if (ropes >= 4) { SetStatus("A passenger can have at most 4 ropes."); return; }
+            if (ropes >= GameRules.MaxRopes) { SetStatus($"A passenger can have at most {GameRules.MaxRopes} ropes."); return; }
             SetRopes(passengerCell, ropes + 1);
             SetStatus("A rope comes off each time a neighbour leaves. Save checks that enough neighbours can leave.");
         }

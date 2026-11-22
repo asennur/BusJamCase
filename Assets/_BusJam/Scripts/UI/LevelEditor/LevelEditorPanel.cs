@@ -330,7 +330,7 @@ namespace BusJam.LevelEditor
         }
 
         public void SetHidden(Vector2Int cell, bool value) => EditPassenger(cell, d => { d.hidden = value; if (value) d.cloak = Cloak.None; return d; });
-        public void SetRopes(Vector2Int cell, int value) => EditPassenger(cell, d => { d.ropes = (byte)Mathf.Clamp(value, 0, 4); return d; });
+        public void SetRopes(Vector2Int cell, int value) => EditPassenger(cell, d => { d.ropes = (byte)Mathf.Clamp(value, 0, GameRules.MaxRopes); return d; });
         public void SetCloak(Vector2Int cell, Cloak value) => EditPassenger(cell, d => { d.cloak = value; if (value != Cloak.None) d.hidden = false; return d; });
 
         private void EditPassenger(Vector2Int cell, Func<CellData, CellData> edit)
