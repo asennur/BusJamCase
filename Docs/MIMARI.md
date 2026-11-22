@@ -68,6 +68,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - **Kaybet (hamle, Asen kuralı, 19 Kasım; ZM2b):** koşu, otobüs geçişi, bekleyen biniş ve taşma yokken gridde yolcu kalır ama erişilebilir, ipsiz ve açık pelerinli/pelerinsiz hiçbir dokunuş yoksa `NoMoves`; metin "No moves left!".
 - Karar: Hiçbir level çözülemez olamaz; ip veya pelerin içeren level en az iki farklı kazanan dokunuş dizisi taşır. İlk ip Level_06, ilk pelerin Level_08 (Asen, 19 Kasım 2026).
 - Karar (R9, 22 Kasım 2026): İp en çok 3 kat (`GameRules.MaxRopes`; SetRopes, editör, Validate, BatchGenerator). Her kat gövdede ayrı kalın halka (Kit_Rope_1 bel, 2 kalça, 3 göğüs altı) + kameraya bakan krem düğüm; düğüm sayısı = kalan ip sayısı. Halka `M_Rope` (RopePalette dokusu: halat/düğüm rengi) + ince `M_RopeOutline` 2. materyal; pivot halka merkezinde, patlama yerinde şişer. Üretim betiği `ArtSource/BoardKit.blend` içinde `build_rope.py`.
+- Karar (R9b, 22 Kasım 2026): Krem düğümler kaldırıldı (Asen beğenmedi); katman sayısı yalnız halka sayısıyla okunur. `M_Rope` düz `_BaseColor` (0.44,0.30,0.34), RopePalette.png silindi. Halka geometrisi/pivotları, kontur ve patlama aynı.
 
 ### Lives (Asen rule, 19 November)
 
