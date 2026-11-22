@@ -34,6 +34,9 @@ namespace BusJam.LevelEditor
         [SerializeField] private WaitingArea waitingArea;
         [Tooltip("Flat translucent marker drawn on Void cells so the grid shape stays readable")]
         [SerializeField] private GameObject voidMarkerPrefab;
+        [Tooltip("Tunnel exit tiles reuse the void marker quad as a flat translucent square (no stripes): the tile must stay empty")]
+        [SerializeField] private Color tunnelExitTint = new Color(0.3f, 0.85f, 0.35f, 0.45f);
+        [SerializeField, Range(0.3f, 1f)] private float tunnelExitScale = 0.8f;
         [SerializeField] private string gameSceneName = "Game";
 
         private DropdownField levelList;
@@ -55,6 +58,13 @@ namespace BusJam.LevelEditor
 
         private readonly Board board = new Board();
         private readonly List<GameObject> voidMarkers = new List<GameObject>();
+        private readonly List<GameObject> exitMarkers = new List<GameObject>();
+        // İşaret karo üst yüzeyinin hemen üstünde durur (board yerel birimi).
+        private const float ExitMarkerLift = 0.035f;
+        private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        private static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
+        private static readonly Direction[] Turn = { Direction.Up, Direction.Right, Direction.Down, Direction.Left };
+        private const string ExitMustStayEmpty = "Tunnel exit must stay empty.";
         private LevelData source;
         private LevelData draft;
         private int sourceIndex = -1;
@@ -184,7 +194,7 @@ namespace BusJam.LevelEditor
         public bool TryScreenToCell(Vector2 screen, out Vector2Int cell)
         {
             cell = default;
-            return draft != null && boardView.TryPickCell(boardCamera.ScreenPointToRay(screen), out cell) && InBounds(cell);
+            return draft != null && boardView.TryPickCell(boardCamera.ScreenPointToRay(screen), draft, out cell) && InBounds(cell);
         }
 
         /// <summary>Yolcu olmayan karoya tık: Tile → Void → Obstacle → Tunnel → Tile.</summary>
@@ -200,10 +210,17 @@ namespace BusJam.LevelEditor
                 _ => CellType.Empty
             };
             draft.tunnels.RemoveAll(t => t.cell == cell);
+            string message = $"({cell.x}, {cell.y}) is now {Describe(next)}.";
             if (next == CellType.Tunnel)
-                draft.tunnels.Add(new TunnelData { cell = cell, facing = Direction.Up });
+            {
+                // Yeni tünel, çıkışı boş karoya bakan ilk yöne döner (önce Up); yolcu asla silinmez.
+                var facing = FindFacing(cell, Direction.Up, true, true) ?? FindFacing(cell, Direction.Up, true, false);
+                draft.tunnels.Add(new TunnelData { cell = cell, facing = facing ?? Direction.Up });
+                message = facing.HasValue ? $"({cell.x}, {cell.y}) is now a tunnel facing {facing.Value}."
+                    : $"{ExitMustStayEmpty} Clear a tile next to the tunnel at ({cell.x}, {cell.y}).";
+            }
             draft.SetCell(cell.x, cell.y, new CellData { type = next });
-            SetStatus($"({cell.x}, {cell.y}) is now {Describe(next)}.");
+            SetStatus(message);
             Rebuild(false);
             if (next == CellType.Tunnel) TunnelSelected?.Invoke(cell);
         }
@@ -214,15 +231,36 @@ namespace BusJam.LevelEditor
         {
             var tunnel = TunnelAt(cell);
             if (tunnel == null) return;
-            tunnel.facing = tunnel.facing switch
-            {
-                Direction.Up => Direction.Right,
-                Direction.Right => Direction.Down,
-                Direction.Down => Direction.Left,
-                _ => Direction.Up
-            };
-            SetStatus($"Tunnel at ({cell.x}, {cell.y}) faces {tunnel.facing}.");
+            // Saat yönünde sıradaki yön; çıkışında yolcu olan yönler atlanır.
+            var facing = FindFacing(cell, tunnel.facing, false, false);
+            if (!facing.HasValue) { SetStatus($"{ExitMustStayEmpty} Every side of this tunnel has a passenger."); return; }
+            bool skipped = facing.Value != Turn[(Array.IndexOf(Turn, tunnel.facing) + 1) % Turn.Length];
+            tunnel.facing = facing.Value;
+            SetStatus(skipped ? $"Tunnel at ({cell.x}, {cell.y}) faces {tunnel.facing}. Sides with a passenger were skipped: the exit must stay empty."
+                : $"Tunnel at ({cell.x}, {cell.y}) faces {tunnel.facing}.");
             Rebuild(false);
+        }
+
+        /// <summary>Tünelin bu yöndeki çıkış hücresinde yolcu var mı.</summary>
+        public bool ExitHasPassenger(Vector2Int tunnelCell, Direction facing)
+        {
+            var mouth = tunnelCell + facing.ToOffset();
+            return InBounds(mouth) && GetCell(mouth).type == CellType.Passenger;
+        }
+
+        // from'dan saat yönünde ilk uygun yön: çıkışında yolcu yok; needTile ise çıkış grid içinde boş karo. Yoksa null.
+        private Direction? FindFacing(Vector2Int cell, Direction from, bool includeFrom, bool needTile)
+        {
+            int start = Array.IndexOf(Turn, from);
+            for (int i = includeFrom ? 0 : 1; i < (includeFrom ? 4 : 5); i++)
+            {
+                var facing = Turn[(start + i) % 4];
+                var mouth = cell + facing.ToOffset();
+                if (ExitHasPassenger(cell, facing)) continue;
+                if (needTile && !(InBounds(mouth) && GetCell(mouth).type == CellType.Empty)) continue;
+                return facing;
+            }
+            return null;
         }
 
         public void AddToTunnel(Vector2Int cell, PassengerColor color)
@@ -250,6 +288,11 @@ namespace BusJam.LevelEditor
                 SetStatus($"Passengers go on tiles, not on a {Describe(data.type)}.");
                 return false;
             }
+            if (draft.IsTunnelExit(cell))
+            {
+                SetStatus(ExitMustStayEmpty);
+                return false;
+            }
             if (data.type == CellType.Passenger && data.color == color)
             {
                 SetStatus($"There is already a {color} passenger here.");
@@ -272,6 +315,7 @@ namespace BusJam.LevelEditor
             if (from == to || !InBounds(to)) return false;
             var data = GetCell(from);
             if (data.type != CellType.Passenger || GetCell(to).type != CellType.Empty) return false;
+            if (draft.IsTunnelExit(to)) { SetStatus(ExitMustStayEmpty); return false; }
             draft.SetCell(to.x, to.y, data);
             draft.SetCell(from.x, from.y, new CellData { type = CellType.Empty });
             Rebuild(false);
@@ -612,16 +656,17 @@ namespace BusJam.LevelEditor
             revision++;
             board.Setup(draft);
             boardView.Build(draft, board);
-            DrawVoidMarkers();
+            DrawMarkers();
             if (busesChanged && busStation != null && draft.busOrder.Count > 0) busStation.Setup(draft.busOrder);
             if (waitingArea != null) waitingArea.Setup(LevelNumber);
             RenderStatus();
             Changed?.Invoke();
         }
 
-        private void DrawVoidMarkers()
+        // Void hücrelerine yarı saydam işaret; tünel çıkışı karosuna aynı quad düz yarı saydam yeşil ve küçük (boş kalmalı).
+        private void DrawMarkers()
         {
-            int used = 0;
+            int used = 0, exits = 0;
             if (voidMarkerPrefab != null)
             {
                 for (int y = 0; y < draft.height; y++)
@@ -633,8 +678,31 @@ namespace BusJam.LevelEditor
                         marker.SetActive(true);
                         marker.transform.position = boardView.CellToWorld(new Vector2Int(x, y));
                     }
+                foreach (var tunnel in draft.tunnels)
+                {
+                    var mouth = tunnel.MouthCell;
+                    if (!InBounds(mouth) || !GetCell(mouth).IsWalkable) continue;
+                    if (exits == exitMarkers.Count) exitMarkers.Add(CreateExitMarker());
+                    var marker = exitMarkers[exits++];
+                    marker.SetActive(true);
+                    marker.transform.position = boardView.CellToWorld(mouth);
+                    marker.transform.localPosition += new Vector3(0f, ExitMarkerLift, 0f);
+                }
             }
             for (int i = used; i < voidMarkers.Count; i++) voidMarkers[i].SetActive(false);
+            for (int i = exits; i < exitMarkers.Count; i++) exitMarkers[i].SetActive(false);
+        }
+
+        private GameObject CreateExitMarker()
+        {
+            var marker = Instantiate(voidMarkerPrefab, boardView.transform);
+            marker.name = "TunnelExitMarker";
+            marker.transform.localScale = Vector3.one * tunnelExitScale;
+            var tint = new MaterialPropertyBlock();
+            tint.SetTexture(BaseMapId, Texture2D.whiteTexture);
+            tint.SetColor(BaseColorId, tunnelExitTint);
+            foreach (var renderer in marker.GetComponentsInChildren<Renderer>()) renderer.SetPropertyBlock(tint);
+            return marker;
         }
 
         private void SetStatus(string text)

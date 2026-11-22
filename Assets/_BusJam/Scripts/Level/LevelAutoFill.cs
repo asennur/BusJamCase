@@ -18,6 +18,8 @@ namespace BusJam.Level
         /// <summary>Unity API'sine dokunmaz: editör arka plan thread'inde taslağın kopyasıyla çağırır.</summary>
         public static bool Fill(LevelData level, int levelNumber, out string message, int attempts = 40, CancellationToken cancel = default)
         {
+            // Tünel çıkışı dolu ya da geçersizse solver her denemede reddeder; nedeni baştan söylenir.
+            if (!level.ValidateTunnels(out message)) return false;
             var free = FreeCells(level);
             if (level.busOrder == null) level.busOrder = new List<PassengerColor>();
             if (level.busOrder.Count == 0)

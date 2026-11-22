@@ -232,6 +232,12 @@ namespace BusJam.LevelEditor
         {
             var tunnel = TunnelAt(tunnelCell);
             if (tunnel == null || tunnel.facing == facing) return;
+            if (ExitHasPassenger(tunnelCell, facing))
+            {
+                var mouth = tunnelCell + facing.ToOffset();
+                SetStatus($"{ExitMustStayEmpty} Move the passenger at ({mouth.x}, {mouth.y}) first.");
+                return;
+            }
             tunnel.facing = facing;
             SetStatus(InBounds(tunnel.MouthCell) ? $"Tunnel faces {facing}." : $"Tunnel faces {facing}, off the grid. Turn it towards a tile or Save will fail.");
             Rebuild(false);

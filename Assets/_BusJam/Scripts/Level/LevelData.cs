@@ -43,7 +43,7 @@ namespace BusJam.Level
 
         /// <summary>
         /// Leveli kaydetmeden önce kurallara uyuyor mu bakar: en az bir otobüs, renk başına yolcu = otobüs × kapasite,
-        /// çıkış satırında yürünebilir hücre var ve tüm yürünebilir hücreler boş gridde çıkışa bağlı.
+        /// tünel çıkışları boş karo, çıkış satırında yürünebilir hücre var ve tüm yürünebilir hücreler boş gridde çıkışa bağlı.
         /// </summary>
         public bool Validate(out string error)
         {
@@ -169,22 +169,43 @@ namespace BusJam.Level
             return true;
         }
 
-        // Her tünelin ağzı grid içinde ve yürünebilir bir hücre (Void/Tunnel olamaz) olmalı.
-        private bool ValidateTunnels(out string error)
+        /// <summary>Hücre bir tünelin çıkışı (ağzı) mı. Tünel yolcuyu buraya çıkarır; bu hücre boş kalmalı.</summary>
+        public bool IsTunnelExit(Vector2Int cell)
+        {
+            for (int i = 0; i < tunnels.Count; i++)
+                if (tunnels[i].MouthCell == cell)
+                    return true;
+            return false;
+        }
+
+        // Her tünelin ağzı grid içinde, boş bir karo olmalı: delik/engel/tünele bakamaz, üstünde yolcu duramaz.
+        public bool ValidateTunnels(out string error)
         {
             foreach (var tunnel in tunnels)
             {
                 Vector2Int mouth = tunnel.MouthCell;
                 if (mouth.x < 0 || mouth.x >= width || mouth.y < 0 || mouth.y >= height)
                 {
-                    error = $"Tunnel ({tunnel.cell.x}, {tunnel.cell.y}) faces outside the grid";
+                    error = $"Tunnel ({tunnel.cell.x}, {tunnel.cell.y}) faces outside the grid. Turn it towards a tile";
                     return false;
                 }
 
                 CellData mouthCell = GetCell(mouth.x, mouth.y);
-                if (!mouthCell.IsWalkable)
+                string blocker = mouthCell.type switch
                 {
-                    error = $"Tunnel ({tunnel.cell.x}, {tunnel.cell.y}) faces a hole or tunnel at ({mouth.x}, {mouth.y})";
+                    CellType.Void => "a hole",
+                    CellType.Obstacle => "an obstacle",
+                    CellType.Tunnel => "another tunnel",
+                    _ => null
+                };
+                if (blocker != null)
+                {
+                    error = $"Tunnel ({tunnel.cell.x}, {tunnel.cell.y}) faces {blocker} at ({mouth.x}, {mouth.y}). Its exit must be a tile";
+                    return false;
+                }
+                if (mouthCell.type == CellType.Passenger)
+                {
+                    error = $"Tunnel exit must stay empty: remove the passenger at ({mouth.x}, {mouth.y}) in front of tunnel ({tunnel.cell.x}, {tunnel.cell.y})";
                     return false;
                 }
             }

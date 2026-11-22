@@ -49,6 +49,15 @@ namespace BusJam.Gameplay
         [SerializeField] private Material baseMaterial;
         [Tooltip("Board backing and tile undersides only. Matches the surrounding sidewalk; the frame stays white.")]
         [SerializeField] private Material sidewalkMaterial;
+        [Header("Level editörü seçimi (hücre birimi)")]
+        [Tooltip("Dokunulan görünen nesne: bu boylardaki kutular sınanır (yolcu = geniş gövde + dar baş), değmezse karo üst yüzeyi.")]
+        [SerializeField] private float pickPassengerHeight = 2.15f;
+        [SerializeField] private float pickPassengerBodyHeight = 1.45f;
+        [SerializeField, Range(0.1f, 0.5f)] private float pickHeadHalfWidth = 0.28f;
+        [SerializeField] private float pickTunnelHeight = 1f;
+        [SerializeField] private float pickObstacleHeight = 0.3f;
+        [SerializeField, Range(0.3f, 0.5f)] private float pickHalfWidth = 0.42f;
+        [SerializeField] private float pickTileTop = 0.05f;
 
         private Mesh baseMesh;
         private readonly List<Vector3> baseVertices = new List<Vector3>();
@@ -422,17 +431,94 @@ namespace BusJam.Gameplay
             active.Add(rim);
         }
 
-        // Karo olmayan Void hücreleri de tahta düzleminde seçilebilir.
-        public bool TryPickCell(Ray ray, out Vector2Int cell)
+        /// <summary>
+        /// Level editörü seçimi: dokunulan noktada görünen hücre. Yolcu (gövde + baş kutusu), tünel ve engel boylarıyla kutu olarak sınanır,
+        /// kameraya en yakın kutu kazanır (eğik kamerada uzun yolcu arkadaki hücreyi örter). Kutuya değmezse karo üst
+        /// yüzeyi düzleminden hücre hesaplanır (Void dahil). Collider kullanmaz; oyundaki dokunuş bu yolu kullanmaz.
+        /// </summary>
+        public bool TryPickCell(Ray ray, LevelData level, out Vector2Int cell)
         {
             cell = default;
-            var plane = new Plane(transform.up, transform.position);
-            if (!plane.Raycast(ray, out float distance))
+            Vector3 origin = transform.InverseTransformPoint(ray.origin);
+            Vector3 direction = transform.InverseTransformVector(ray.direction);
+            float half = pickHalfWidth * cellSize;
+            float best = float.MaxValue;
+            bool hit = false;
+            for (int y = 0; y < level.height; y++)
+            {
+                for (int x = 0; x < level.width; x++)
+                {
+                    CellType type = level.GetCell(x, y).type;
+                    float top = type switch
+                    {
+                        CellType.Passenger => pickPassengerBodyHeight,
+                        CellType.Tunnel => pickTunnelHeight,
+                        CellType.Obstacle => pickObstacleHeight,
+                        _ => 0f
+                    } * cellSize;
+                    if (top <= 0f)
+                        continue;
+
+                    var c = new Vector2Int(x, y);
+                    Vector3 center = CellToLocal(c);
+                    float t;
+                    bool inside = RayBox(origin, direction, center - new Vector3(half, 0f, half), center + new Vector3(half, top, half), out t);
+                    if (type == CellType.Passenger)
+                    {
+                        float head = pickHeadHalfWidth * cellSize;
+                        if (RayBox(origin, direction, center + new Vector3(-head, top, -head), center + new Vector3(head, pickPassengerHeight * cellSize, head), out float headT)
+                            && (!inside || headT < t))
+                        {
+                            inside = true;
+                            t = headT;
+                        }
+                    }
+                    if (inside && t < best)
+                    {
+                        best = t;
+                        cell = c;
+                        hit = true;
+                    }
+                }
+            }
+            if (hit)
+                return true;
+
+            float surface = pickTileTop * cellSize;
+            if (Mathf.Abs(direction.y) < 1e-6f)
+                return false;
+            float distance = (surface - origin.y) / direction.y;
+            if (distance < 0f)
                 return false;
 
-            Vector3 local = transform.InverseTransformPoint(ray.GetPoint(distance));
+            Vector3 local = origin + direction * distance;
             cell = new Vector2Int(Mathf.RoundToInt(local.x / cellSize + (width - 1) * 0.5f),
                 Mathf.RoundToInt(-local.z / cellSize));
+            return true;
+        }
+
+        // Eksen hizalı kutu ile ışın (slab yöntemi); t ışın parametresi.
+        private static bool RayBox(Vector3 origin, Vector3 direction, Vector3 min, Vector3 max, out float t)
+        {
+            float near = 0f, far = float.MaxValue;
+            t = 0f;
+            for (int axis = 0; axis < 3; axis++)
+            {
+                float o = origin[axis], d = direction[axis];
+                if (Mathf.Abs(d) < 1e-8f)
+                {
+                    if (o < min[axis] || o > max[axis])
+                        return false;
+                    continue;
+                }
+                float a = (min[axis] - o) / d, b = (max[axis] - o) / d;
+                if (a > b) (a, b) = (b, a);
+                near = Mathf.Max(near, a);
+                far = Mathf.Min(far, b);
+                if (near > far)
+                    return false;
+            }
+            t = near;
             return true;
         }
 
