@@ -73,10 +73,11 @@ namespace BusJam.UI
 
         private void Update()
         {
-            RefreshResultTimeline();
+#if UNITY_EDITOR
+            RefreshResultTimeline(); // Inspector'da canlı ayar; build'de timeline değişmez.
+#endif
             UpdateFadeHold();
             if (waitingForTree && document.rootVisualElement?.Q("ui-root") != null) OnEnable();
-            if (Application.isPlaying) celebrationBus?.Resize(Screen.width, Screen.height);
         }
 
         /// <summary>Returns false until the UIDocument tree exists; never binds to a half-built tree.</summary>
@@ -283,6 +284,7 @@ namespace BusJam.UI
         }
         private void ApplyLayout(LayoutMode mode)
         {
+            if (Application.isPlaying) celebrationBus?.Resize(Screen.width, Screen.height);
             root.EnableInClassList("portrait", mode == LayoutMode.Portrait);
             root.EnableInClassList("square", mode == LayoutMode.Square);
             root.EnableInClassList("landscape", mode == LayoutMode.Landscape);
