@@ -34,6 +34,8 @@ Unity'de silerken her zaman **asset ile `.meta` dosyası birlikte** silinir. Ter
 
 **A toplamı:** 50+ dosya. Assets altında yaklaşık **32,5 MB** (A1-A11), ArtSource altında 4,8 MB.
 
+> W3 notu (22.11): `CelebrationReview` bozuk — `MeasurePose`/`VerifyMotion` `CompleteCelebration`'da artık olmayan alanları (`feet`, `footSoles`, `deckPositions`, `riderHeights`, `heads`) reflection ile okuyor (`3c7388c` iki klip sürümlü yolcuya geçişte kalktı) → satır 122 NullReference. Düzeltilmedi: araç A11 ile silinecek; kutlama görsel doğrulaması `Bus Jam > Result Timeline Preview` ve Play ile yapılıyor (W3.md). `ZScnValidation.cs:90` `CelebrationReview.Verify()` çağırıyor; ikisi birlikte silinmeli.
+
 ## (B) Şüpheli — Asen'e sor
 
 | # | Yol | Boyut | Soru / öneri |
