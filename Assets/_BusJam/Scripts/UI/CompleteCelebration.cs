@@ -12,7 +12,6 @@ namespace BusJam.UI
     /// <summary>Havuzdan tek yandan görünüşlü otobüs durağı; mevcut unscaled DOTween sonuç timeline'ı ile örneklenir.</summary>
     public sealed class CompleteCelebration : IDisposable
     {
-        public const float StartTime = 1.05f, Duration = 2.4f;
         private readonly ResultTimeline timeline;
         private CelebrationChoreography Motion => timeline.Celebration;
         private readonly CelebrationSettings settings;
@@ -38,7 +37,6 @@ namespace BusJam.UI
         private float halfWidth, halfHeight, radius;
         public Camera Camera => camera;
         public RenderTexture Target => target;
-        public GameObject Stage => stage;
         public bool Visible => camera.enabled;
 
         public CompleteCelebration(CelebrationSettings assets, Image output, UnityEngine.SceneManagement.Scene scene, Camera sourceCamera = null, ResultTimeline resultTimeline = null)
