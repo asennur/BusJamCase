@@ -22,10 +22,10 @@ namespace BusJam.UI
         private float RetryReadyAt => Step(ResultStepId.Panel).start + Step(ResultStepId.Panel).duration;
         private VisualElement complete, completePanel, resultHeader, rays, pile, rewardContent, rewardFlash;
         private VisualElement resultCoinPlate, effects, fail, failPanel, failIcon, lifeCost, noLives;
-        private VisualElement buttonGlow, floatingHeart, failEffects, failHudHeart;
+        private VisualElement buttonGlow, floatingHeart, failEffects, failHudHeart, resultBoosters;
         private Label rewardLabel, resultCoins, failReason, failLevel, noLivesCount, noLivesCountdown, failLives, failCountdown;
         private Button continueButton, retryButton, failClose;
-        private readonly VisualElement[] confetti = new VisualElement[54];
+        private readonly VisualElement[] confetti = new VisualElement[72];
         private readonly VisualElement[] twinkles = new VisualElement[8];
         private readonly VisualElement[] pileGlints = new VisualElement[4];
         private readonly VisualElement[] flyingCoins = new VisualElement[FlyingCoinCount];
@@ -63,7 +63,7 @@ namespace BusJam.UI
             rewardFlash = root.Q("reward-flash"); rewardLabel = root.Q<Label>("reward-label");
             resultCoinPlate = root.Q("result-coin-plate"); resultCoins = root.Q<Label>("result-coins");
             continueButton = root.Q<Button>("continue-button"); buttonGlow = root.Q("continue-glow");
-            effects = root.Q("celebration-effects");
+            effects = root.Q("celebration-effects"); resultBoosters = root.Q("booster-bar");
             fail = root.Q("fail-overlay"); failPanel = root.Q("fail-panel"); failIcon = root.Q("fail-icon"); lifeCost = root.Q("life-cost");
             failReason = root.Q<Label>("fail-reason"); failLevel = root.Q<Label>("fail-level");
             failLives = root.Q<Label>("fail-lives-count"); failCountdown = root.Q<Label>("fail-countdown");
@@ -143,6 +143,7 @@ namespace BusJam.UI
             celebrationBus?.Hide();
             collecting = retrying = resultTransitionDone = false;
             Show(complete, state == GameState.Complete); Show(fail, state == GameState.Fail);
+            if (state != GameState.Complete && resultBoosters != null) resultBoosters.style.opacity = 1;
             if (state == GameState.Complete)
             {
                 BuildResultTweens();
@@ -221,23 +222,40 @@ namespace BusJam.UI
             }
         }
 
+        // Reference win: two bursts from the booster bar ends shoot up and inward over the board, then flutter down.
+        // Closed-form drag motion, so scrubbing any time gives the same frame. The booster bar fades as they launch.
         private void AnimateConfetti(float time)
         {
+            var step = Step(ResultStepId.Confetti);
             float width = effects.resolvedStyle.width, height = effects.resolvedStyle.height;
+            if (float.IsNaN(width) || width <= 0) return;
+            float left = width * .2f, right = width * .8f, baseY = height * .86f;
+            if (resultBoosters != null && resultBoosters.worldBound.width > 0)
+            {
+                Rect bar = resultBoosters.worldBound;
+                Vector2 a = effects.WorldToLocal(bar.min), b = effects.WorldToLocal(bar.max);
+                left = a.x + (b.x - a.x) * .12f; right = b.x - (b.x - a.x) * .12f; baseY = Mathf.Lerp(a.y, b.y, .35f);
+                resultBoosters.style.opacity = step.enabled ? 1 - Phase(time, step.start - .05f, .12f) : 1;
+            }
+            const float drag = 4f;
             for (int i = 0; i < confetti.Length; i++)
             {
-                var step = Step(ResultStepId.Confetti);
-                float start = step.start + i % 6 * step.stagger;
-                float p = step.Evaluate(time, i % 6);
-                float seed = (i * .618034f) % 1;
-                Vector2 from = new Vector2(width * (.3f + seed * .4f), height * .54f);
-                float direction = i % 2 == 0 ? -1 : 1;
-                Vector2 point = from + new Vector2(direction * width * (.18f + seed * .4f) * p,
-                    height * (-1.5f * p + 1.8f * p * p) * (.5f + seed * .4f));
-                MoveElement(confetti[i], point);
-                confetti[i].style.opacity = !step.enabled || time <= start ? 0 : 1 - Phase(p, .72f, .28f);
-                confetti[i].style.rotate = new Rotate(direction * (i * 17 + p * 660));
-                confetti[i].style.scale = new Scale(new Vector3((.5f + seed * .7f) * (.4f + .6f * Mathf.Abs(Mathf.Cos(p * 12 + i))), .5f + seed * .7f, 1));
+                float s = step.Phase(time, i % 6) * step.duration;
+                float seed = (i * .618034f) % 1, seed2 = (i * .414214f + .3f) % 1, seed3 = (i * .732051f + .6f) % 1;
+                float inward = i % 2 == 0 ? 1 : -1;
+                float decay = (1 - Mathf.Exp(-drag * s)) / drag;
+                // Up speed sets the apex (lower board to the road); fall speed tends to gravity / drag.
+                float up = height * (1.3f + seed2 * 2.3f), gravity = height * 1.5f;
+                float side = width * inward * (-.25f + seed3 * 1.9f);
+                float x = (i % 2 == 0 ? left : right) + (seed - .5f) * width * .1f + side * decay
+                    + Mathf.Sin(s * 9 + i) * width * .012f * Mathf.Min(1, s * 3);
+                float y = baseY - (up + gravity / drag) * decay + gravity / drag * s;
+                MoveElement(confetti[i], new Vector2(x, y));
+                bool live = step.enabled && time > step.start + i % 6 * step.stagger;
+                confetti[i].style.opacity = live ? 1 - Phase(s, step.duration * .75f, step.duration * .25f) : 0;
+                confetti[i].style.rotate = new Rotate(i * 37 + inward * (300 + seed * 500) * s);
+                float size = .95f + seed2 * .5f;
+                confetti[i].style.scale = new Scale(new Vector3(size * (.35f + .65f * Mathf.Abs(Mathf.Cos(s * (6 + seed * 8) + i))), size, 1));
             }
         }
 
@@ -446,13 +464,15 @@ namespace BusJam.UI
 
         private static Color ConfettiColor(int index)
         {
-            switch (index % 5)
+            switch (index % 7)
             {
-                case 0: return new Color(1, .8f, .2f);
-                case 1: return new Color(1, .3f, .55f);
-                case 2: return new Color(.25f, .8f, 1);
-                case 3: return new Color(.4f, 1, .5f);
-                default: return new Color(.75f, .4f, 1);
+                case 0: return new Color(1, .82f, .15f);
+                case 1: return new Color(1, .3f, .6f);
+                case 2: return new Color(.2f, .85f, 1);
+                case 3: return new Color(.6f, 1, .2f);
+                case 4: return new Color(.6f, .35f, 1);
+                case 5: return new Color(1, .45f, .15f);
+                default: return new Color(.35f, .45f, 1);
             }
         }
     }
