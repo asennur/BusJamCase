@@ -16,7 +16,7 @@ MonoBehaviour:
   - id: 0
     enabled: 1
     start: 0.3
-    duration: 0.75
+    duration: 1
     ease: 0
     overshoot: 1.70158
     stagger: 0.009

@@ -180,7 +180,7 @@ namespace BusJam.UI
             => new ResultStep { id = id, enabled = true, start = start, duration = duration, ease = ease, overshoot = 1.70158f, stagger = stagger };
         private static List<ResultStep> Defaults() => new List<ResultStep>
         {
-            S(ResultStepId.Confetti, .3f, .75f, stagger: .009f),
+            S(ResultStepId.Confetti, .3f, 1f, stagger: .009f),
             S(ResultStepId.Overlay, 1.05f, .2f), S(ResultStepId.CelebrationBus, 1.05f, 2.4f),
             S(ResultStepId.Title, 1.75f, .3f, ResultEase.OutBack), S(ResultStepId.Rays, 1.75f, .3f),
             S(ResultStepId.CoinPile, 2.5f, .3f, ResultEase.OutBack), S(ResultStepId.CoinCount, 2.5f, .9f, ResultEase.OutQuad),

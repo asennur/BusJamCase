@@ -25,7 +25,8 @@ namespace BusJam.UI
         private VisualElement buttonGlow, floatingHeart, failEffects, failHudHeart, resultBoosters;
         private Label rewardLabel, resultCoins, failReason, failLevel, noLivesCount, noLivesCountdown, failLives, failCountdown;
         private Button continueButton, retryButton, failClose;
-        private readonly VisualElement[] confetti = new VisualElement[72];
+        private readonly VisualElement[] confetti = new VisualElement[96];
+        private const int ColoredConfetti = 72; // the rest are small white paper flecks
         private readonly VisualElement[] twinkles = new VisualElement[8];
         private readonly VisualElement[] pileGlints = new VisualElement[4];
         private readonly VisualElement[] flyingCoins = new VisualElement[FlyingCoinCount];
@@ -74,8 +75,8 @@ namespace BusJam.UI
             string[] shapes = { "confetti-star", "confetti-heart", "confetti-disc", "confetti-piece" };
             for (int i = 0; i < confetti.Length; i++)
             {
-                confetti[i] = Effect(effects, shapes[i % shapes.Length]);
-                confetti[i].style.unityBackgroundImageTintColor = ConfettiColor(i);
+                confetti[i] = Effect(effects, i < ColoredConfetti ? shapes[i % shapes.Length] : "confetti-piece");
+                confetti[i].style.unityBackgroundImageTintColor = i < ColoredConfetti ? ConfettiColor(i) : Color.white;
             }
             for (int i = 0; i < FlyingCoinCount; i++) flyingCoins[i] = Effect(effects, "flying-coin");
             VisualElement sparkleLayer = root.Q("complete-sparkles");
@@ -237,7 +238,9 @@ namespace BusJam.UI
                 left = a.x + (b.x - a.x) * .12f; right = b.x - (b.x - a.x) * .12f; baseY = Mathf.Lerp(a.y, b.y, .35f);
                 resultBoosters.style.opacity = step.enabled ? 1 - Phase(time, step.start - .05f, .12f) : 1;
             }
-            const float drag = 4f;
+            const float drag = 5f;
+            // Pieces sit above the result overlay, so they dim with it like the reference (falling under the purple layer).
+            float dim = 1 - .85f * Step(ResultStepId.Overlay).Evaluate(time);
             for (int i = 0; i < confetti.Length; i++)
             {
                 float s = step.Phase(time, i % 6) * step.duration;
@@ -245,16 +248,16 @@ namespace BusJam.UI
                 float inward = i % 2 == 0 ? 1 : -1;
                 float decay = (1 - Mathf.Exp(-drag * s)) / drag;
                 // Up speed sets the apex (lower board to the road); fall speed tends to gravity / drag.
-                float up = height * (1.3f + seed2 * 2.3f), gravity = height * 1.5f;
-                float side = width * inward * (-.25f + seed3 * 1.9f);
+                float up = height * (1.6f + seed2 * 2.9f), gravity = height * 1.5f;
+                float side = width * inward * (-.3f + seed3 * 2.4f);
                 float x = (i % 2 == 0 ? left : right) + (seed - .5f) * width * .1f + side * decay
                     + Mathf.Sin(s * 9 + i) * width * .012f * Mathf.Min(1, s * 3);
                 float y = baseY - (up + gravity / drag) * decay + gravity / drag * s;
                 MoveElement(confetti[i], new Vector2(x, y));
                 bool live = step.enabled && time > step.start + i % 6 * step.stagger;
-                confetti[i].style.opacity = live ? 1 - Phase(s, step.duration * .75f, step.duration * .25f) : 0;
+                confetti[i].style.opacity = live ? dim * (1 - Phase(s, step.duration * .75f, step.duration * .25f)) : 0;
                 confetti[i].style.rotate = new Rotate(i * 37 + inward * (300 + seed * 500) * s);
-                float size = .95f + seed2 * .5f;
+                float size = (.95f + seed2 * .5f) * (i < ColoredConfetti ? 1 : .35f);
                 confetti[i].style.scale = new Scale(new Vector3(size * (.35f + .65f * Mathf.Abs(Mathf.Cos(s * (6 + seed * 8) + i))), size, 1));
             }
         }
