@@ -7,19 +7,19 @@ namespace BusJam.UI
 {
     public sealed partial class ToolkitGameUI
     {
-        private VisualElement hudTop, boosterBar, adBanner, resultColumn;
+        private VisualElement hudTop, barSpace, adBanner, resultColumn;
         private VisualElement[] popups, overlays;
         private VisualElement failBar;
         // Panel units per reference pixel; popups and the result column are authored in reference pixels.
         private float refScale = 1f;
 
-        /// <summary>Places the reference HUD: top column under the notch, banner on the bottom safe inset, booster bar
-        /// above it. Columns are authored in reference pixels and scaled by screen height (ScreenLayout).</summary>
+        /// <summary>Places the reference HUD: top column under the notch, banner on the bottom safe inset, an empty
+        /// bar strip above it (reserved space, confetti origin). Columns are authored in reference pixels and scaled by screen height (ScreenLayout).</summary>
         private void LayoutHud(Rect safe, float width, float height)
         {
             if (hudTop == null || hudTop.panel != root.panel)
             {
-                hudTop = root.Q("hud-top"); boosterBar = root.Q("booster-bar"); adBanner = root.Q("ad-banner");
+                hudTop = root.Q("hud-top"); barSpace = root.Q("bar-space"); adBanner = root.Q("ad-banner");
                 resultColumn = root.Q("complete-panel");
                 popups = new[] { settings.Q(className: "modal"), pause.Q(className: "modal"), pauseConfirmation.Q(className: "modal"), noLives.Q(className: "modal") };
                 overlays = new[] { complete, fail, noLives, settings, pause, pauseConfirmation };
@@ -32,8 +32,8 @@ namespace BusJam.UI
             var scale = new Scale(new Vector3(unit, unit, 1f));
             hudTop.style.top = ScreenLayout.HudTopFraction(safe, aspect) * height - safeTop;
             hudTop.style.scale = scale;
-            boosterBar.style.bottom = (ScreenLayout.BannerHeight + ScreenLayout.BarGap) * unit;
-            boosterBar.style.scale = scale;
+            barSpace.style.bottom = (ScreenLayout.BannerHeight + ScreenLayout.BarGap) * unit;
+            barSpace.style.scale = scale;
             // The banner also covers the home-indicator strip below the safe area, as in the reference.
             adBanner.style.height = ScreenLayout.BannerHeight * unit + safeBottom;
             adBanner.style.bottom = -safeBottom;

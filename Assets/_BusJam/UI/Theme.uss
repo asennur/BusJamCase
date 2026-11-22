@@ -423,14 +423,8 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .hud-top .timer-level { display: none; }
 .hud-top > .timer-counter > .raster-panel-art.vector-header { left: 34px; top: 10px; bottom: 7px; -unity-slice-scale: .29px; }
 .hud-top > .gear { position: absolute; left: 575px; top: 17px; width: 79px; height: 81px; }
-.booster-bar { height: 111px; flex-direction: row; padding-left: 70px; transform-origin: 50% 100%; }
-.booster-track { position: absolute; left: 48px; right: 49px; top: 18px; height: 86px; background-image: url("Vector/booster_bar.svg"); -unity-background-scale-mode: stretch-to-fill; }
-.booster-lock { width: 127px; height: 111px; margin-right: 31px; flex-shrink: 0; background-image: url("Vector/booster_locked.svg"); -unity-background-scale-mode: stretch-to-fill; }
-.booster-label {
-    position: absolute; left: 7px; top: 83px; width: 111px; height: 28px; margin: 0; padding: 0;
-    background-color: #f7b80f; border-radius: 9px; border-width: 2px; border-color: #c27b04;
-    font-size: 23px; color: #8c1212; -unity-text-outline-width: 0; text-shadow: 0 0 0 transparent;
-}
+/* Reserved strip above the banner (ScreenLayout.BarHeight); empty, the camera keeps the grid above it. */
+.bar-space { height: 111px; transform-origin: 50% 100%; }
 .ad-banner { position: absolute; left: 0; right: 0; bottom: 0; height: 93px; background-color: rgb(251, 251, 251); border-top-width: 1px; border-color: rgb(141, 141, 141); align-items: center; justify-content: center; }
 .ad-label { font-size: 22px; color: rgba(0, 0, 0, 0.3); -unity-text-outline-width: 0; text-shadow: 0 0 0 transparent; }
 .editor-return { position: absolute; left: 24px; top: 200px; width: 180px; }

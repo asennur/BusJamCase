@@ -9,7 +9,7 @@ namespace BusJam.Gameplay
     {
         [SerializeField] private Camera cam;
         [SerializeField] private LayerMask passengerMask;
-        [Tooltip("Taps on pickable UI of this document (buttons, banner, booster bar, modals) never reach the world.")]
+        [Tooltip("Taps on pickable UI of this document (buttons, banner, modals) never reach the world.")]
         [SerializeField] private UIDocument uiDocument;
 
         public event Action<Passenger> PassengerTapped;

@@ -30,6 +30,7 @@ Bu dosya kodun tek tasarım kaynağıdır; kod (AI destekli) buna uyar. Kararlar
 Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videosu (level 29-30), aşağıdaki yerleşim oradan.
 
 **Ekran düzeni (yukarıdan aşağı):** sol üstte "Level N" rozeti → yatay yol ve otobüsler → bekleme slotu şeridi → grid → (alt boşluk; orijinaldeki booster çubuğu kapsam dışı).
+- Karar (U1, Asen, 22 Kasım 2026): Kilitli booster butonları (Level 8/15/25/35) ve SVG'leri silindi; yerine görünmez `bar-space` şeridi (`ScreenLayout.BarGap/BarHeight`) kalır, kamera grid'i yine onun üstüne koyar (board konumu değişmedi), konfeti çıkış noktası bu şerit.
 - Kamera: neredeyse tepeden (~65-70°), hafif perspektif; grid ekranın alt yarısında ortalı.
 - **Yol:** ekran genişliğinde yatay şerit. Otobüsler soldan gelir, ortada (slot şeridinin hizasında) durur, dolunca sağa çıkar. **Sıradaki otobüs aktifin hemen solunda, kuyrukta görünür.**
 - **Otobüs:** üstü açık, renkli gövde (uzun küp), üstünde 3 koltuk; binen yolcu koltukta görünür. Placeholder: renkli küp + 3 koltuk küpü, binen yolcu koltuğa yerleşir.

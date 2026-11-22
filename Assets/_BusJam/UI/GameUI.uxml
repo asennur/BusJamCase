@@ -32,13 +32,7 @@
                     </ui:VisualElement>
                     <ui:Button name="pause-settings" class="gear" tooltip="Settings" />
                 </ui:VisualElement>
-                <ui:VisualElement name="booster-bar" class="hud-column booster-bar">
-                    <ui:VisualElement class="booster-track" picking-mode="Ignore" />
-                    <ui:VisualElement class="booster-lock" picking-mode="Ignore"><ui:Label text="Level 8" class="booster-label" picking-mode="Ignore" /></ui:VisualElement>
-                    <ui:VisualElement class="booster-lock" picking-mode="Ignore"><ui:Label text="Level 15" class="booster-label" picking-mode="Ignore" /></ui:VisualElement>
-                    <ui:VisualElement class="booster-lock" picking-mode="Ignore"><ui:Label text="Level 25" class="booster-label" picking-mode="Ignore" /></ui:VisualElement>
-                    <ui:VisualElement class="booster-lock" picking-mode="Ignore"><ui:Label text="Level 35" class="booster-label" picking-mode="Ignore" /></ui:VisualElement>
-                </ui:VisualElement>
+                <ui:VisualElement name="bar-space" class="hud-column bar-space" picking-mode="Ignore" />
                 <ui:VisualElement name="ad-banner" class="ad-banner">
                     <ui:Label text="AD" class="ad-label" picking-mode="Ignore" />
                 </ui:VisualElement>

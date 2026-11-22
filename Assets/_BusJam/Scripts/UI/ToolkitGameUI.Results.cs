@@ -23,7 +23,7 @@ namespace BusJam.UI
         private float RetryReadyAt => Step(ResultStepId.Panel).start + Step(ResultStepId.Panel).duration;
         private VisualElement complete, completePanel, resultHeader, rays, raysFront, raysBack, halo, burst, pile, rewardContent, rewardFlash;
         private VisualElement resultCoinPlate, effects, fail, failPanel, failIcon, lifeCost, noLives;
-        private VisualElement buttonGlow, floatingHeart, failEffects, failHudHeart, resultBoosters;
+        private VisualElement buttonGlow, floatingHeart, failEffects, failHudHeart, confettiBase;
         private Label rewardLabel, resultCoins, failReason, failLevel, noLivesCount, noLivesCountdown, failLives, failCountdown;
         private Button continueButton, retryButton, failClose;
         private readonly VisualElement[] confetti = new VisualElement[96];
@@ -73,7 +73,7 @@ namespace BusJam.UI
             rewardFlash = root.Q("reward-flash"); rewardLabel = root.Q<Label>("reward-label");
             resultCoinPlate = root.Q("result-coin-plate"); resultCoins = root.Q<Label>("result-coins");
             continueButton = root.Q<Button>("continue-button"); buttonGlow = root.Q("continue-glow");
-            effects = root.Q("celebration-effects"); resultBoosters = root.Q("booster-bar");
+            effects = root.Q("celebration-effects"); confettiBase = root.Q("bar-space");
             fail = root.Q("fail-overlay"); failPanel = root.Q("fail-panel"); failIcon = root.Q("fail-icon"); lifeCost = root.Q("life-cost");
             failReason = root.Q<Label>("fail-reason"); failLevel = root.Q<Label>("fail-level");
             failLives = root.Q<Label>("fail-lives-count"); failCountdown = root.Q<Label>("fail-countdown");
@@ -154,7 +154,6 @@ namespace BusJam.UI
             celebrationBus?.Hide();
             collecting = retrying = resultTransitionDone = false;
             Show(complete, state == GameState.Complete); Show(fail, state == GameState.Fail);
-            if (state != GameState.Complete && resultBoosters != null) resultBoosters.style.opacity = 1;
             if (state == GameState.Complete)
             {
                 BuildResultTweens();
@@ -273,20 +272,19 @@ namespace BusJam.UI
             }
         }
 
-        // Reference win: two bursts from the booster bar ends shoot up and inward over the board, then flutter down.
-        // Closed-form drag motion, so scrubbing any time gives the same frame. The booster bar fades as they launch.
+        // Reference win: two bursts from the ends of the bottom bar strip shoot up and inward over the board, then flutter down.
+        // Closed-form drag motion, so scrubbing any time gives the same frame.
         private void AnimateConfetti(float time)
         {
             var step = Step(ResultStepId.Confetti);
             float width = effects.resolvedStyle.width, height = effects.resolvedStyle.height;
             if (float.IsNaN(width) || width <= 0) return;
             float left = width * .2f, right = width * .8f, baseY = height * .86f;
-            if (resultBoosters != null && resultBoosters.worldBound.width > 0)
+            if (confettiBase != null && confettiBase.worldBound.width > 0)
             {
-                Rect bar = resultBoosters.worldBound;
+                Rect bar = confettiBase.worldBound;
                 Vector2 a = effects.WorldToLocal(bar.min), b = effects.WorldToLocal(bar.max);
                 left = a.x + (b.x - a.x) * .12f; right = b.x - (b.x - a.x) * .12f; baseY = Mathf.Lerp(a.y, b.y, .35f);
-                resultBoosters.style.opacity = step.enabled ? 1 - Phase(time, step.start - .05f, .12f) : 1;
             }
             const float drag = 5f;
             // Pieces sit above the result overlay, so they dim with it like the reference (falling under the purple layer).

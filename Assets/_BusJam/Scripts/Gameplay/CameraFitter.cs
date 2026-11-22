@@ -5,7 +5,7 @@ using UnityEngine;
 namespace BusJam.Gameplay
 {
     /// <summary>Dünyayı sabit FOV ile, tasarlanan bakış ekseni boyunca referans telefon kadrajına oturtur: otobüs tavanı HUD'un altında,
-    /// grid altı booster çubuğunun üstünde, yüksekliğe göre ölçekli; tabletler yanlarda daha fazla zemin görür, referanstan (7×8) büyük
+    /// grid altı alttaki boş şeridin üstünde, yüksekliğe göre ölçekli; tabletler yanlarda daha fazla zemin görür, referanstan (7×8) büyük
     /// gridler ya da dar ekranlar kamerayı geri çeker. Level editörü aynı kadrajı ekranın bir bölgesine (<see cref="SetScreenArea"/>) çizer.</summary>
     [ExecuteAlways, RequireComponent(typeof(Camera))]
     public sealed class CameraFitter : MonoBehaviour
