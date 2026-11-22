@@ -25,6 +25,8 @@ namespace BusJam.Gameplay
         [SerializeField] private float rimStraightYaw;
         [SerializeField] private float rimOuterYaw;
         [SerializeField] private float rimInnerYaw;
+        [Tooltip("Kaldırım kenarı çizgisi tahtanın iki yanına bu kadar hücre uzar (ekranı kesecek kadar).")]
+        [SerializeField, Min(0)] private int sidewalkEdgeExtraCells = 12;
         [Tooltip("PassengerColor sırasıyla")]
         [SerializeField] private Material[] colorMaterials;
         [SerializeField] private Material hiddenMaterial;
@@ -219,26 +221,20 @@ namespace BusJam.Gameplay
 
             for (int cy = 0; cy <= level.height; cy++)
             {
-                for (int cx = 0; cx <= level.width; cx++)
+                int extra = cy == 0 ? sidewalkEdgeExtraCells : 0;
+                for (int cx = -extra; cx <= level.width + extra; cx++)
                 {
-                    bool ne = IsGround(level, cx, cy - 1);
+                    // Çıkış satırının üstü kaldırım: zemin sayılır. Böylece kaldırım kenarı boyunca düz çerçeve,
+                    // çıkış ağzının iki yanında kaldırıma kıvrılan iç köşe (fillet) oluşur.
+                    bool ne = cy == 0 || IsGround(level, cx, cy - 1);
                     bool se = IsGround(level, cx, cy);
                     bool sw = IsGround(level, cx - 1, cy);
-                    bool nw = IsGround(level, cx - 1, cy - 1);
+                    bool nw = cy == 0 || IsGround(level, cx - 1, cy - 1);
                     int count = (ne ? 1 : 0) + (se ? 1 : 0) + (sw ? 1 : 0) + (nw ? 1 : 0);
                     if (count == 0 || count == 4)
                         continue;
 
                     Vector3 corner = CellToLocal(new Vector2Int(cx, cy)) + new Vector3(-0.5f, 0f, 0.5f) * cellSize;
-
-                    // Çıkış kaldırıma açılır. Burada yalnız yan kenarlar bitirilir, tahta boyunca bir kenar çıkıntısı olmadan.
-                    if (cy == 0)
-                    {
-                        if (se != sw)
-                            PlaceRim(rimStraightPool, activeRimStraights, corner + Vector3.back * (cellSize * .25f),
-                                (se ? 90f : 270f) + rimStraightYaw, .5f);
-                        continue;
-                    }
 
                     if (count == 1)
                     {
@@ -276,12 +272,12 @@ namespace BusJam.Gameplay
             return type == CellType.Empty || type == CellType.Passenger || type == CellType.Tunnel;
         }
 
-        private static void PlaceRim(ObjectPool<Transform> pool, List<Transform> active, Vector3 local, float yaw, float length = 1f)
+        private static void PlaceRim(ObjectPool<Transform> pool, List<Transform> active, Vector3 local, float yaw)
         {
             Transform rim = pool.Get();
             rim.localPosition = local;
             rim.localRotation = Quaternion.Euler(0f, yaw, 0f);
-            rim.localScale = new Vector3(length, 1f, 1f);
+            rim.localScale = Vector3.one;
             active.Add(rim);
         }
 

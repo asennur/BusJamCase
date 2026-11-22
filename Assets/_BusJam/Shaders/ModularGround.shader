@@ -11,6 +11,11 @@ Shader "BusJam/Modular Ground"
         _SidewalkSpot ("Sidewalk Spot", Color) = (0.70,0.74,0.93,1)
         _Road ("Road", Color) = (0.47,0.40,0.74,1)
         _Grass ("Grass", Color) = (0.61,0.86,0.12,1)
+        _Curb ("Top Curb", Color) = (0.96,0.93,0.86,1)
+        _CurbTop ("Top Curb upper z (grass above)", Float) = 13.01
+        _RoadEdge ("Road Edge Stripe", Color) = (0.84,0.53,0.43,1)
+        _RoadEdgeGutter ("Road Edge Gutter", Color) = (0.36,0.31,0.45,1)
+        _RoadEdgeZ ("Road Edge z (bottom, top, half width, gutter half width)", Vector) = (8.98,12.65,0.05,0.09)
         _ShadeColor ("Toon Shade Tint", Color) = (0.72, 0.7, 0.88, 1)
         _RampThreshold ("Toon Ramp Threshold", Range(0, 1)) = 0.45
         _RampSmooth ("Toon Ramp Smooth", Range(0.001, 0.5)) = 0.06
@@ -31,7 +36,8 @@ Shader "BusJam/Modular Ground"
             struct Attributes { float4 positionOS:POSITION; float2 band:TEXCOORD1; UNITY_VERTEX_INPUT_INSTANCE_ID };
             struct Varyings { float4 positionCS:SV_POSITION; float2 ground:TEXCOORD0; float band:TEXCOORD1; half3 light:TEXCOORD2; UNITY_VERTEX_INPUT_INSTANCE_ID };
             CBUFFER_START(UnityPerMaterial)
-                half4 _TileLight, _TileDark, _Grout, _Sidewalk, _SidewalkSpot, _Road, _Grass;
+                half4 _TileLight, _TileDark, _Grout, _Sidewalk, _SidewalkSpot, _Road, _Grass, _Curb, _RoadEdge, _RoadEdgeGutter;
+                float4 _RoadEdgeZ; float _CurbTop;
                 half4 _ShadeColor; half _RampThreshold, _RampSmooth, _AmbientStrength;
             CBUFFER_END
             Varyings Vert(Attributes input)
@@ -54,6 +60,7 @@ Shader "BusJam/Modular Ground"
                 float2 p=input.ground;
                 half3 color;
                 bool mute=true;
+                float gutter=0, edge=0;
                 if(input.band<0.5)
                 {
                     // The source has roughly 18 columns and 70-pixel rows on its 45-unit quad.
@@ -73,17 +80,21 @@ Shader "BusJam/Modular Ground"
                 else if(input.band<2.5)
                 {
                     color=_Road.rgb*(0.97+0.035*sin(p.y*0.8));
-                    float yellow=max(Stripe(p.y,8.811,0.082),Stripe(p.y,12.634,0.067));
-                    color=lerp(color,half3(1,0.90,0.02),yellow);
+                    // Alt ve üst kenarda koyu oluk içinde ince turuncu şerit (ref t0030).
+                    gutter=max(Stripe(p.y,_RoadEdgeZ.x,_RoadEdgeZ.w),Stripe(p.y,_RoadEdgeZ.y,_RoadEdgeZ.w));
+                    edge=max(Stripe(p.y,_RoadEdgeZ.x,_RoadEdgeZ.z),Stripe(p.y,_RoadEdgeZ.y,_RoadEdgeZ.z));
                     float along=abs(frac(p.x/4.80)-.5)*4.80;
                     float distance=length(float2(max(along-.89,0),p.y-10.768));
                     float dash=1-smoothstep(.092-fwidth(distance),.092+fwidth(distance),distance);
                     color=lerp(color,half3(.96,.96,1),dash);
                 }
                 else if(input.band<3.5) { color=_Grass.rgb; mute=false; }
-                else color=half3(.96,.96,1);
+                else { color=p.y<_CurbTop?_Curb.rgb:_Grass.rgb; mute=false; }
                 color*=input.light;
-                return half4(mute?MuteBackground(color):color,1);
+                if(mute) color=MuteBackground(color);
+                // Şerit kısılmaz: referans turuncusu yol tonundan bağımsız.
+                color=lerp(lerp(color,_RoadEdgeGutter.rgb,gutter),_RoadEdge.rgb*input.light,edge);
+                return half4(color,1);
             }
             ENDHLSL
         }
