@@ -28,3 +28,11 @@ crashlytics-buildid.txt
 sysinfo.txt
 .DS_Store
 Thumbs.db
+
+# Blender yedekleri, Python önbelleği, geçici dosyalar
+*.blend1
+*.bak
+__pycache__/
+*.pyc
+*.tmp
+Docs/Takip/EDITOR.lock
