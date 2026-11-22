@@ -26,6 +26,10 @@ namespace BusJam.UI
         private readonly Transform[] riders;
         private readonly GameObject[] waveRoots;
         private readonly Renderer[] riderBodies;
+        // Tutunma ↔ kutlama geçişi için önceden ayrılmış kemik tamponları (karede allocation yok).
+        private readonly Transform[][] riderBones;
+        private readonly Vector3[][] bracePositions;
+        private readonly Quaternion[][] braceRotations;
         private readonly Renderer busBody;
         private readonly Material[] busMaterials;
         private readonly float modelScale;
@@ -55,21 +59,28 @@ namespace BusJam.UI
             driveRoot = vehicle.model.gameObject;
             int count = Mathf.Clamp(settings.riderCount, 1, 2);
             riders = new Transform[count]; waveRoots = new GameObject[count]; riderBodies = new Renderer[count];
+            riderBones = new Transform[count][]; bracePositions = new Vector3[count][]; braceRotations = new Quaternion[count][];
+            Transform model = vehicle.model.transform;
             for (int i = 0; i < count; i++)
             {
                 Passenger passenger = Object.Instantiate(settings.passengerPrefab, cast.transform);
                 passenger.enabled = false; passenger.PrepareCelebration();
                 riders[i] = passenger.transform;
-                riders[i].SetParent(i == 0 ? vehicle.frontSeat : vehicle.rearSeat, false);
-                // İçe aktarılan otobüs ölçeğine rağmen mevcut ayakta yolcu boyutu korunur.
-                Vector3 parentScale = riders[i].parent.lossyScale;
-                riders[i].localScale = new Vector3(1 / parentScale.x, 1 / parentScale.y, 1 / parentScale.z);
-                riders[i].localRotation = Quaternion.Euler(0, 180, 0);
+                Transform seat = i == 0 ? vehicle.frontSeat : vehicle.rearSeat;
+                riders[i].SetParent(seat, false);
+                // Boy otobüs ölçeğinden bağımsız: ayakta oyun yolcusu × riderScale.
+                Vector3 parentScale = seat.lossyScale;
+                riders[i].localScale = new Vector3(1 / parentScale.x, 1 / parentScale.y, 1 / parentScale.z) * settings.riderScale;
+                // Ofset ve yön otobüs modeli uzayında verilir; koltuk kemiğinin ekseninden bağımsız.
+                Vector3 offset = i == 0 ? settings.frontRiderOffset : settings.rearRiderOffset;
+                riders[i].position = model.TransformPoint(model.InverseTransformPoint(seat.position) + offset);
+                riders[i].rotation = model.rotation * Quaternion.Euler(0, i == 0 ? settings.frontRiderYaw : settings.rearRiderYaw, 0);
                 riderBodies[i] = passenger.PresentationBody;
                 waveRoots[i] = passenger.PresentationAnimator.gameObject;
                 settings.idle.SampleAnimation(waveRoots[i], 0);
-                riders[i].localPosition = Vector3.zero;
-                GroundOnSeat((SkinnedMeshRenderer)riderBodies[i], riders[i]);
+                GroundOnDeck((SkinnedMeshRenderer)riderBodies[i], riders[i]);
+                riderBones[i] = waveRoots[i].GetComponentsInChildren<Transform>(true);
+                bracePositions[i] = new Vector3[riderBones[i].Length]; braceRotations[i] = new Quaternion[riderBones[i].Length];
                 Destroy(passenger);
             }
             Destroy(vehicle);
@@ -112,8 +123,8 @@ namespace BusJam.UI
             for (int i = 0; i < node.childCount; i++) SetLayer(node.GetChild(i), layer);
         }
 
-        // Rest pose taban hizası bir kez yapılır. Sonraki tüm vücut hareketi içe aktarılan cheer kliplerine aittir.
-        private static void GroundOnSeat(SkinnedMeshRenderer body, Transform rider)
+        // Idle pozunda ayak tabanı güverte noktasına bir kez hizalanır; sonraki tüm hareket Cheer kliplerine aittir.
+        private static void GroundOnDeck(SkinnedMeshRenderer body, Transform rider)
         {
             var mesh = body.sharedMesh;
             var vertices = mesh.vertices; var weights = mesh.boneWeights;
@@ -128,7 +139,7 @@ namespace BusJam.UI
                 if (w.weight3 > 0) point += bones[w.boneIndex3].TransformPoint(binds[w.boneIndex3].MultiplyPoint3x4(vertices[i])) * w.weight3;
                 bottom = Mathf.Min(bottom, rider.InverseTransformPoint(point).y);
             }
-            rider.localPosition = new Vector3(0, -bottom * rider.localScale.y, 0);
+            rider.localPosition += new Vector3(0, -bottom * rider.localScale.y, 0);
         }
 
         public void Prepare(LevelData level)
@@ -252,10 +263,34 @@ namespace BusJam.UI
                 settings.celebrateHold.SampleAnimation(driveRoot, Mathf.Repeat(holdTime, settings.celebrateHold.length));
             else if (leaving)
                 settings.celebrateLeave.SampleAnimation(driveRoot, exitTime);
+            SampleRiders(elapsed, motion.enterDuration - settings.cheerLead, motion.enterDuration + motion.holdDuration + settings.cheerTail);
+        }
+
+        // Otobüs yoldayken yolcular çömelip tutunur (Cheer_Lean); durunca ön yolcu zıplar, arka yolcu faz farkıyla el sallar.
+        private void SampleRiders(float elapsed, float cheerStart, float cheerEnd)
+        {
+            float blend = settings.braceBlend;
+            float cheer = Mathf.Clamp01((elapsed - cheerStart) / blend) * Mathf.Clamp01((cheerEnd - elapsed) / blend);
+            cheer = cheer * cheer * (3 - 2 * cheer);
+            AnimationClip brace = settings.cheerLean;
             for (int i = 0; i < riders.Length; i++)
             {
-                AnimationClip clip = i == 0 ? settings.cheerJump : settings.rearRiderWaves ? settings.cheerWave : settings.cheerLean;
-                clip.SampleAnimation(waveRoots[i], Mathf.Repeat(elapsed, clip.length));
+                GameObject root = waveRoots[i];
+                if (cheer < 1) brace.SampleAnimation(root, Mathf.Repeat(elapsed + i * .2f, brace.length));
+                if (cheer <= 0) continue;
+                Transform[] bones = riderBones[i];
+                if (cheer < 1)
+                    for (int b = 0; b < bones.Length; b++)
+                    { bracePositions[i][b] = bones[b].localPosition; braceRotations[i][b] = bones[b].localRotation; }
+                AnimationClip clip = i == 0 ? settings.cheerJump : settings.cheerWave;
+                float phase = i == 0 ? 0 : settings.rearCheerPhase;
+                clip.SampleAnimation(root, Mathf.Repeat(elapsed - cheerStart + phase, clip.length));
+                if (cheer < 1)
+                    for (int b = 0; b < bones.Length; b++)
+                    {
+                        bones[b].localPosition = Vector3.LerpUnclamped(bracePositions[i][b], bones[b].localPosition, cheer);
+                        bones[b].localRotation = Quaternion.SlerpUnclamped(braceRotations[i][b], bones[b].localRotation, cheer);
+                    }
             }
         }
 

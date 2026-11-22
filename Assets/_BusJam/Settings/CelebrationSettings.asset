@@ -26,7 +26,15 @@ MonoBehaviour:
   celebrateHold: {fileID: 116179091005079126, guid: d6960471188d6c6498a29afa91e863fb, type: 3}
   celebrateLeave: {fileID: 3198224896099527575, guid: d6960471188d6c6498a29afa91e863fb, type: 3}
   riderCount: 2
-  rearRiderWaves: 0
+  riderScale: 1.3
+  frontRiderOffset: {x: -0.52, y: -0.21, z: -0.45}
+  rearRiderOffset: {x: -0.35, y: -0.21, z: -0.45}
+  frontRiderYaw: 200
+  rearRiderYaw: 160
+  rearCheerPhase: 0.3
+  cheerLead: 0.12
+  cheerTail: 0.15
+  braceBlend: 0.12
   colors:
   - {fileID: 2100000, guid: eb792c8e8e8377f4a8745ed9d5454d38, type: 2}
   - {fileID: 2100000, guid: b8a39108f39b86540bc77a9f19661ce3, type: 2}

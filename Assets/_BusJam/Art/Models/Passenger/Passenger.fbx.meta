@@ -187,7 +187,7 @@ ModelImporter:
       takeName: Cheer_Jump
       internalID: 2948011000578428252
       firstFrame: 0
-      lastFrame: 21
+      lastFrame: 24
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -245,7 +245,7 @@ ModelImporter:
       takeName: Cheer_Wave
       internalID: -1235613125577050657
       firstFrame: 0
-      lastFrame: 18
+      lastFrame: 24
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
