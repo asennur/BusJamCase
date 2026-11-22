@@ -13,7 +13,7 @@ All sound effects are from [Pixabay](https://pixabay.com/sound-effects/) under t
 | Level failed | `Assets/_BusJam/Audio/sfx_lose.mp3` | `fail-trombone-229173` (universfield) |
 
 ## Fonts
-Fredoka and Lilita One from Google Fonts, SIL Open Font License 1.1 (license files in `Assets/_BusJam/Art/Fonts/`).
+Fredoka and Baloo 2 from Google Fonts, SIL Open Font License 1.1 (license files in `Assets/_BusJam/Art/Fonts/`).
 
 ## Tools
 DOTween (Demigiant), TextMeshPro (Unity).
