@@ -333,8 +333,9 @@ namespace BusJam.Gameplay
         /// <summary>Otobüsle giden ya da başka bir sebeple ayrılan tek yolcuyu havuza geri verir (parent BoardView'a döner).</summary>
         public void ReleasePassenger(Passenger passenger)
         {
-            activePassengers.Remove(passenger);
-            passengerPool.Release(passenger);
+            // Zaten havuzdaki yolcu ikinci kez bırakılmaz; yoksa sonraki Get aynı nesneyi iki hücreye verir.
+            if (activePassengers.Remove(passenger))
+                passengerPool.Release(passenger);
         }
 
         private Vector3 CellToLocal(Vector2Int cell) =>

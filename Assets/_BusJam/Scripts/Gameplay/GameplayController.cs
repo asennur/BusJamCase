@@ -77,8 +77,7 @@ namespace BusJam.Gameplay
                 reachable = new bool[board.CellCount];
 
             runningCount = 0;
-            for (int i = 0; i < overflowQueue.Count; i++)
-                boardView.ReleasePassenger(overflowQueue[i]);
+            // BoardView.Build tüm yolcuları zaten havuza verdi; burada tekrar bırakmak aynı yolcuyu iki hücreye dağıtırdı.
             overflowQueue.Clear();
 
             cloakedPassengers.Clear();
