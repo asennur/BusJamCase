@@ -121,10 +121,11 @@ namespace BusJam.Gameplay
                 startedCount++;
 
                 singlePointPath[0] = bus.ArrivalEntryPosition;
-                passenger.RunTo(singlePointPath, runSpeed, () =>
+                float runTime = passenger.RunTo(singlePointPath, runSpeed, () =>
                 {
                     bus.BoardWhenReady(seatIndex, passenger, () => onSeatArrived(bus, seatIndex, passenger));
                 });
+                bus.OpenDoorBefore(runTime);
             }
 
             return startedCount;

@@ -187,10 +187,11 @@ namespace BusJam.Gameplay
             {
                 bus.ReserveSeat(out int seatIndex);
                 worldPathBuffer.Add(bus.DoorEntry.position);
-                passenger.RunTo(worldPathBuffer, runSpeed, () =>
+                float runTime = passenger.RunTo(worldPathBuffer, runSpeed, () =>
                 {
                     bus.Enter(seatIndex, passenger, () => OnSeatArrived(bus, seatIndex, passenger));
                 });
+                bus.OpenDoorBefore(runTime);
             }
             else if (hasFreeSlot)
             {

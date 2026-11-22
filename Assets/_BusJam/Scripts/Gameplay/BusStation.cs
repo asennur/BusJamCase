@@ -21,6 +21,8 @@ namespace BusJam.Gameplay
         [SerializeField] private float moveDuration = 0.3f;
         [Tooltip("Visible buses, including the bus at the door.")]
         [SerializeField] private int visibleQueueCount = 3;
+        [Tooltip("Shared world-space exhaust; puffs outlive the pooled bus that emitted them.")]
+        [SerializeField] private ParticleSystem exhaust;
 
         private readonly List<Bus> queue = new List<Bus>();
         [SerializeField] private Ease arrivalEase = Ease.OutCubic;
@@ -50,7 +52,7 @@ namespace BusJam.Gameplay
                 return;
 
             busPool = new ObjectPool<Bus>(
-                () => Instantiate(busPrefab, transform),
+                () => { Bus bus = Instantiate(busPrefab, transform); bus.Exhaust = exhaust; return bus; },
                 b => b.gameObject.SetActive(true),
                 b => { b.gameObject.SetActive(false); b.transform.SetParent(transform, false); });
         }

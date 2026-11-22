@@ -48,8 +48,8 @@ namespace BusJam.Gameplay
         [SerializeField] private Vector3 seatRotation;
         [Tooltip("Seated size relative to the grid size; 1 keeps the same size on the grid and in the bus.")]
         [SerializeField, Min(0.1f)] private float seatedScale = 1f;
-        [Tooltip("VisualRoot local height while seated; the grid lift (0.1) would make passengers float above the seat.")]
-        [SerializeField] private float seatedVisualHeight = 0f;
+        [Tooltip("VisualRoot local offset while seated: down onto the cushion and back against the seat back.")]
+        [SerializeField] private Vector3 seatedVisualOffset = new Vector3(0f, -0.1f, -0.28f);
 
         private Vector3 bodyRestPosition;
         private Vector3 visualRestPosition;
@@ -80,7 +80,8 @@ namespace BusJam.Gameplay
             outline.SetActive(false); angryIcon.gameObject.SetActive(false); hiddenMark.SetActive(false);
             if (cloakVisual != null) cloakVisual.gameObject.SetActive(false);
             SetRopes(0);
-            if (visualRoot != null) visualRoot.localPosition = new Vector3(0, seatedVisualHeight, 0);
+            // CompleteCelebration grounds the rider on its own seat.
+            if (visualRoot != null) visualRoot.localPosition = Vector3.zero;
         }
         public Vector2Int Cell { get; private set; }
         public bool IsHidden { get; private set; }
@@ -312,7 +313,7 @@ namespace BusJam.Gameplay
             transform.localRotation = Quaternion.Euler(seatRotation);
             seatedLocalScale = LocalScaleFor(seatedScale);
             transform.localScale = seatedLocalScale;
-            if (visualRoot != null) visualRoot.localPosition = new Vector3(visualRestPosition.x, seatedVisualHeight, visualRestPosition.z);
+            if (visualRoot != null) visualRoot.localPosition = seatedVisualOffset;
             Play(SitHash);
         }
 
@@ -349,8 +350,8 @@ namespace BusJam.Gameplay
                 .OnComplete(onSeated);
         }
 
-        /// <summary>Runs along the path at constant speed and reports arrival.</summary>
-        public void RunTo(List<Vector3> path, float speed, TweenCallback onArrived)
+        /// <summary>Runs along the path at constant speed, reports arrival and returns the run duration.</summary>
+        public float RunTo(List<Vector3> path, float speed, TweenCallback onArrived)
         {
             State = PassengerState.Running;
             revealTween?.Kill();
@@ -382,6 +383,7 @@ namespace BusJam.Gameplay
                     body.transform.localPosition = bodyRestPosition;
                     onArrived();
                 });
+            return duration;
         }
 
         /// <summary>Slides out of the tunnel into its mouth cell, growing from inside the box.</summary>

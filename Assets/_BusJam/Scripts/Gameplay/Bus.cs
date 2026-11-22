@@ -35,6 +35,18 @@ namespace BusJam.Gameplay
         [SerializeField, Min(0f)] private float idleShakeHeight = 0.0012f;
         [SerializeField, Min(0f)] private float idleShakeRoll = 0.04f;
         [SerializeField, Range(4f, 15f)] private float idleShakeFrequency = 8f;
+        [Tooltip("The door starts opening this long before a running passenger reaches it.")]
+        [SerializeField, Min(0f)] private float doorOpenLead = 0.1f;
+        [Tooltip("Tailpipe; puffs go to the station's shared exhaust so they outlive a pooled bus.")]
+        [SerializeField] private Transform exhaustPoint;
+        [Tooltip("World distance driven between two exhaust puffs.")]
+        [SerializeField, Min(0.05f)] private float exhaustSpacing = 0.8f;
+        [SerializeField, Min(0)] private int departurePuffs = 3;
+        [Tooltip("Local-space burst played on the seat when a passenger pops in.")]
+        [SerializeField] private ParticleSystem seatFlash;
+        [Tooltip("Door entry to seat pop time (Passenger.EnterBus).")]
+        [SerializeField, Min(0f)] private float seatFlashDelay = 0.17f;
+        [SerializeField] private Vector3 seatFlashOffset = new Vector3(0f, 0.45f, 0f);
 
         private Material[] bodyMaterials;
         private int reservedCount;
@@ -56,7 +68,13 @@ namespace BusJam.Gameplay
         private bool idleShake = true;
         // Per-bus phase so queued buses do not shake in sync (reads as a screen shake otherwise).
         private float shakePhase;
+        private float doorOpenAt = -1f;
+        private float exhaustDistance;
+        private ParticleSystem.EmitParams exhaustParams;
+        private Tween[] seatFlashTimers;
 
+        /// <summary>Shared exhaust system assigned by BusStation; null disables puffs.</summary>
+        internal ParticleSystem Exhaust { get; set; }
         public PassengerColor Color { get; private set; }
         internal Renderer PresentationBody => body;
         internal Transform PresentationSeat(int index) => seatPoints[index];
@@ -75,6 +93,16 @@ namespace BusJam.Gameplay
             bufferedPassengers = new Passenger[seatPoints.Length];
             bufferedCallbacks = new TweenCallback[seatPoints.Length];
             doorCloseTimer = DOVirtual.DelayedCall(doorHoldTime, ShutDoor, false).SetAutoKill(false).Pause();
+            exhaustParams.applyShapeToPosition = true;
+            if (seatFlash != null)
+            {
+                seatFlashTimers = new Tween[seatPoints.Length];
+                for (int i = 0; i < seatPoints.Length; i++)
+                {
+                    Transform seat = seatPoints[i];
+                    seatFlashTimers[i] = DOVirtual.DelayedCall(seatFlashDelay, () => FlashSeat(seat), false).SetAutoKill(false).Pause();
+                }
+            }
             wheelRestRotations = new Quaternion[wheels == null ? 0 : wheels.Length];
             for (int i = 0; i < wheelRestRotations.Length; i++)
                 wheelRestRotations[i] = wheels[i].localRotation;
@@ -95,6 +123,7 @@ namespace BusJam.Gameplay
             transform.DOKill();
             anticipation?.Pause();
             doorCloseTimer?.Pause();
+            PauseSeatFlashes();
             motionActive = false;
             RestoreModel();
         }
@@ -103,10 +132,37 @@ namespace BusJam.Gameplay
         {
             anticipation?.Kill();
             doorCloseTimer?.Kill();
+            if (seatFlashTimers != null)
+                for (int i = 0; i < seatFlashTimers.Length; i++)
+                    seatFlashTimers[i].Kill();
+        }
+
+        private void PauseSeatFlashes()
+        {
+            if (seatFlashTimers == null) return;
+            for (int i = 0; i < seatFlashTimers.Length; i++)
+                seatFlashTimers[i].Pause();
+            seatFlash.Clear();
+        }
+
+        private void FlashSeat(Transform seat)
+        {
+            var flash = new ParticleSystem.EmitParams
+            {
+                position = seatFlash.transform.InverseTransformPoint(seat.position + seatFlashOffset),
+                applyShapeToPosition = false
+            };
+            seatFlash.Emit(flash, 1);
         }
 
         private void LateUpdate()
         {
+            if (doorOpenAt >= 0f && Time.time >= doorOpenAt)
+            {
+                doorOpenAt = -1f;
+                if (IsAtDoor) OpenDoor();
+            }
+
             if (motionActive) { ApplyMotionPose(); return; }
             ApplyWheelPose();
             if (!idleShake || model == null) return;
@@ -140,7 +196,10 @@ namespace BusJam.Gameplay
             DOTween.Kill(this);
             anticipation?.Pause();
             doorCloseTimer?.Pause();
+            PauseSeatFlashes();
             doorOpen = false;
+            doorOpenAt = -1f;
+            exhaustDistance = 0f;
             RestoreModel();
             Play(IdleHash);
 
@@ -186,15 +245,26 @@ namespace BusJam.Gameplay
         /// <summary>Opens the door for a passenger standing at it; the door closes after the last one walks in.</summary>
         public void Enter(int seatIndex, Passenger passenger, TweenCallback onSeated)
         {
-            if (!doorOpen && animator != null)
-            {
-                doorOpen = true;
-                // No crossfade and a head start: the passenger is already at the door.
-                Play(DoorOpenHash);
-                animator.Play(DoorOpenHash, 0, doorOpenHeadStart);
-            }
-            doorCloseTimer?.Restart();
+            OpenDoor();
+            seatFlashTimers?[seatIndex].Restart();
             passenger.EnterBus(doorEntry, seatPoints[seatIndex], onSeated);
+        }
+
+        /// <summary>Starts opening the door a step before a passenger running for <paramref name="runDuration"/> arrives.</summary>
+        public void OpenDoorBefore(float runDuration)
+        {
+            float at = Time.time + Mathf.Max(0f, runDuration - doorOpenLead);
+            if (doorOpenAt < 0f || at < doorOpenAt) doorOpenAt = at;
+        }
+
+        private void OpenDoor()
+        {
+            doorCloseTimer?.Restart();
+            if (doorOpen || animator == null) return;
+            doorOpen = true;
+            // No crossfade and a head start: the passenger is already close to the door.
+            Play(DoorOpenHash);
+            animator.Play(DoorOpenHash, 0, doorOpenHeadStart);
         }
 
         private void ShutDoor()
@@ -220,14 +290,31 @@ namespace BusJam.Gameplay
             motionActive = true;
             motionTime = 0f;
             previousMotionPosition = transform.position;
+            exhaustDistance = 0f;
+            if (!isArrival) Puff(departurePuffs);
         }
 
         public void SampleMotion(float time)
         {
             motionTime = time;
-            wheelAngle += Vector3.Distance(previousMotionPosition, transform.position) / wheelRadius * Mathf.Rad2Deg;
+            float step = Vector3.Distance(previousMotionPosition, transform.position);
+            wheelAngle += step / wheelRadius * Mathf.Rad2Deg;
             previousMotionPosition = transform.position;
+            exhaustDistance += step;
+            if (exhaustDistance >= exhaustSpacing)
+            {
+                exhaustDistance -= exhaustSpacing;
+                Puff(1);
+            }
             ApplyMotionPose();
+        }
+
+        // World-space puffs stay on the road behind the moving bus.
+        private void Puff(int count)
+        {
+            if (Exhaust == null || exhaustPoint == null || count == 0) return;
+            exhaustParams.position = exhaustPoint.position;
+            Exhaust.Emit(exhaustParams, count);
         }
 
         private void ApplyMotionPose()

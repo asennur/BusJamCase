@@ -1198,7 +1198,7 @@ MonoBehaviour:
   halfWave: 0.14
   seatRotation: {x: 270.01978, y: 179.99998, z: 0}
   seatedScale: 1
-  seatedVisualHeight: 0
+  seatedVisualOffset: {x: 0, y: -0.1, z: -0.28}
 --- !u!1001 &945332770017905765
 PrefabInstance:
   m_ObjectHideFlags: 0
