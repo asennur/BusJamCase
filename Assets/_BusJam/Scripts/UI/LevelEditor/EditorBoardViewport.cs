@@ -1,3 +1,4 @@
+using BusJam.Core;
 using BusJam.Gameplay;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -18,6 +19,7 @@ namespace BusJam.LevelEditor
         {
             root = document != null ? document.rootVisualElement : null;
             if (root == null || fitter == null) return;
+            fitter.SetMinimumGrid(GameRules.MaxWidth, GameRules.MaxHeight); // her level en büyük grid kadrajında görünür
             root.RegisterCallback<GeometryChangedEvent>(OnGeometry);
             Apply();
         }
@@ -26,7 +28,7 @@ namespace BusJam.LevelEditor
         {
             if (root != null) root.UnregisterCallback<GeometryChangedEvent>(OnGeometry);
             if (space != null) space.UnregisterCallback<GeometryChangedEvent>(OnGeometry);
-            if (fitter != null) fitter.SetScreenArea(new Rect(0, 0, 1, 1));
+            if (fitter != null) { fitter.SetScreenArea(new Rect(0, 0, 1, 1)); fitter.SetMinimumGrid(0, 0); }
             root = space = null;
         }
 

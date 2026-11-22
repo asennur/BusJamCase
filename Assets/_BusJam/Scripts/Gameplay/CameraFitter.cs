@@ -26,6 +26,7 @@ namespace BusJam.Gameplay
         [SerializeField, Min(0)] private float sideMargin = .12f;
         [SerializeField] private float slotRowLocal = 1.95f;
         private int columns, rows;
+        private Vector2Int minimumGrid; // editör: kadraj level boyutundan bağımsız bu gride göre kurulur
         private Rect screenArea = new Rect(0, 0, 1, 1);
         public event System.Action Fitted;
 
@@ -63,6 +64,15 @@ namespace BusJam.Gameplay
             Fit();
         }
 
+        /// <summary>Kadrajı en az bu grid boyutuna göre kurar (editör 9×9 ile çağırır; 0×0 kapatır). Board yine ortada durur.</summary>
+        public void SetMinimumGrid(int minColumns, int minRows)
+        {
+            var grid = new Vector2Int(minColumns, minRows);
+            if (grid == minimumGrid) return;
+            minimumGrid = grid;
+            Fit();
+        }
+
         /// <summary>Otobüs tavanı ve grid altı referans ekran yüksekliklerine otursun diye kamera uzaklığını ve dikey lens kaymasını
         /// çözer; grid ya da slotlar güvenli genişlikten genişse geri çeker. Ekran bölgesi verilmişse görüntü o bölgeye sıkıştırılır.</summary>
         [ContextMenu("Fit World")]
@@ -78,7 +88,7 @@ namespace BusJam.Gameplay
             float top = 1f - busRoofTop * unit - hudShift;
             float bottom = ScreenLayout.BarTopFraction(safe, aspect) + gridAboveBar * unit;
             float cell = board.CellSize;
-            int depth = Mathf.Max(rows, referenceRows);
+            int depth = Mathf.Max(Mathf.Max(rows, minimumGrid.y), referenceRows);
             Vector3 roof = board.transform.TransformPoint(busRoofLocal);
             Vector3 gridBottom = board.transform.TransformPoint(new Vector3(0, 0, (.5f - depth) * cell));
             float tanY = Mathf.Tan(targetCamera.fieldOfView * Mathf.Deg2Rad * .5f);
@@ -92,8 +102,8 @@ namespace BusJam.Gameplay
             }
             float distance = far;
             // Genişlik gerçek gridi kullanır; boş bir referans satır bandı kenardan taşabilir.
-            float half = Mathf.Max(columns, referenceColumns) * cell * .5f + sideMargin;
-            int realDepth = rows > 0 ? rows : referenceRows;
+            float half = Mathf.Max(Mathf.Max(columns, minimumGrid.x), referenceColumns) * cell * .5f + sideMargin;
+            int realDepth = Mathf.Max(rows > 0 ? rows : referenceRows, minimumGrid.y);
             float limit = tanY * aspect * (safe.width - 2f * padding);
             if (Width(half, realDepth, cell, distance) > limit)
             {
