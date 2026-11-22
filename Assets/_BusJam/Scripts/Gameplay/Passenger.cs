@@ -13,6 +13,21 @@ namespace BusJam.Gameplay
         Seated
     }
 
+    /// <summary>Bir rengin hazır materyalleri: canlı gövde, erişilemezken soluk gövde ve koyu tonlu ince kontur.</summary>
+    public readonly struct PassengerLook
+    {
+        public readonly Material Body;
+        public readonly Material Blocked;
+        public readonly Material ThinOutline;
+
+        public PassengerLook(Material body, Material blocked, Material thinOutline)
+        {
+            Body = body;
+            Blocked = blocked;
+            ThinOutline = thinOutline;
+        }
+    }
+
     /// <summary>Displays passenger state supplied by GameplayController, using clips or placeholder tweens.</summary>
     public class Passenger : MonoBehaviour
     {
@@ -66,12 +81,15 @@ namespace BusJam.Gameplay
         private TweenCallback hideBurstRope;
         private Vector3 angryRestPosition;
         private Vector3 angryRestScale;
-        private Material colorMaterial;
-        // Gövde materyal dizileri önceden hazır; atama yalnız materyal ya da kontur değişince.
+        private PassengerLook look;
+        private Material hiddenMaterial;
+        // Grid'de bekleyen yolcu erişilebilirliğe göre görünür; koşan/slottaki/oturan hep canlı ve kontursuz.
+        private bool onGrid;
+        // Gövde materyal dizileri önceden hazır; atama yalnız gövde ya da kontur materyali değişince.
         private readonly Material[] plainMaterials = new Material[1];
         private readonly Material[] outlinedMaterials = new Material[2];
-        private Material bodyMaterial;
-        private bool outlined;
+        private Material appliedBody;
+        private Material appliedOutline;
         private Tween cloakTween;
         private bool isReachable;
         private Vector3 standingWorldScale;
@@ -80,11 +98,12 @@ namespace BusJam.Gameplay
         public PassengerColor Color { get; private set; }
         internal Renderer PresentationBody => body;
         internal Animator PresentationAnimator => animator;
+        internal Material OutlineMaterial => outlineMaterial;
 
         // The isolated presentation reuses the prefab without gameplay state, feedback or input.
         internal void PrepareCelebration()
         {
-            outlined = false; SetBodyMaterial(body.sharedMaterial); angryIcon.gameObject.SetActive(false); hiddenMark.SetActive(false);
+            onGrid = false; look = new PassengerLook(body.sharedMaterial, null, null); RefreshLook(); angryIcon.gameObject.SetActive(false); hiddenMark.SetActive(false);
             if (cloakVisual != null) cloakVisual.gameObject.SetActive(false);
             SetRopes(0);
             // CompleteCelebration grounds the rider on its own seat.
@@ -151,12 +170,15 @@ namespace BusJam.Gameplay
                 .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
         }
 
-        public void Setup(PassengerColor color, Vector2Int cell, bool hidden, Material material, Cloak cloak = Cloak.None)
+        /// <summary>Havuzdan alınan yolcuyu kurar; hiddenMaterial verilirse "?" gizli yolcu olarak başlar.</summary>
+        public void Setup(PassengerColor color, Vector2Int cell, in PassengerLook look, Material hiddenMaterial = null, Cloak cloak = Cloak.None)
         {
             Color = color;
             Cell = cell;
-            IsHidden = hidden;
-            colorMaterial = material;
+            this.look = look;
+            this.hiddenMaterial = hiddenMaterial;
+            IsHidden = hiddenMaterial != null;
+            onGrid = true;
             IsCloaked = cloak != Cloak.None;
             CloakOpen = cloak != Cloak.StartsClosed;
             isReachable = false;
@@ -167,12 +189,10 @@ namespace BusJam.Gameplay
                 visualRoot.localPosition = visualRestPosition;
             }
             Play(IdleHash);
-            outlined = false;
-            SetBodyMaterial(CloakOpen ? material : cloakMaterial);
             body.enabled = true;
             if (contactShadow != null) contactShadow.SetActive(true);
             angryIcon.gameObject.SetActive(false);
-            hiddenMark.SetActive(hidden);
+            hiddenMark.SetActive(IsHidden);
             runTween?.Kill();
             angryTween?.Kill();
             revealTween?.Kill();
@@ -202,8 +222,7 @@ namespace BusJam.Gameplay
             if (!IsCloaked || CloakOpen == open)
                 return;
             CloakOpen = open;
-            SetBodyMaterial(open ? colorMaterial : cloakMaterial);
-            SetReachable(isReachable);
+            RefreshLook();
             if (cloakVisual == null)
                 return;
             cloakVisual.gameObject.SetActive(true);
@@ -243,7 +262,8 @@ namespace BusJam.Gameplay
                     if (ropeLayers[i] != null)
                         ropeLayers[i].SetActive(i < RopesLeft);
             if (RopesLeft > 0)
-                SetReachable(false);
+                isReachable = false;
+            RefreshLook();
         }
 
         /// <summary>Removes one rope: the outer layer swells and vanishes like the reference burst, then the scale punch restarts.</summary>
@@ -268,13 +288,13 @@ namespace BusJam.Gameplay
         }
 
         /// <summary>Permanently reveals a hidden passenger's color and removes the question mark.</summary>
-        public void Reveal(Material material)
+        public void Reveal()
         {
             if (!IsHidden)
                 return;
 
             IsHidden = false;
-            SetBodyMaterial(material);
+            RefreshLook();
             hiddenMark.SetActive(false);
 
             revealTween?.Kill();
@@ -282,30 +302,43 @@ namespace BusJam.Gameplay
             revealTween = transform.DOPunchScale(LocalScaleFor(0.25f), 0.3f, 1, 0.5f);
         }
 
-        /// <summary>Shows the outline only when the passenger is reachable and unlocked.</summary>
+        /// <summary>Erişilebilir ve kilitsiz yolcu canlı + kalın kontur, diğerleri soluk + ince kontur.</summary>
         public void SetReachable(bool reachable)
         {
             isReachable = reachable;
-            bool visible = reachable && RopesLeft == 0 && (!IsCloaked || CloakOpen);
-            if (outlined == visible)
-                return;
-            outlined = visible;
-            ApplyBodyMaterials();
+            RefreshLook();
         }
 
-        private void SetBodyMaterial(Material material)
+        // Gizli ve pelerini kapalı yolcu kendi görünümünde kalır. Geçiş anında (referansta da tek karede).
+        private void RefreshLook()
         {
-            bodyMaterial = material;
-            ApplyBodyMaterials();
+            Material bodyMaterial = look.Body;
+            Material outline = null;
+            if (IsHidden)
+                bodyMaterial = hiddenMaterial;
+            else if (IsCloaked && !CloakOpen)
+                bodyMaterial = cloakMaterial;
+            else if (onGrid && isReachable && RopesLeft == 0)
+                outline = outlineMaterial;
+            else if (onGrid)
+            {
+                if (look.Blocked != null) bodyMaterial = look.Blocked;
+                outline = look.ThinOutline;
+            }
+            ApplyBodyMaterials(bodyMaterial, outline);
         }
 
         // Kontur aynı SkinnedMeshRenderer'da ikinci materyal: alt mesh tekrar çizilir, skinning bir kez.
-        private void ApplyBodyMaterials()
+        private void ApplyBodyMaterials(Material bodyMaterial, Material outline)
         {
-            if (outlined && outlineMaterial != null)
+            if (bodyMaterial == appliedBody && outline == appliedOutline)
+                return;
+            appliedBody = bodyMaterial;
+            appliedOutline = outline;
+            if (outline != null)
             {
                 outlinedMaterials[0] = bodyMaterial;
-                outlinedMaterials[1] = outlineMaterial;
+                outlinedMaterials[1] = outline;
                 body.sharedMaterials = outlinedMaterials;
             }
             else
@@ -390,7 +423,9 @@ namespace BusJam.Gameplay
             State = PassengerState.Running;
             revealTween?.Kill();
             transform.localScale = LocalScaleFor();
-            SetReachable(false);
+            onGrid = false;
+            isReachable = false;
+            RefreshLook();
             Play(RunHash);
 
             float length = 0f;

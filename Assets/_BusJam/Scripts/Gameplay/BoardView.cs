@@ -34,12 +34,28 @@ namespace BusJam.Gameplay
         [Tooltip("PassengerColor sırasıyla")]
         [SerializeField] private Material[] colorMaterials;
         [SerializeField] private Material hiddenMaterial;
+        [Header("Erişilemez yolcu (renk başına bir kez türetilir)")]
+        [Tooltip("Gövde parlaklığı çarpanı (HSV V); referans ~0.75-0.8.")]
+        [SerializeField, Range(0f, 1f)] private float blockedBrightness = 0.8f;
+        [Tooltip("Gövde doygunluğu çarpanı (HSV S).")]
+        [SerializeField, Range(0f, 1f)] private float blockedSaturation = 0.95f;
+        [Tooltip("Specular parlama çarpanı; referansta erişilemez yolcuda parlama yok.")]
+        [SerializeField, Range(0f, 1f)] private float blockedSpecular = 0f;
+        [Tooltip("İnce kontur kalınlığı, yolcu prefab'ındaki kalın konturun bu katı (Width ve Min px).")]
+        [SerializeField, Range(0f, 1f)] private float thinOutlineScale = 0.4f;
+        [Tooltip("İnce kontur rengi = gövde renginin parlaklığı × bu değer (aynı ton).")]
+        [SerializeField, Range(0f, 1f)] private float thinOutlineBrightness = 0.4f;
         [SerializeField] private float cellSize = 1f;
         [SerializeField] private Material baseMaterial;
         [Tooltip("Board backing and tile undersides only. Matches the surrounding sidewalk; the frame stays white.")]
         [SerializeField] private Material sidewalkMaterial;
 
         private Mesh baseMesh;
+        private PassengerLook[] looks;
+        private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        private static readonly int SpecStrengthId = Shader.PropertyToID("_SpecStrength");
+        private static readonly int WidthId = Shader.PropertyToID("_Width");
+        private static readonly int MinPixelsId = Shader.PropertyToID("_MinPixels");
 
         private ObjectPool<Passenger> passengerPool;
         private ObjectPool<Transform> tilePool;
@@ -83,6 +99,33 @@ namespace BusJam.Gameplay
             rimStraightPool = CreatePool(rimStraightPrefab);
             rimOuterPool = CreatePool(rimOuterPrefab);
             rimInnerPool = CreatePool(rimInnerPrefab);
+            CreateLooks();
+        }
+
+        // Renk başına soluk gövde + koyu tonlu ince kontur materyali; hepsi aynı shader → SRP Batcher korunur.
+        private void CreateLooks()
+        {
+            Material thick = passengerPrefab.OutlineMaterial;
+            looks = new PassengerLook[colorMaterials.Length];
+            for (int i = 0; i < colorMaterials.Length; i++)
+            {
+                Material source = colorMaterials[i];
+                Color.RGBToHSV(source.GetColor(BaseColorId), out float h, out float s, out float v);
+
+                var blocked = new Material(source) { name = source.name + " (Blocked)", hideFlags = HideFlags.DontSave };
+                blocked.SetColor(BaseColorId, Color.HSVToRGB(h, s * blockedSaturation, v * blockedBrightness));
+                blocked.SetFloat(SpecStrengthId, source.GetFloat(SpecStrengthId) * blockedSpecular);
+
+                Material thin = null;
+                if (thick != null)
+                {
+                    thin = new Material(thick) { name = source.name + " (Thin Outline)", hideFlags = HideFlags.DontSave };
+                    thin.SetColor(BaseColorId, Color.HSVToRGB(h, s, v * thinOutlineBrightness));
+                    thin.SetFloat(WidthId, thick.GetFloat(WidthId) * thinOutlineScale);
+                    thin.SetFloat(MinPixelsId, thick.GetFloat(MinPixelsId) * thinOutlineScale);
+                }
+                looks[i] = new PassengerLook(source, blocked, thin);
+            }
         }
 
         // Materyal override'ları havuzdaki board görsellerine aittir, asla paylaşılan kit prefab'larına ya da slotlara değil.
@@ -154,7 +197,7 @@ namespace BusJam.Gameplay
 
                     Passenger passenger = passengerPool.Get();
                     passenger.transform.localPosition = local;
-                    passenger.Setup(data.color, cell, data.hidden, data.hidden ? hiddenMaterial : colorMaterials[(int)data.color], data.cloak);
+                    passenger.Setup(data.color, cell, looks[(int)data.color], data.hidden ? hiddenMaterial : null, data.cloak);
                     passenger.SetRopes(data.ropes);
                     activePassengers.Add(passenger);
                     board.SetOccupant(cell, passenger);
@@ -237,6 +280,12 @@ namespace BusJam.Gameplay
 
         private void OnDestroy()
         {
+            if (looks != null)
+                foreach (PassengerLook look in looks)
+                {
+                    DestroyAsset(look.Blocked);
+                    DestroyAsset(look.ThinOutline);
+                }
             if (baseMesh != null)
             {
 #if UNITY_EDITOR
@@ -248,6 +297,13 @@ namespace BusJam.Gameplay
 #endif
                 Destroy(baseMesh);
             }
+        }
+
+        private static void DestroyAsset(Object asset)
+        {
+            if (asset == null) return;
+            if (Application.isPlaying) Destroy(asset);
+            else DestroyImmediate(asset);
         }
 
         // Her köşe noktası 4 hücreye komşu: NE (x, y-1), SE (x, y), SW (x-1, y), NW (x-1, y-1).
@@ -335,7 +391,7 @@ namespace BusJam.Gameplay
 
         public Vector3 CellToWorld(Vector2Int cell) => transform.TransformPoint(CellToLocal(cell));
 
-        /// <summary>Gizli yolcu rengi açılırken kullanılacak gerçek renk materyali.</summary>
+        /// <summary>Rengin canlı materyali (level editörü önizlemesi).</summary>
         public Material GetColorMaterial(PassengerColor color) => colorMaterials[(int)color];
 
         /// <summary>Kurulu tünel görünümlerinden hücresi eşleşeni döndürür (GameplayController kuyruk sayısını güncellemek için kullanır).</summary>
@@ -353,7 +409,7 @@ namespace BusJam.Gameplay
         {
             Passenger passenger = passengerPool.Get();
             passenger.transform.localPosition = CellToLocal(tunnelCell);
-            passenger.Setup(color, mouthCell, false, colorMaterials[(int)color]);
+            passenger.Setup(color, mouthCell, looks[(int)color]);
             activePassengers.Add(passenger);
             passenger.EmergeFromTunnel(CellToLocal(mouthCell));
             return passenger;

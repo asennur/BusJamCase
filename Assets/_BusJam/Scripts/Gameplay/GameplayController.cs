@@ -459,7 +459,7 @@ namespace BusJam.Gameplay
 
                 p.SetReachable(reachable[i]);
                 if (reachable[i] && p.IsHidden)
-                    p.Reveal(boardView.GetColorMaterial(p.Color));
+                    p.Reveal();
             }
         }
     }
