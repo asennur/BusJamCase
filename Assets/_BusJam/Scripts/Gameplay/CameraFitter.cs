@@ -4,22 +4,19 @@ using UnityEngine;
 
 namespace BusJam.Gameplay
 {
-    /// <summary>Dünyayı sabit FOV ile, tasarlanan bakış ekseni boyunca kadrajlar. Oyunda (GameManager bağlıyken)
-    /// referans telefon ekran görüntülerini izler: otobüs tavanı HUD'un altında, grid altı booster çubuğunun üstünde, yüksekliğe göre ölçekli; böylece
-    /// tabletler yalnız yanlarda daha fazla zemin görür; referans boyutu aşan gridler ya da dar ekranlar kamerayı geri çeker.</summary>
+    /// <summary>Dünyayı sabit FOV ile, tasarlanan bakış ekseni boyunca referans telefon kadrajına oturtur: otobüs tavanı HUD'un altında,
+    /// grid altı booster çubuğunun üstünde, yüksekliğe göre ölçekli; tabletler yanlarda daha fazla zemin görür, referanstan (7×8) büyük
+    /// gridler ya da dar ekranlar kamerayı geri çeker. Level editörü aynı kadrajı ekranın bir bölgesine (<see cref="SetScreenArea"/>) çizer.</summary>
     [ExecuteAlways, RequireComponent(typeof(Camera))]
     public sealed class CameraFitter : MonoBehaviour
     {
         [SerializeField] private Camera targetCamera;
         [SerializeField] private LayoutModeController layout;
+        [Tooltip("Oyunda level yüklenince kadrajı yeniler; editörde boş, kadraj BoardView.Built ile yenilenir.")]
         [SerializeField] private GameManager gameManager;
         [SerializeField] private BoardView board;
-        [SerializeField] private Transform[] worldReferences;
-        [SerializeField] private Bounds playBounds = new Bounds(new Vector3(0, 1, -2.625f), new Vector3(8.4f, 2.6f, 15.05f));
         [SerializeField] private Vector3 referencePosition;
         [SerializeField, Range(0, .1f)] private float padding = .015f;
-        [SerializeField] private Rect freeViewport = new Rect(0, .045f, 1, .825f);
-        [SerializeField, Min(0)] private float referenceHudBottomPixels = 310;
         [Header("Reference layout (reference pixels, ScreenLayout)")]
         [SerializeField] private Vector3 busRoofLocal = new Vector3(0, 1.93f, 5.03f);
         [SerializeField] private float busRoofTop = 205f;
@@ -29,10 +26,8 @@ namespace BusJam.Gameplay
         [SerializeField, Min(0)] private float sideMargin = .12f;
         [SerializeField] private float slotRowLocal = 1.95f;
         private int columns, rows;
-        private Bounds levelBounds;
-        private bool hasLevel;
+        private Rect screenArea = new Rect(0, 0, 1, 1);
         public event System.Action Fitted;
-        public Bounds CurrentBounds => hasLevel ? levelBounds : playBounds;
 
         private void OnEnable()
         {
@@ -54,69 +49,29 @@ namespace BusJam.Gameplay
 
         public void SetLevel(LevelData level)
         {
-            levelBounds = playBounds; hasLevel = level != null && board != null;
-            columns = hasLevel ? level.width : 0; rows = hasLevel ? level.height : 0;
-            if (hasLevel)
-            {
-                float half = (level.width - 1) * board.CellSize * .5f;
-                levelBounds.Encapsulate(board.transform.TransformPoint(new Vector3(-half - .65f, -.3f, -(level.height - 1) * board.CellSize - .65f)));
-                levelBounds.Encapsulate(board.transform.TransformPoint(new Vector3(half + .65f, 1.8f, .65f)));
-            }
+            columns = level != null ? level.width : 0;
+            rows = level != null ? level.height : 0;
             Fit();
         }
 
-        public void Configure(Camera camera, LayoutModeController modes, GameManager manager, BoardView boardView, Transform[] references)
+        /// <summary>Oyun ekranı yerine ekranın bu normalize bölgesine (ör. editörün board alanı) güvenli alansız bir telefon ekranı gibi çizer.</summary>
+        public void SetScreenArea(Rect area)
         {
-            OnDisable(); targetCamera = camera; layout = modes; gameManager = manager; board = boardView;
-            worldReferences = references; referencePosition = camera.transform.position; OnEnable();
+            if (area.width <= 0 || area.height <= 0) area = new Rect(0, 0, 1, 1);
+            if (area == screenArea) return;
+            screenArea = area;
+            Fit();
         }
 
+        /// <summary>Otobüs tavanı ve grid altı referans ekran yüksekliklerine otursun diye kamera uzaklığını ve dikey lens kaymasını
+        /// çözer; grid ya da slotlar güvenli genişlikten genişse geri çeker. Ekran bölgesi verilmişse görüntü o bölgeye sıkıştırılır.</summary>
         [ContextMenu("Fit World")]
         public void Fit()
         {
-            if (targetCamera == null || targetCamera.orthographic) return;
-            if (gameManager != null && board != null) { FitReference(); return; }
-            Bounds bounds = CurrentBounds;
-            if (worldReferences != null)
-                for (int i = 0; i < worldReferences.Length; i++)
-                    if (worldReferences[i] != null) bounds.Encapsulate(worldReferences[i].position);
-            Rect safe = layout != null ? layout.SafeViewport : new Rect(0, 0, 1, 1);
-            float left = Mathf.Max(safe.xMin, freeViewport.xMin) + padding;
-            float right = Mathf.Min(safe.xMax, freeViewport.xMax) - padding;
-            float bottom = Mathf.Max(safe.yMin, freeViewport.yMin) + padding;
-            float top = Mathf.Min(safe.yMax, freeViewport.yMax) - padding;
-            // Mevcut canvas'lar Match Width Or Height (.5) kullanır; gerçek ölçekli üst şeritleri ayrılır.
-            if (targetCamera.aspect > .5626f)
-            {
-                float reservedHeight = referenceHudBottomPixels / 1920f * Mathf.Sqrt(targetCamera.aspect / .5625f);
-                top = Mathf.Min(top, 1 - reservedHeight - padding);
-            }
-            float tanY = Mathf.Tan(targetCamera.fieldOfView * Mathf.Deg2Rad * .5f);
-            float tanX = tanY * targetCamera.aspect;
-            float centerY = targetCamera.aspect > .5626f ? (bottom + top) * .5f : .5f;
-            float distance = 0;
-            Vector3 min = bounds.min, max = bounds.max;
-            Quaternion inverse = Quaternion.Inverse(transform.rotation);
-            for (int i = 0; i < 8; i++)
-            {
-                Vector3 p = inverse * (new Vector3((i & 1) == 0 ? min.x : max.x, (i & 2) == 0 ? min.y : max.y, (i & 4) == 0 ? min.z : max.z) - referencePosition);
-                float horizontal = p.x / (tanX * (p.x < 0 ? 2 * left - 1 : 2 * right - 1));
-                float vertical = p.y / (tanY * 2 * (p.y < 0 ? bottom - centerY : top - centerY));
-                distance = Mathf.Max(distance, Mathf.Max(horizontal, vertical) - p.z);
-            }
-            transform.position = referencePosition - transform.forward * distance;
-            var projection = Matrix4x4.Perspective(targetCamera.fieldOfView, targetCamera.aspect, targetCamera.nearClipPlane, targetCamera.farClipPlane);
-            projection.m12 = 1 - 2 * centerY;
-            targetCamera.projectionMatrix = projection;
-            Fitted?.Invoke();
-        }
-    
-        /// <summary>Otobüs tavanı ve grid altı referans ekran yüksekliklerine otursun diye kamera uzaklığını ve dikey lens kaymasını
-        /// çözer; grid ya da slotlar güvenli genişlikten genişse geri çeker.</summary>
-        private void FitReference()
-        {
-            float aspect = targetCamera.aspect;
-            Rect safe = layout != null ? layout.SafeViewport : new Rect(0, 0, 1, 1);
+            if (targetCamera == null || targetCamera.orthographic || board == null) return;
+            bool fullScreen = screenArea == new Rect(0, 0, 1, 1);
+            float aspect = targetCamera.aspect * screenArea.width / screenArea.height;
+            Rect safe = fullScreen && layout != null ? layout.SafeViewport : new Rect(0, 0, 1, 1);
             float unit = ScreenLayout.Unit(aspect);
             float hudShift = ScreenLayout.HudTopFraction(safe, aspect) - ScreenLayout.HudTop * unit;
             float top = 1f - busRoofTop * unit - hudShift;
@@ -153,6 +108,12 @@ namespace BusJam.Gameplay
             var projection = Matrix4x4.Perspective(targetCamera.fieldOfView, aspect, targetCamera.nearClipPlane, targetCamera.farClipPlane);
             projection.m02 = 1f - (safe.xMin + safe.xMax);
             projection.m12 = Ndc(roof, distance, tanY) - (2f * top - 1f);
+            if (!fullScreen)
+            {
+                // Sanal ekranın NDC'si bölgeye ölçeklenip kaydırılır (w = -z olduğundan kaydırma m02/m12'ye eklenir).
+                projection.m00 *= screenArea.width; projection.m02 = projection.m02 * screenArea.width - (screenArea.xMin + screenArea.xMax - 1f);
+                projection.m11 *= screenArea.height; projection.m12 = projection.m12 * screenArea.height - (screenArea.yMin + screenArea.yMax - 1f);
+            }
             targetCamera.projectionMatrix = projection;
             Fitted?.Invoke();
         }

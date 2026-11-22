@@ -61,7 +61,7 @@ namespace BusJam.Level
 
             if (width > GameRules.MaxWidth || height > GameRules.MaxHeight)
             {
-                error = $"Grid {width}x{height}, izin verilen en fazla {GameRules.MaxWidth}x{GameRules.MaxHeight} (kamera sabit)";
+                error = $"Grid {width}x{height}, izin verilen en fazla {GameRules.MaxWidth}x{GameRules.MaxHeight}";
                 return false;
             }
 

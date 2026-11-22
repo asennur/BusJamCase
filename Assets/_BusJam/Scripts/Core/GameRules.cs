@@ -5,8 +5,8 @@ namespace BusJam.Core
     {
         public const int BusCapacity = 3;
 
-        // Kamera sabit; grid + üstündeki yol/slot alanı bu sınırın içine elle kuruldu (Z5.1, Asen kararı).
-        public const int MaxWidth = 7;
+        // Grid sınırı 9×9 (Asen, 22 Kasım); referanstan (7×8) büyük gridlerde CameraFitter kamerayı geri çeker.
+        public const int MaxWidth = 9;
         public const int MaxHeight = 9;
 
         // Slot sayısı sabit 7, level verisinden gelmez (Asen kuralı). Uçtaki iki slot level numarasına göre açılır.
