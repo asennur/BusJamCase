@@ -27,7 +27,8 @@ namespace BusJam.Gameplay
         [SerializeField, Min(1f)] private float standingVisualScale = 1.4f;
         [SerializeField] private Animator animator;
         [SerializeField, Min(0f)] private float crossFade = 0.1f;
-        [SerializeField] private GameObject outline;
+        [Tooltip("Erişilebilir yolcuda gövdeye ikinci materyal olarak eklenen kontur (tek skinning).")]
+        [SerializeField] private Material outlineMaterial;
         [SerializeField] private Transform angryIcon;
         [SerializeField] private GameObject hiddenMark;
         [SerializeField] private GameObject[] ropeLayers;
@@ -64,6 +65,11 @@ namespace BusJam.Gameplay
         private Vector3 angryRestPosition;
         private Vector3 angryRestScale;
         private Material colorMaterial;
+        // Gövde materyal dizileri önceden hazır; atama yalnız materyal ya da kontur değişince.
+        private readonly Material[] plainMaterials = new Material[1];
+        private readonly Material[] outlinedMaterials = new Material[2];
+        private Material bodyMaterial;
+        private bool outlined;
         private Tween cloakTween;
         private bool isReachable;
         private Vector3 standingWorldScale;
@@ -76,7 +82,7 @@ namespace BusJam.Gameplay
         // The isolated presentation reuses the prefab without gameplay state, feedback or input.
         internal void PrepareCelebration()
         {
-            outline.SetActive(false); angryIcon.gameObject.SetActive(false); hiddenMark.SetActive(false);
+            outlined = false; SetBodyMaterial(body.sharedMaterial); angryIcon.gameObject.SetActive(false); hiddenMark.SetActive(false);
             if (cloakVisual != null) cloakVisual.gameObject.SetActive(false);
             SetRopes(0);
             // CompleteCelebration grounds the rider on its own seat.
@@ -158,9 +164,9 @@ namespace BusJam.Gameplay
                 visualRoot.localPosition = visualRestPosition;
             }
             Play(IdleHash);
-            body.sharedMaterial = CloakOpen ? material : cloakMaterial;
+            outlined = false;
+            SetBodyMaterial(CloakOpen ? material : cloakMaterial);
             body.enabled = true;
-            outline.SetActive(false);
             angryIcon.gameObject.SetActive(false);
             hiddenMark.SetActive(hidden);
             runTween?.Kill();
@@ -192,7 +198,7 @@ namespace BusJam.Gameplay
             if (!IsCloaked || CloakOpen == open)
                 return;
             CloakOpen = open;
-            body.sharedMaterial = open ? colorMaterial : cloakMaterial;
+            SetBodyMaterial(open ? colorMaterial : cloakMaterial);
             SetReachable(isReachable);
             if (cloakVisual == null)
                 return;
@@ -264,7 +270,7 @@ namespace BusJam.Gameplay
                 return;
 
             IsHidden = false;
-            body.sharedMaterial = material;
+            SetBodyMaterial(material);
             hiddenMark.SetActive(false);
 
             revealTween?.Kill();
@@ -277,8 +283,32 @@ namespace BusJam.Gameplay
         {
             isReachable = reachable;
             bool visible = reachable && RopesLeft == 0 && (!IsCloaked || CloakOpen);
-            if (outline.activeSelf != visible)
-                outline.SetActive(visible);
+            if (outlined == visible)
+                return;
+            outlined = visible;
+            ApplyBodyMaterials();
+        }
+
+        private void SetBodyMaterial(Material material)
+        {
+            bodyMaterial = material;
+            ApplyBodyMaterials();
+        }
+
+        // Kontur aynı SkinnedMeshRenderer'da ikinci materyal: alt mesh tekrar çizilir, skinning bir kez.
+        private void ApplyBodyMaterials()
+        {
+            if (outlined && outlineMaterial != null)
+            {
+                outlinedMaterials[0] = bodyMaterial;
+                outlinedMaterials[1] = outlineMaterial;
+                body.sharedMaterials = outlinedMaterials;
+            }
+            else
+            {
+                plainMaterials[0] = bodyMaterial;
+                body.sharedMaterials = plainMaterials;
+            }
         }
 
         /// <summary>Waits in a slot until WaitingArea sends the passenger to a matching bus.</summary>
