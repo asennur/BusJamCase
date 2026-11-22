@@ -407,7 +407,6 @@ namespace BusJam.LevelEditor
             bool ok = LevelAutoGrid.Generate(draft, out string message);
             SelectedColor = null;
             ShowSolver(message);
-            SetStatus(message);
             if (ok) Rebuild(false);
         }
 
@@ -431,8 +430,8 @@ namespace BusJam.LevelEditor
             if (draft.busOrder.Count == 0) { SetStatus("Cannot save: add at least one bus."); return; }
             if (!draft.Validate(out string error)) { SetStatus($"Cannot save: {error}"); return; }
             StartJob(Job.Save);
-            SetStatus("Checking the level can be solved…");
             ShowSolver("Solving…");
+            SetStatus("Checking the level can be solved…");
 #else
             SetStatus("Saving works in the Unity Editor.");
 #endif
@@ -568,11 +567,11 @@ namespace BusJam.LevelEditor
 
         private void FinishSave(LevelSolver.Result result)
         {
-            if (result.Error != null) { SetStatus($"Cannot save: {result.Error}"); ShowSolver(result.Error); return; }
+            if (result.Error != null) { ShowSolver(result.Error); SetStatus($"Cannot save: {result.Error}"); return; }
             if (result.SolutionCount == 0)
             {
                 string message = result.Limited ? "Could not verify solvable (too complex) — not saved." : "No solution — level not saved.";
-                SetStatus(message); ShowSolver(message);
+                ShowSolver(message);
                 return;
             }
             if (source == null)
@@ -596,8 +595,8 @@ namespace BusJam.LevelEditor
                 UnityEditor.EditorUtility.SetDirty(source);
             }
             UnityEditor.AssetDatabase.SaveAssets();
-            SetStatus($"Saved as Level {LevelNumber} ({source.name}). The solver found a solution.");
             ShowSolver($"Solvable.\nExample taps: {LevelSolver.Format(result.Solutions[0], draft.width)}");
+            SetStatus($"Saved as Level {LevelNumber} ({source.name}). The solver found a solution.");
             MarkSaved();
         }
 #else
@@ -654,10 +653,12 @@ namespace BusJam.LevelEditor
             status.text = string.IsNullOrEmpty(lastMessage) ? help : $"{help}\n<color=#FFE066>{lastMessage}</color>";
         }
 
+        // Solver/otomatik araç sonucu: tam metin sonuç kutusuna, ilk satırı durum satırına (eski mesaj kalmasın).
         private void ShowSolver(string text)
         {
             if (solverResult != null) solverResult.text = text;
-            else SetStatus(text);
+            int line = text.IndexOf('\n');
+            SetStatus(line < 0 ? text : text.Substring(0, line));
         }
 
         public static string Describe(CellType type) => type switch

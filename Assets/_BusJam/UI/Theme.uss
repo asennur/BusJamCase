@@ -186,7 +186,8 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .editor-square { min-width: 116px; width: 116px; padding: 0; }
 .editor-square > .vector-caption { font-size: 44px; }
 .editor-remove { min-width: 160px; padding: 0 14px; }
-.editor-bus-chips { flex-grow: 1; flex-basis: 0; min-width: 0; }
+.editor-bus-chips { flex-grow: 1; flex-basis: 0; min-width: 0; flex-direction: row; flex-wrap: wrap; align-content: flex-start; }
+.editor-bus-chips > .editor-color-button { width: 70px; height: 66px; margin: 4px; font-size: 32px; }
 .editor-level { flex-grow: 1; flex-basis: 0; min-width: 170px; margin: 4px; height: 76px; }
 .editor-field { flex-direction: row; align-items: center; width: 210px; min-width: 0; margin: 4px; height: 76px; }
 .portrait .editor-field { flex-shrink: 1; }

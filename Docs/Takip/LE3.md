@@ -25,3 +25,7 @@ Durum: bitti (22.11 ~15:20).
 - "Too complex" yolu (sınır aşımı) kodda var ama gerçek bir levelde denenmedi (elimizdeki en ağır 9×9 da 1 sn altında çözüldü).
 - Auto Fill, otobüs yokken otobüs sırası da üretir; durum satırında Auto Grid'in eski "Add buses, then Auto Fill." mesajı kalıyor (önceden de vardı, sonuç Solver satırında).
 - Otobüs çip satırında 12 otobüste yatay/dikey kaydırma çubukları görünüyor (önceden de vardı).
+
+## Ek (Luma, 22.11 ~15:10): iki küçük kusur
+- [x] Durum satırı: `ShowSolver` artık sonucun ilk satırını durum satırına da yazar; Auto Fill/Solve/Save kendi güncel mesajını gösterir (Auto Grid'in eski "Add buses..." mesajı kalmıyor). Testte Auto Fill sonrası durum: "Filled 36 passengers. The level has at least 2 solutions."
+- [x] Otobüs çipleri: `bus-scroll` yatay ScrollView yerine düz VisualElement, `flex-wrap: wrap`, çipler 70×66; kaydırma çubuğu yok. 12 otobüs: telefonda 7+5 iki satır (panel 297 px), tablette tek satır. `ChipRow` kapsayıcısı ScrollView değilse ScrollTo atlanır (tünel kuyruğu ScrollView olarak kalır). Görüntüler: `chips_telefon_1080x1920.jpg`, `chips_uzuntelefon_1080x2340.jpg`, `chips_tablet_1536x2048.jpg`. Console temiz; kayıt yapılmadı, PlayerPrefs ve LevelDatabase değişmedi.

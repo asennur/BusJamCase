@@ -424,11 +424,12 @@ namespace BusJam.LevelEditor
         }
 
         // Otobüs sırası / tünel kuyruğu: renk ekleme butonları, seçilebilir sıralı çipler ve seçili çip için
-        // öne/arkaya al ve sil. Çipler ve callback'leri uzunluk değiştikçe havuzlanır.
+        // öne/arkaya al ve sil. Çipler ve callback'leri uzunluk değiştikçe havuzlanır. Kapsayıcı ScrollView ise
+        // yatay kayar, düz VisualElement ise (otobüs sırası) çipler satıra sarılır.
         private sealed class ChipRow
         {
             private readonly LevelEditorPanel owner;
-            private readonly ScrollView container;
+            private readonly VisualElement container;
             private readonly Action<int, int> move;
             private readonly List<Button> chips = new List<Button>();
             private readonly List<Action> handlers = new List<Action>();
@@ -443,7 +444,7 @@ namespace BusJam.LevelEditor
             public ChipRow(LevelEditorPanel owner, VisualElement root, string prefix, Action<PassengerColor> add, Action<int> remove, Action<int, int> move)
             {
                 this.owner = owner; this.move = move; limitAdds = prefix == "tunnel";
-                container = root.Q<ScrollView>(prefix + "-scroll");
+                container = root.Q(prefix + "-scroll");
                 container.contentContainer.style.flexDirection = FlexDirection.Row;
                 var addRow = root.Q(prefix + "-add");
                 for (int i = 0; i < Colors.Length; i++)
@@ -479,7 +480,7 @@ namespace BusJam.LevelEditor
                 selected = index >= 0 && index < count ? index : -1;
                 for (int i = 0; i < chips.Count; i++) chips[i].EnableInClassList("selected", i == selected);
                 left.SetEnabled(selected > 0); right.SetEnabled(selected >= 0 && selected < count - 1); delete.SetEnabled(selected >= 0);
-                if (selected >= 0) container.ScrollTo(chips[selected]);
+                if (selected >= 0 && container is ScrollView scroll) scroll.ScrollTo(chips[selected]);
             }
 
             private void Move(int delta)

@@ -25,7 +25,7 @@
                 </ui:VisualElement>
                 <ui:VisualElement name="bus-add" class="editor-row editor-add-row" picking-mode="Ignore" />
                 <ui:VisualElement class="editor-row" picking-mode="Ignore">
-                    <ui:ScrollView name="bus-scroll" mode="Horizontal" class="editor-chip-scroll editor-bus-chips" />
+                    <ui:VisualElement name="bus-scroll" class="editor-bus-chips" />
                     <art:VectorButton name="bus-left" text="&lt;" class="editor-button yellow editor-square" tooltip="Move earlier" />
                     <art:VectorButton name="bus-right" text="&gt;" class="editor-button yellow editor-square" tooltip="Move later" />
                     <art:VectorButton name="bus-remove" text="Remove" class="editor-button red editor-remove" />
