@@ -48,8 +48,8 @@ namespace BusJam.Gameplay
         [SerializeField] private Vector3 seatRotation;
         [Tooltip("Seated size relative to the grid size; 1 keeps the same size on the grid and in the bus.")]
         [SerializeField, Min(0.1f)] private float seatedScale = 1f;
-        [Tooltip("VisualRoot local offset while seated: down onto the cushion and back against the seat back.")]
-        [SerializeField] private Vector3 seatedVisualOffset = new Vector3(0f, -0.1f, -0.28f);
+        [Tooltip("Otururken VisualRoot yerel ofseti: kalça minder üstünde, sırt sırtlıkta, dizler minderin önünde (Sit pozu).")]
+        [SerializeField] private Vector3 seatedVisualOffset = new Vector3(0f, 0f, -0.08f);
 
         private Vector3 bodyRestPosition;
         private Vector3 visualRestPosition;

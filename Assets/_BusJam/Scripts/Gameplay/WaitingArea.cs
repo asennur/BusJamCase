@@ -18,6 +18,8 @@ namespace BusJam.Gameplay
         [Tooltip("Eski placeholder kilit ikonu; kit modelinde kilit SlotTile içinde, boş bırakılabilir")]
         [SerializeField] private GameObject lockIconPrefab;
         [SerializeField] private float slotSpacing = 1.003f;
+        [Tooltip("Slottaki yolcunun yerel y'si: slot karosu grid karosundan yüksek, ayak slot üstüne bassın.")]
+        [SerializeField] private float standHeight = 0.034f;
         [SerializeField] private float overflowBaseDistance = 0.9f;
         [SerializeField] private float overflowSpacing = 0.5f;
         [SerializeField] private float runSpeed = 6.72f;
@@ -60,15 +62,17 @@ namespace BusJam.Gameplay
                 }
 
                 int unlockLevel = i == 0 ? GameRules.FirstSlotUnlockLevel : GameRules.LastSlotUnlockLevel;
-                tiles[i].transform.position = SlotPosition(i);
+                tiles[i].transform.position = transform.TransformPoint(SlotLocalX(i), 0f, 0f);
                 tiles[i].SetLocked(!unlocked[i], unlockLevel);
                 if (lockIcons[i] != null)
                     lockIcons[i].SetActive(!unlocked[i]);
             }
         }
 
-        public Vector3 SlotPosition(int index) =>
-            transform.TransformPoint(new Vector3((index - (GameRules.VisibleSlotCount - 1) * 0.5f) * slotSpacing, 0f, 0f));
+        /// <summary>Slottaki yolcunun duracağı nokta (karo üstü).</summary>
+        public Vector3 SlotPosition(int index) => transform.TransformPoint(SlotLocalX(index), standHeight, 0f);
+
+        private float SlotLocalX(int index) => (index - (GameRules.VisibleSlotCount - 1) * 0.5f) * slotSpacing;
 
         /// <summary>Taşma kuyruğundaki sıraya (0 = en önde) göre, slot şeridinin grid tarafında dizilen nokta (Asen kararı, 19 Kasım).</summary>
         public Vector3 OverflowPosition(int queueIndex) =>
