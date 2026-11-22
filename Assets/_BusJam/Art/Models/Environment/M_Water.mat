@@ -34,15 +34,15 @@ Material:
     - _EdgeThreshold: 0.78
     - _RampSmooth: 0.06
     - _RampThreshold: 0.45
-    - _RimStrength: 0.35
+    - _RimStrength: 0
     - _RimThreshold: 0.62
     - _SpecSize: 0.06
-    - _SpecStrength: 0.55
+    - _SpecStrength: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _EdgeColor: {r: 0.45, g: 0.4, b: 0.5, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
     - _ScrollSpeed: {r: 0.015, g: 0.025, b: 0, a: 0}
     - _ShadeColor: {r: 0.72, g: 0.7, b: 0.88, a: 1}
-    - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SpecColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

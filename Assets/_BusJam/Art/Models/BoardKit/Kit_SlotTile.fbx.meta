@@ -8,7 +8,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: M_KitTile
-    second: {fileID: 2100000, guid: 1d6030128c9e31e41aa3f159604d768f, type: 2}
+    second: {fileID: 2100000, guid: 1fea2e0ba245dee4e844931aa0bf54f9, type: 2}
   materials:
     materialImportMode: 1
     materialName: 1

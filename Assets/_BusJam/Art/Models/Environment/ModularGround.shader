@@ -1,4 +1,5 @@
 // Prosedürel oyun zemini (karo, kaldırım, yol, çimen); düz yüzey, ortak toon ışığı vertex'te.
+// Arka plan kısma (MuteBackground) yalnız mor karo ve yolda; kaldırım ve çimen referanstaki gibi açık kalır.
 Shader "BusJam/Modular Ground"
 {
     Properties
@@ -7,6 +8,7 @@ Shader "BusJam/Modular Ground"
         _TileDark ("Dark tile", Color) = (0.45,0.37,0.70,1)
         _Grout ("Grout", Color) = (0.30,0.25,0.52,1)
         _Sidewalk ("Sidewalk", Color) = (0.77,0.72,0.87,1)
+        _SidewalkSpot ("Sidewalk Spot", Color) = (0.70,0.74,0.93,1)
         _Road ("Road", Color) = (0.47,0.40,0.74,1)
         _Grass ("Grass", Color) = (0.61,0.86,0.12,1)
         _ShadeColor ("Toon Shade Tint", Color) = (0.72, 0.7, 0.88, 1)
@@ -25,10 +27,11 @@ Shader "BusJam/Modular Ground"
             #pragma multi_compile_instancing
             #include "../../../Shaders/ToonLighting.hlsl"
             #include "../../../Shaders/BackgroundTone.hlsl"
+            #include "../../../Shaders/SidewalkSpots.hlsl"
             struct Attributes { float4 positionOS:POSITION; float2 band:TEXCOORD1; UNITY_VERTEX_INPUT_INSTANCE_ID };
             struct Varyings { float4 positionCS:SV_POSITION; float2 ground:TEXCOORD0; float band:TEXCOORD1; half3 light:TEXCOORD2; UNITY_VERTEX_INPUT_INSTANCE_ID };
             CBUFFER_START(UnityPerMaterial)
-                half4 _TileLight, _TileDark, _Grout, _Sidewalk, _Road, _Grass;
+                half4 _TileLight, _TileDark, _Grout, _Sidewalk, _SidewalkSpot, _Road, _Grass;
                 half4 _ShadeColor; half _RampThreshold, _RampSmooth, _AmbientStrength;
             CBUFFER_END
             Varyings Vert(Attributes input)
@@ -50,6 +53,7 @@ Shader "BusJam/Modular Ground"
                 UNITY_SETUP_INSTANCE_ID(input);
                 float2 p=input.ground;
                 half3 color;
+                bool mute=true;
                 if(input.band<0.5)
                 {
                     // The source has roughly 18 columns and 70-pixel rows on its 45-unit quad.
@@ -65,7 +69,7 @@ Shader "BusJam/Modular Ground"
                     float bevel=(1-smoothstep(.005,.022,-border))*.10;
                     color=lerp(_Grout.rgb,color*(1+bevel),inside);
                 }
-                else if(input.band<1.5) color=_Sidewalk.rgb;
+                else if(input.band<1.5) { color=SidewalkSpots(p,_Sidewalk.rgb,_SidewalkSpot.rgb); mute=false; }
                 else if(input.band<2.5)
                 {
                     color=_Road.rgb*(0.97+0.035*sin(p.y*0.8));
@@ -76,9 +80,10 @@ Shader "BusJam/Modular Ground"
                     float dash=1-smoothstep(.092-fwidth(distance),.092+fwidth(distance),distance);
                     color=lerp(color,half3(.96,.96,1),dash);
                 }
-                else if(input.band<3.5) color=_Grass.rgb;
+                else if(input.band<3.5) { color=_Grass.rgb; mute=false; }
                 else color=half3(.96,.96,1);
-                return half4(MuteBackground(color*input.light),1);
+                color*=input.light;
+                return half4(mute?MuteBackground(color):color,1);
             }
             ENDHLSL
         }

@@ -31,5 +31,6 @@ Material:
     - _RampThreshold: 0.45
     m_Colors:
     - _ShadeColor: {r: 0.72, g: 0.7, b: 0.88, a: 1}
-    - _Sidewalk: {r: 0.7930286, g: 0.7180282, b: 0.8605053, a: 1}
+    - _Sidewalk: {r: 0.79, g: 0.83, b: 0.915, a: 1}
+    - _SidewalkSpot: {r: 0.74, g: 0.755, b: 0.885, a: 1}
   m_BuildTextureStacks: []
