@@ -104,3 +104,4 @@ Kaynak dosyalar: `C:\Users\Kullanici\Downloads\WhatsApp Image 2026-11-22 at 00.1
 - 22.11 — U1 bitti (1b0308f): booster çubuğu + 2 SVG silindi, görünmez bar-space kaldı (konfeti çıkış noktası), board konumu değişmedi (L2/L10, 1080×1920/2400 cmp). R9 sürüyor.
 - 22.11 — R9 bitti (13c9318, ab94a51, d5fedaf): her ip ayrı halka + krem düğüm (1/2/3), MaxRopes=3 (editör, Validate, Solver); hiçbir levelde 3+ ip yoktu, değişen level yok. Sırada: Asen testleri → performans testi.
 - 22.11 — Asen: sarı düğümler olmasın → R9b bitti (6c89b71, 6129cf5): yalnız halkalar, M_Rope düz renk, RopePalette silindi.
+- 23.11 — P3 bitti (9a0664f): iPhone X + Galaxy S10e ölçüm, 11 level oynandı, kırık yok. Öneriler (karo birleştirme, doku sıkıştırma, otobüs havuzu ön doldurma) Asen onayı bekliyor. Bug: eski 6 level tünel çıkış kuralına takılıyor (oyunda sorun yok), L27 süre dengesi, tünel rozeti 0.
