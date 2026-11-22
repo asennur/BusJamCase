@@ -31,6 +31,7 @@ namespace BusJam.Gameplay
         [SerializeField] private Transform angryIcon;
         [SerializeField] private GameObject hiddenMark;
         [SerializeField] private GameObject[] ropeLayers;
+        [SerializeField, Min(0.01f)] private float ropeBurstDuration = 0.14f;
         [SerializeField] private Transform cloakVisual;
         [SerializeField] private Material cloakMaterial;
         [SerializeField, Min(0.01f)] private float cloakDuration = 0.18f;
@@ -57,6 +58,9 @@ namespace BusJam.Gameplay
         private Tween runTween;
         private Tween angryTween;
         private Tween revealTween;
+        private Tween ropeTween;
+        private Transform burstingRope;
+        private TweenCallback hideBurstRope;
         private Vector3 angryRestPosition;
         private Vector3 angryRestScale;
         private Material colorMaterial;
@@ -90,6 +94,7 @@ namespace BusJam.Gameplay
 
         private void Awake()
         {
+            hideBurstRope = HideBurstRope;
             bodyRestPosition = body.transform.localPosition;
             if (visualRoot != null) visualRestPosition = visualRoot.localPosition;
             angryRestPosition = angryIcon.localPosition;
@@ -101,6 +106,8 @@ namespace BusJam.Gameplay
             runTween?.Kill();
             angryTween?.Kill();
             revealTween?.Kill();
+            ropeTween?.Kill();
+            HideBurstRope();
             strideTween?.Kill();
             armTween?.Kill();
             cloakTween?.Pause();
@@ -208,6 +215,15 @@ namespace BusJam.Gameplay
 
         private void OnDestroy() => cloakTween?.Kill();
 
+        private void HideBurstRope()
+        {
+            if (burstingRope == null)
+                return;
+            burstingRope.localScale = Vector3.one;
+            burstingRope.gameObject.SetActive(false);
+            burstingRope = null;
+        }
+
         /// <summary>Resets rope count and visible layers when reusing a passenger.</summary>
         public void SetRopes(int count)
         {
@@ -220,13 +236,22 @@ namespace BusJam.Gameplay
                 SetReachable(false);
         }
 
-        /// <summary>Removes one rope and restarts the scale punch.</summary>
+        /// <summary>Removes one rope: the outer layer swells and vanishes like the reference burst, then the scale punch restarts.</summary>
         public void RemoveRope()
         {
             if (RopesLeft == 0)
                 return;
 
+            ropeTween?.Kill();
+            HideBurstRope();
+            GameObject layer = ropeLayers != null && RopesLeft <= ropeLayers.Length ? ropeLayers[RopesLeft - 1] : null;
             SetRopes(RopesLeft - 1);
+            if (layer != null)
+            {
+                burstingRope = layer.transform;
+                layer.SetActive(true);
+                ropeTween = burstingRope.DOScale(1.35f, ropeBurstDuration).SetEase(Ease.OutQuad).OnComplete(hideBurstRope);
+            }
             revealTween?.Kill();
             transform.localScale = LocalScaleFor();
             revealTween = transform.DOPunchScale(LocalScaleFor(0.12f), 0.2f, 1, 0.5f);
@@ -359,11 +384,14 @@ namespace BusJam.Gameplay
                 });
         }
 
-        /// <summary>Slides from the tunnel into its mouth cell.</summary>
+        /// <summary>Slides out of the tunnel into its mouth cell, growing from inside the box.</summary>
         public void EmergeFromTunnel(Vector3 localTarget)
         {
             runTween?.Kill();
             runTween = transform.DOLocalMove(localTarget, 0.3f).SetEase(Ease.OutQuad);
+            revealTween?.Kill();
+            transform.localScale = LocalScaleFor(0.45f);
+            revealTween = transform.DOScale(LocalScaleFor(), 0.3f).SetEase(Ease.OutBack);
         }
 
         /// <summary>Advances one place when someone leaves the overflow queue.</summary>

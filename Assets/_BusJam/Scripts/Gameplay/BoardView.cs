@@ -17,8 +17,6 @@ namespace BusJam.Gameplay
         [SerializeField] private Passenger passengerPrefab;
         [SerializeField] private Transform tilePrefab;
         [SerializeField] private TunnelView tunnelPrefab;
-        [Tooltip("Engel hücresi: karo yok, yalnız çukur (Kit_Hole)")]
-        [SerializeField] private Transform obstaclePrefab;
         [Header("Çerçeve (köşe noktasına konur)")]
         [SerializeField] private Transform rimStraightPrefab;
         [SerializeField] private Transform rimOuterPrefab;
@@ -40,11 +38,9 @@ namespace BusJam.Gameplay
         private ObjectPool<Passenger> passengerPool;
         private ObjectPool<Transform> tilePool;
         private ObjectPool<TunnelView> tunnelPool;
-        private ObjectPool<Transform> obstaclePool;
         private readonly List<Passenger> activePassengers = new List<Passenger>();
         private readonly List<Transform> activeTiles = new List<Transform>();
         private readonly List<TunnelView> activeTunnelViews = new List<TunnelView>();
-        private readonly List<Transform> activeObstacles = new List<Transform>();
         private ObjectPool<Transform> rimStraightPool;
         private ObjectPool<Transform> rimOuterPool;
         private ObjectPool<Transform> rimInnerPool;
@@ -75,7 +71,6 @@ namespace BusJam.Gameplay
                 t => t.gameObject.SetActive(true),
                 t => t.gameObject.SetActive(false));
 
-            obstaclePool = CreatePool(obstaclePrefab);
             rimStraightPool = CreatePool(rimStraightPrefab);
             rimOuterPool = CreatePool(rimOuterPrefab);
             rimInnerPool = CreatePool(rimInnerPrefab);
@@ -113,20 +108,13 @@ namespace BusJam.Gameplay
             {
                 for (int x = 0; x < level.width; x++)
                 {
+                    // Engel referanstaki gibi tahtada boşluktur: karo çizilmez, çerçeve etrafından dolaşır, zemin görünür.
                     CellData data = level.GetCell(x, y);
-                    if (data.type == CellType.Void)
+                    if (data.type == CellType.Void || data.type == CellType.Obstacle)
                         continue;
 
                     var cell = new Vector2Int(x, y);
                     Vector3 local = CellToLocal(cell);
-
-                    if (data.type == CellType.Obstacle)
-                    {
-                        Transform obstacle = obstaclePool.Get();
-                        obstacle.localPosition = local;
-                        activeObstacles.Add(obstacle);
-                        continue;
-                    }
 
                     Transform tile = tilePool.Get();
                     tile.localPosition = local;
@@ -364,12 +352,9 @@ namespace BusJam.Gameplay
                 tilePool.Release(activeTiles[i]);
             for (int i = 0; i < activeTunnelViews.Count; i++)
                 tunnelPool.Release(activeTunnelViews[i]);
-            for (int i = 0; i < activeObstacles.Count; i++)
-                obstaclePool.Release(activeObstacles[i]);
             activePassengers.Clear();
             activeTiles.Clear();
             activeTunnelViews.Clear();
-            activeObstacles.Clear();
             ReleaseAll(rimStraightPool, activeRimStraights);
             ReleaseAll(rimOuterPool, activeRimOuters);
             ReleaseAll(rimInnerPool, activeRimInners);
