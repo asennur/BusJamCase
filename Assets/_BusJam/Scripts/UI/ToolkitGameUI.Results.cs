@@ -276,7 +276,8 @@ namespace BusJam.UI
             if (collecting && arrivals == FlyingCoinCount) CreditReward();
             var fade = Step(ResultStepId.CollectionFade);
             complete.style.opacity = collecting && fade.enabled ? 1 - fade.Evaluate(time) : 1;
-            if (collecting && time >= CollectionDuration) { CreditReward(); FinishResultTransition(false); }
+            // The level fade darkens while the panel fades, so the finished board never shows uncovered.
+            if (collecting && (time >= CollectionDuration || fade.enabled && time >= fade.start)) FinishResultTransition(false);
         }
 
         private void CreditReward()
@@ -326,7 +327,7 @@ namespace BusJam.UI
         {
             if (resultTransitionDone) return;
             resultTransitionDone = true;
-            collection?.Pause(); failureExit?.Pause();
+            // Collection and retry fades keep running under the level fade; the state change pauses them.
             if (Application.isPlaying) BeginTransition(retry ? FadeAction.Retry : FadeAction.Next);
         }
 
@@ -365,7 +366,7 @@ namespace BusJam.UI
         {
             var fade = Step(ResultStepId.RetryFade);
             fail.style.opacity = fade.enabled ? 1 - fade.Evaluate(time) : 1;
-            if (retrying && time >= RetryDuration) FinishResultTransition(true);
+            if (retrying && (time >= RetryDuration || fade.enabled && time >= fade.start)) FinishResultTransition(true);
         }
 
         private void SetResultCoinValue(int count)
