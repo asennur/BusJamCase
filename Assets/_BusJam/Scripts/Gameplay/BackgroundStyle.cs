@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace BusJam.Gameplay
 {
-    /// <summary>One tunable palette treatment shared by the gameplay background shaders.</summary>
+    /// <summary>Oynanış arka plan shader'larının paylaştığı, ayarlanabilir tek palet işlemi.</summary>
     [CreateAssetMenu(menuName = "Bus Jam/Background Style")]
     public sealed class BackgroundStyle : ScriptableObject
     {

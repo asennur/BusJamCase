@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 
 namespace BusJam.UI
 {
-    /// <summary>Guides introductory taps without changing normal move or failure rules.</summary>
+    /// <summary>Normal hamle ve kaybetme kurallarını değiştirmeden giriş dokunuşlarını yönlendirir.</summary>
     public sealed partial class TapTutorial : MonoBehaviour
     {
         [SerializeField] private GameManager gameManager;
@@ -25,9 +25,9 @@ namespace BusJam.UI
         private Vector2Int tunnelMouth;
         private bool tunnelLessonActive;
 
-        // LevelDatabase first introduces tunnels in Level_03.
+        // LevelDatabase tünelleri ilk kez Level_03'te tanıtır.
         private const int TunnelIntroduction = 3;
-        // Level_03 starts with Green at the mouth and Yellow, Yellow, Green inside.
+        // Level_03 ağızda Green, içeride Yellow, Yellow, Green ile başlar.
         private const PassengerColor TunnelColor = PassengerColor.Green;
 
         private void Awake()
@@ -89,13 +89,13 @@ namespace BusJam.UI
                 LevelData data = gameManager.CurrentLevel;
                 if (data.tunnels.Count == 0) { Hide(); return; }
                 tunnelMouth = data.tunnels[0].MouthCell;
-                // A bus can arrive during Ready, before PlayingStarted arms the lesson.
+                // Otobüs Ready sırasında, PlayingStarted dersi kurmadan önce gelebilir.
                 OnBusArrived(busStation.ActiveBus);
                 return;
             }
             else target = gameplay.FirstTappablePassenger();
 
-            // Unsupported layouts keep free play available and do not save a completed lesson.
+            // Desteklenmeyen düzenler serbest oyunu açık tutar ve tamamlanmış ders kaydetmez.
             if (target == null) { Hide(); return; }
             if (guided) gameplay.TapFilter = AllowsTap;
             hint.text = level == 6 ? "Free tied passengers by moving their neighbours."
@@ -106,7 +106,7 @@ namespace BusJam.UI
 
         private bool AllowsTap(Passenger passenger)
         {
-            // Recheck during input as well as LateUpdate: a stale target must never block a tap.
+            // LateUpdate'in yanında girdi sırasında da yeniden kontrol edilir: eskimiş bir hedef asla dokunuşu engellememeli.
             if (!gameplay.CanTapPassenger(target)) ReleaseGuidance();
             return !guided || passenger == target;
         }
@@ -164,7 +164,7 @@ namespace BusJam.UI
             TravelToTarget();
         }
 
-        // Both neighbours must be legal at the start; never lock an incompatible level.
+        // İki komşu da başta geçerli olmalı; uyumsuz bir level asla kilitlenmez.
         private Passenger FindRopeLesson()
         {
             Board board = gameManager.Board;
@@ -207,7 +207,7 @@ namespace BusJam.UI
             if (introduction == TunnelIntroduction && !tunnelLessonActive) return;
             if (introduction == 1 && steps == GameRules.BusCapacity) return;
             if (introduction == 1 && !guided) { Hide(); return; }
-            // Safety releases input, but the rope hint still waits for the last rope.
+            // Güvenlik girdiyi serbest bırakır ama ip ipucu yine son ipi bekler.
             if (introduction == 6 && !guided && tiedPassenger != null && tiedPassenger.RopesLeft > 0) return;
             if (guided)
             {
@@ -226,7 +226,7 @@ namespace BusJam.UI
                 }
                 if (introduction == TunnelIntroduction)
                 {
-                    // TapAccepted runs after the next queued passenger has emerged.
+                    // TapAccepted, kuyruktaki sıradaki yolcu çıktıktan sonra çalışır.
                     Passenger mouthPassenger = gameManager.Board.GetOccupant(tunnelMouth);
                     if (passenger.Color == TunnelColor
                         && !gameplay.TunnelContainsColor(tunnelMouth, TunnelColor)

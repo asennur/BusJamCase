@@ -5,8 +5,8 @@ using UnityEngine;
 namespace BusJam.Gameplay
 {
     /// <summary>
-    /// Displays one bus and tracks seat reservations separately from passenger arrivals.
-    /// Doors stay closed; they open for each boarding passenger and close once nobody is entering.
+    /// Tek bir otobüsü gösterir ve koltuk rezervasyonlarını yolcu varışlarından ayrı tutar.
+    /// Kapılar kapalı durur; binen her yolcu için açılır, kimse girmeyince kapanır.
     /// </summary>
     public class Bus : MonoBehaviour
     {
@@ -66,14 +66,14 @@ namespace BusJam.Gameplay
         private Passenger[] bufferedPassengers;
         private TweenCallback[] bufferedCallbacks;
         private bool idleShake = true;
-        // Per-bus phase so queued buses do not shake in sync (reads as a screen shake otherwise).
+        // Otobüs başına faz, sıradaki otobüsler senkron sallanmasın (yoksa ekran sarsıntısı gibi okunur).
         private float shakePhase;
         private float doorOpenAt = -1f;
         private float exhaustDistance;
         private ParticleSystem.EmitParams exhaustParams;
         private Tween[] seatFlashTimers;
 
-        /// <summary>Shared exhaust system assigned by BusStation; null disables puffs.</summary>
+        /// <summary>BusStation'ın atadığı ortak egzoz sistemi; null ise duman çıkmaz.</summary>
         internal ParticleSystem Exhaust { get; set; }
         public PassengerColor Color { get; private set; }
         internal Renderer PresentationBody => body;
@@ -82,7 +82,7 @@ namespace BusJam.Gameplay
         public bool CanApproach { get; private set; }
         public Vector3 ArrivalEntryPosition => doorEntry.position + arrivalPosition - transform.position;
 
-        /// <summary>Allows boarding only after the bus reaches the door.</summary>
+        /// <summary>Binişe yalnız otobüs kapıya vardıktan sonra izin verir.</summary>
         public bool IsAtDoor { get; private set; }
 
         private void Awake()
@@ -241,7 +241,7 @@ namespace BusJam.Gameplay
             }
         }
 
-        /// <summary>Opens the door for a passenger standing at it; the door closes after the last one walks in.</summary>
+        /// <summary>Kapıda duran yolcu için kapıyı açar; son yolcu girince kapı kapanır.</summary>
         public void Enter(int seatIndex, Passenger passenger, TweenCallback onSeated)
         {
             OpenDoor();
@@ -249,7 +249,7 @@ namespace BusJam.Gameplay
             passenger.EnterBus(doorEntry, seatPoints[seatIndex], onSeated);
         }
 
-        /// <summary>Starts opening the door a step before a passenger running for <paramref name="runDuration"/> arrives.</summary>
+        /// <summary><paramref name="runDuration"/> boyunca koşan yolcu varmadan bir adım önce kapıyı açmaya başlar.</summary>
         public void OpenDoorBefore(float runDuration)
         {
             float at = Time.time + Mathf.Max(0f, runDuration - doorOpenLead);
@@ -261,7 +261,7 @@ namespace BusJam.Gameplay
             doorCloseTimer?.Restart();
             if (doorOpen || animator == null) return;
             doorOpen = true;
-            // No crossfade and a head start: the passenger is already close to the door.
+            // Crossfade yok ve önden başlangıç: yolcu kapıya zaten yakın.
             Play(DoorOpenHash);
             animator.Play(DoorOpenHash, 0, doorOpenHeadStart);
         }
@@ -308,7 +308,7 @@ namespace BusJam.Gameplay
             ApplyMotionPose();
         }
 
-        // World-space puffs stay on the road behind the moving bus.
+        // Dünya uzayındaki dumanlar hareket eden otobüsün arkasında yolda kalır.
         private void Puff(int count)
         {
             if (Exhaust == null || exhaustPoint == null || count == 0) return;
@@ -350,21 +350,21 @@ namespace BusJam.Gameplay
             RestoreModel();
         }
 
-        /// <summary>Plays while advancing through the queue or departing.</summary>
+        /// <summary>Kuyrukta ilerlerken ya da kalkarken çalar.</summary>
         public void PlayDrive()
         {
             DOTween.Kill(this);
             Play(DriveHash);
         }
 
-        /// <summary>Stops with closed doors; passengers open them on arrival.</summary>
+        /// <summary>Kapılar kapalı durur; yolcular varınca açar.</summary>
         public void PlayStop()
         {
             DOTween.Kill(this);
             Play(IdleHash);
         }
 
-        /// <summary>Closes a still-open door before departure and returns the delay it needs.</summary>
+        /// <summary>Kalkıştan önce hâlâ açık kapıyı kapatır ve gereken gecikmeyi döndürür.</summary>
         public float CloseDoor()
         {
             doorCloseTimer?.Pause();
@@ -379,7 +379,7 @@ namespace BusJam.Gameplay
             return 0.08f;
         }
 
-        /// <summary>Reserves a seat immediately without changing the door animation.</summary>
+        /// <summary>Kapı animasyonunu değiştirmeden hemen bir koltuk rezerve eder.</summary>
         public Transform ReserveSeat(out int seatIndex)
         {
             seatIndex = reservedCount;
@@ -387,7 +387,7 @@ namespace BusJam.Gameplay
             return seatPoints[seatIndex];
         }
 
-        /// <summary>Records an arrival and returns whether every seat is occupied.</summary>
+        /// <summary>Bir varışı kaydeder ve tüm koltukların dolu olup olmadığını döndürür.</summary>
         public bool SeatArrived(int seatIndex, Passenger passenger)
         {
             seatedPassengers[seatIndex] = passenger;
@@ -397,7 +397,7 @@ namespace BusJam.Gameplay
             return arrivedCount >= seatPoints.Length;
         }
 
-        /// <summary>Passengers to return to BoardView's pool after departure.</summary>
+        /// <summary>Kalkıştan sonra BoardView'ın havuzuna dönecek yolcular.</summary>
         public Passenger[] SeatedPassengers => seatedPassengers;
 
         private void Play(int stateHash)

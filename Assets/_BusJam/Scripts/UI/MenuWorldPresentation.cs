@@ -5,7 +5,7 @@ using UnityEngine.Rendering.Universal;
 
 namespace BusJam.UI
 {
-    /// <summary>Owns the Start camera and its pooled, deterministic driving presentation.</summary>
+    /// <summary>Start kamerasını ve onun havuzlu, deterministik sürüş sunumunu yönetir.</summary>
     [ExecuteAlways]
     public sealed class MenuWorldPresentation : MonoBehaviour
     {
@@ -115,8 +115,8 @@ namespace BusJam.UI
             menuActive = menuVisible;
             if (menuWorld != null) menuWorld.SetActive(menuVisible);
             if (menuCamera != null) menuCamera.enabled = menuVisible;
-            // An unstacked URP Overlay does not render. Keeping Camera.main enabled preserves
-            // existing indicator and celebration camera bindings during Start initialization.
+            // Stack'lenmemiş bir URP Overlay render etmez. Camera.main'i açık tutmak, Start başlatması sırasında
+            // mevcut gösterge ve kutlama kamera bağlantılarını korur.
             if (gameplayCameraData != null) gameplayCameraData.renderType = menuVisible ? CameraRenderType.Overlay : CameraRenderType.Base;
             if (gameplayCamera != null) gameplayCamera.enabled = gameplayCameraData != null || !menuVisible;
             if (busAnimator != null) busAnimator.enabled = menuVisible && Application.isPlaying;
@@ -151,11 +151,11 @@ namespace BusJam.UI
             value *= 0x846ca68b; return value ^ (value >> 16);
         }
 
-        // Absolute travel avoids accumulating drift and allows repeatable editor captures and scrubbing.
+        // Mutlak yol, birikmeli kaymayı önler ve tekrarlanabilir editör çekimlerine ve scrubbing'e izin verir.
         public void SampleMotion(double seconds)
         {
             if (!menuActive || !isActiveAndEnabled) return;
-            // The imported Drive includes both wheel rotation and exhaust emission.
+            // İçe aktarılan Drive hem tekerlek dönüşünü hem egzoz salınımını içerir.
             float driveSpeed = scrollSpeed / .9f;
             if (busAnimator != null) busAnimator.speed = driveSpeed;
             double travel = Math.Max(0, seconds) * scrollSpeed;
@@ -167,9 +167,9 @@ namespace BusJam.UI
                 int local = slot.tree ? i - houses : i;
                 int count = slot.tree ? scenery.Length - houses : houses;
                 float spacing = scenerySpacing * (slot.tree ? .25f : .5f);
-                // Every slot travels a full circuit. Endpoints are beyond the camera and the far fade.
+                // Her slot tam bir tur gider. Uç noktalar kameranın ve uzak solmanın ötesindedir.
                 double length = count * spacing;
-                // Reverse the slot order so increasing time always moves toward the camera (+Z).
+                // Slot sırası ters çevrilir, böylece artan zaman hep kameraya doğru (+Z) ilerler.
                 double distance = local * spacing - travel;
                 int cycle = (int)Math.Floor(distance / length);
                 float z = 48 - (float)(distance - cycle * length);
@@ -211,7 +211,7 @@ namespace BusJam.UI
             busBody.SetPropertyBlock(bodyProperties, 0);
         }
 
-        // The quad grows around the optical axis: cover-fit crops the image without stretching it.
+        // Quad optik eksen etrafında büyür: cover-fit görüntüyü germeden kırpar.
         public void FitAspect(float aspect)
         {
             if (menuCamera == null || cameraTarget == null || sky == null || aspect <= 0) return;

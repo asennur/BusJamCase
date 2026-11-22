@@ -6,9 +6,9 @@ using UnityEngine;
 namespace BusJam.Level
 {
     /// <summary>
-    /// Fills the passengers a level still needs (3 per bus, minus passengers already placed or queued in tunnels)
-    /// into free tiles, retrying random layouts until the solver finds at least two solutions.
-    /// The designer keeps control of the grid shape, tunnels, bus order and any passenger already placed.
+    /// Levelin hâlâ ihtiyaç duyduğu yolcuları (otobüs başına 3, zaten yerleşmiş ya da tünel kuyruğundakiler düşülür)
+    /// boş karolara doldurur; solver en az iki çözüm bulana kadar rastgele yerleşimleri yeniden dener.
+    /// Grid şekli, tüneller, otobüs sırası ve zaten yerleşmiş yolcular tasarımcının kontrolünde kalır.
     /// </summary>
     public static class LevelAutoFill
     {
@@ -38,7 +38,7 @@ namespace BusJam.Level
                 message = "Nothing to fill: every bus already has its passengers.";
                 return false;
             }
-            // Empty tunnels get up to 3 of the needed passengers (decided per attempt below).
+            // Boş tüneller gereken yolculardan en fazla 3 tane alır (aşağıda her denemede belirlenir).
             var emptyTunnels = level.tunnels.FindAll(t => t.queue.Count == 0);
             int tunnelShare = Mathf.Min(needed.Count / 3, emptyTunnels.Count * 3);
             if (needed.Count - tunnelShare > free.Count)
@@ -113,7 +113,7 @@ namespace BusJam.Level
             return count;
         }
 
-        // Empty walkable tiles that are not a tunnel mouth (the mouth is filled from the tunnel at start).
+        // Tünel ağzı olmayan boş yürünebilir karolar (ağız başlangıçta tünelden doldurulur).
         private static List<int> FreeCells(LevelData level)
         {
             var mouths = new HashSet<Vector2Int>();
@@ -126,7 +126,7 @@ namespace BusJam.Level
             return free;
         }
 
-        // No bus order given: one bus per three free tiles, colours spread so neighbouring buses differ.
+        // Otobüs sırası verilmemiş: her üç boş karoya bir otobüs, renkler komşu otobüsler farklı olacak şekilde dağıtılır.
         private static void CreateBusOrder(LevelData level, int freeTiles)
         {
             var colors = (PassengerColor[])Enum.GetValues(typeof(PassengerColor));

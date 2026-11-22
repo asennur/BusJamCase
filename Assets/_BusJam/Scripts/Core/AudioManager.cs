@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BusJam.Core
 {
-    /// <summary>The sound effects the game plays.</summary>
+    /// <summary>Oyunun çaldığı ses efektleri.</summary>
     public enum Sfx
     {
         Start,
@@ -16,9 +16,9 @@ namespace BusJam.Core
     }
 
     /// <summary>
-    /// Plays short sound effects through one AudioSource. Game events (start, win, lose, bus leaving) are heard by
-    /// listening to GameManager and BusStation; gameplay code calls AudioManager.Play for the passenger tap;
-    /// UI Toolkit controllers request button sounds through Play.
+    /// Kısa ses efektlerini tek AudioSource ile çalar. Oyun olayları (başlama, kazanma, kaybetme, otobüs kalkışı)
+    /// GameManager ve BusStation dinlenerek duyulur; yolcu dokunuşu için oynanış kodu AudioManager.Play çağırır;
+    /// UI Toolkit controller'ları buton seslerini Play ile ister.
     /// </summary>
     public class AudioManager : MonoBehaviour
     {
@@ -40,7 +40,7 @@ namespace BusJam.Core
 
         private const string MutedKey = "SoundMuted";
 
-        /// <summary>Sound on/off from the settings panel; saved so it survives a restart of the game.</summary>
+        /// <summary>Ayarlar panelinden ses açık/kapalı; oyun yeniden başlasa da korunsun diye kaydedilir.</summary>
         public static bool Muted
         {
             get => PlayerPrefs.GetInt(MutedKey, 0) == 1;
@@ -52,7 +52,7 @@ namespace BusJam.Core
             }
         }
 
-        /// <summary>Plays a sound if an AudioManager exists in the scene and has a clip for it.</summary>
+        /// <summary>Sahnede AudioManager varsa ve bu ses için klibi varsa sesi çalar.</summary>
         public static void Play(Sfx sound)
         {
             if (instance != null) instance.PlayClip(sound);
@@ -62,7 +62,7 @@ namespace BusJam.Core
         {
             instance = this;
             AudioListener.volume = Muted ? 0f : 1f;
-            // Index the inspector list by enum value once, so Play is a direct array lookup.
+            // Inspector listesi bir kez enum değerine göre indekslenir, böylece Play doğrudan dizi okuması olur.
             bySound = new Entry[Enum.GetValues(typeof(Sfx)).Length];
             foreach (var entry in sounds) bySound[(int)entry.sound] = entry;
         }

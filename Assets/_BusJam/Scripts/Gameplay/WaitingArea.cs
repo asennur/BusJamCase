@@ -103,7 +103,7 @@ namespace BusJam.Gameplay
         /// <summary>Taşma kuyruğundan gelen yolcuyu doğrudan bu slota yazar (GameplayController zaten hangi slotun boşaldığını SlotOpened ile öğrendi).</summary>
         public void ReserveSlotDirect(int slotIndex, Passenger passenger) => slots[slotIndex] = passenger;
 
-        /// <summary>Starts matching slot passengers during settling; boarding waits for physical arrival.</summary>
+        /// <summary>Yerleşme sırasında eşleşen slot yolcularını başlatır; biniş fiziksel varışı bekler.</summary>
         public int SendMatchingPassengers(Bus bus, Action<Bus, int, Passenger> onSeatArrived)
         {
             if (!bus.CanApproach) return 0;

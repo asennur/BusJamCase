@@ -8,7 +8,7 @@ using UnityEngine.Pool;
 namespace BusJam.Gameplay
 {
     /// <summary>
-    /// Overlaps departure and queue movement, keeping boarding gated by physical arrival.
+    /// Kalkışı ve kuyruk hareketini üst üste bindirir; biniş fiziksel varışa bağlı kalır.
     /// </summary>
     public class BusStation : MonoBehaviour
     {
@@ -42,7 +42,7 @@ namespace BusJam.Gameplay
         public event Action<Bus> BusApproaching;
         public event Action<Bus> BusFilled;
         public event Action<Bus> BusDeparted;
-        /// <summary>A full bus starts driving away (after its door closed); used for the departure sound.</summary>
+        /// <summary>Dolu bir otobüs (kapısı kapandıktan sonra) uzaklaşmaya başlar; kalkış sesi için kullanılır.</summary>
         public event Action<Bus> BusDeparting;
         public event Action AllBusesDone;
 
@@ -133,7 +133,7 @@ namespace BusJam.Gameplay
                 foreach (Passenger passenger in leaving.SeatedPassengers)
                     passenger.Wave();
 
-            // Door closing shares the anticipation; final completion keeps its immediate event.
+            // Kapı kapanışı hazırlık süresini paylaşır; son tamamlanma olayı hemen atılır.
             float delay = finalBus ? 0f : Mathf.Max(0.08f, leaving.CloseDoor());
             leaving.AnticipateDeparture();
             departing.Add(leaving);
@@ -147,7 +147,7 @@ namespace BusJam.Gameplay
                 .OnUpdate(() => leaving.SampleMotion(departure.ElapsedPercentage()))
                 .OnComplete(() => { leaving.EndMotion(); BusDeparted?.Invoke(leaving); });
 
-            // A 60% overlap preserves clearance between the 4.12-unit bodies.
+            // %60 örtüşme 4.12 birimlik gövdeler arasındaki boşluğu korur.
             float queueDelay = delay + moveDuration * 0.4f;
             for (int i = 0; i < queue.Count; i++)
                 MoveToQueuePosition(i, queueDelay + i * 0.04f);

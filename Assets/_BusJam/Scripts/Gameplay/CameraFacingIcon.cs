@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace BusJam.Gameplay
 {
-    /// <summary>Keeps the visible indicator aligned with the fixed gameplay camera.</summary>
+    /// <summary>Görünen göstergeyi sabit oyun kamerasına hizalı tutar.</summary>
     public sealed class CameraFacingIcon : MonoBehaviour
     {
         private Transform view;

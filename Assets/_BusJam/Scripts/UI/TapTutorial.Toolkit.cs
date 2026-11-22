@@ -19,7 +19,7 @@ namespace BusJam.UI
             if (waitingForTree && document.rootVisualElement?.Q("tutorial-overlay") != null) OnEnable();
         }
 
-        // Do not remember an empty document root before UIDocument has built its tree.
+        // UIDocument ağacını kurmadan önce boş bir döküman kökü hatırlanmaz.
         private bool CacheHand()
         {
             var current = document != null ? document.rootVisualElement : null;
@@ -72,7 +72,7 @@ namespace BusJam.UI
             AnimateTravel(0); handTravel.Restart();
         }
 
-        // Press at the old fingertip before gliding; distant targets crossfade while invisible.
+        // Kaymadan önce eski parmak ucunda basılır; uzak hedefler görünmezken crossfade yapar.
         private void AnimateTravel(float time)
         {
             float p = Mathf.Clamp01((time - .35f) / .5f);

@@ -232,7 +232,7 @@ namespace BusJam.Gameplay
             TapAccepted?.Invoke(passenger);
         }
 
-        /// <summary>Returns the first passenger that satisfies the current tap rules.</summary>
+        /// <summary>Geçerli dokunma kurallarını sağlayan ilk yolcuyu döndürür.</summary>
         public Passenger FirstTappablePassenger(PassengerColor? color = null)
         {
             if (board == null || (!waitingArea.HasFreeSlot && !SlotWillOpen())) return null;
@@ -246,7 +246,7 @@ namespace BusJam.Gameplay
             return null;
         }
 
-        /// <summary>Checks normal move rules without applying the tutorial input filter.</summary>
+        /// <summary>Tutorial girdi filtresini uygulamadan normal hamle kurallarını kontrol eder.</summary>
         public bool CanTapPassenger(Passenger passenger)
         {
             return passenger != null && board != null && board.InBounds(passenger.Cell)
@@ -256,7 +256,7 @@ namespace BusJam.Gameplay
                 && (waitingArea.HasFreeSlot || SlotWillOpen());
         }
 
-        /// <summary>Reads the remaining runtime queue without changing the level asset.</summary>
+        /// <summary>Level asset'ini değiştirmeden kalan çalışma zamanı kuyruğunu okur.</summary>
         public bool TunnelContainsColor(Vector2Int mouthCell, PassengerColor color)
         {
             for (int i = 0; i < tunnelGroups.Count; i++)

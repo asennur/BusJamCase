@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BusJam.Core
 {
-    /// <summary>Persists lives and recovers elapsed UTC time, including time spent offline.</summary>
+    /// <summary>Canları kaydeder ve geçen UTC süresini (çevrimdışı geçen süre dahil) geri kazandırır.</summary>
     [DefaultExecutionOrder(-100)]
     public sealed class LivesSystem : MonoBehaviour
     {
@@ -64,7 +64,7 @@ namespace BusJam.Core
             long guard = ReadTicks(GuardKey, now);
             lastObservedUtc = now;
             rollbackUntilUtc = guard > now ? guard : 0;
-            // A future saved guard must not overwrite valid progress on every startup.
+            // Kayıtlı koruma değeri gelecekteyse her açılışta geçerli yenilenme ilerlemesini silmemeli.
             if (lastRegenUtc > now) lastRegenUtc = now;
             RefreshAt(now);
             Save();
@@ -84,7 +84,7 @@ namespace BusJam.Core
             else RefreshAt(now);
         }
 
-        // There is no server clock; a real game uses server time.
+        // Sunucu saati yok; gerçek bir oyun sunucu zamanını kullanır.
         private void RefreshAt(long now)
         {
             bool save = false;
@@ -96,7 +96,7 @@ namespace BusJam.Core
             }
             else if (rollbackUntilUtc > 0 && now >= rollbackUntilUtc)
             {
-                // Crossing the old clock value must not award the forward rebound.
+                // Saat geri alınıp yeniden ileri getirilince eski değeri geçmek bedava can vermemeli.
                 lastRegenUtc = now;
                 rollbackUntilUtc = 0;
                 save = true;
@@ -136,7 +136,7 @@ namespace BusJam.Core
             return true;
         }
 
-        /// <summary>Refills lives and resets the regeneration clock after a confirmed progress reset.</summary>
+        /// <summary>Onaylanmış ilerleme sıfırlamasından sonra canları doldurur ve yenilenme saatini sıfırlar.</summary>
         public void ResetFull()
         {
             initialized = true;

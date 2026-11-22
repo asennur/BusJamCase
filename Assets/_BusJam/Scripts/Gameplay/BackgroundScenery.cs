@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace BusJam.Gameplay
 {
-    /// <summary>Shows the seeded side scenery only in the landscape layout band.</summary>
+    /// <summary>Tohumlu yan dekoru yalnız yatay düzen bandında gösterir.</summary>
     [ExecuteAlways]
     public sealed class BackgroundScenery : MonoBehaviour
     {

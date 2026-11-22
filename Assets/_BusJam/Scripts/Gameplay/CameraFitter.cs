@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace BusJam.Gameplay
 {
-    /// <summary>Frames the world along the authored view axis with a fixed FOV. In the game (GameManager bound) it follows
-    /// the reference phone screenshots: bus roof under the HUD, grid bottom above the booster bar, height-scaled, so
-    /// tablets only see more side ground; grids beyond the reference size or narrow screens pull the camera back.</summary>
+    /// <summary>Dünyayı sabit FOV ile, tasarlanan bakış ekseni boyunca kadrajlar. Oyunda (GameManager bağlıyken)
+    /// referans telefon ekran görüntülerini izler: otobüs tavanı HUD'un altında, grid altı booster çubuğunun üstünde, yüksekliğe göre ölçekli; böylece
+    /// tabletler yalnız yanlarda daha fazla zemin görür; referans boyutu aşan gridler ya da dar ekranlar kamerayı geri çeker.</summary>
     [ExecuteAlways, RequireComponent(typeof(Camera))]
     public sealed class CameraFitter : MonoBehaviour
     {
@@ -85,7 +85,7 @@ namespace BusJam.Gameplay
             float right = Mathf.Min(safe.xMax, freeViewport.xMax) - padding;
             float bottom = Mathf.Max(safe.yMin, freeViewport.yMin) + padding;
             float top = Mathf.Min(safe.yMax, freeViewport.yMax) - padding;
-            // Existing canvases use Match Width Or Height (.5); reserve their actual scaled top strip.
+            // Mevcut canvas'lar Match Width Or Height (.5) kullanır; gerçek ölçekli üst şeritleri ayrılır.
             if (targetCamera.aspect > .5626f)
             {
                 float reservedHeight = referenceHudBottomPixels / 1920f * Mathf.Sqrt(targetCamera.aspect / .5625f);
@@ -111,8 +111,8 @@ namespace BusJam.Gameplay
             Fitted?.Invoke();
         }
     
-        /// <summary>Solves dolly distance and vertical lens shift so the bus roof and grid bottom land on the reference
-        /// screen heights; then pulls back if the grid or slots are wider than the safe width.</summary>
+        /// <summary>Otobüs tavanı ve grid altı referans ekran yüksekliklerine otursun diye kamera uzaklığını ve dikey lens kaymasını
+        /// çözer; grid ya da slotlar güvenli genişlikten genişse geri çeker.</summary>
         private void FitReference()
         {
             float aspect = targetCamera.aspect;
@@ -127,7 +127,7 @@ namespace BusJam.Gameplay
             Vector3 gridBottom = board.transform.TransformPoint(new Vector3(0, 0, (.5f - depth) * cell));
             float tanY = Mathf.Tan(targetCamera.fieldOfView * Mathf.Deg2Rad * .5f);
             float span = 2f * (top - bottom);
-            // The projected roof-to-grid span shrinks monotonically with distance.
+            // Tavandan gride izdüşen aralık uzaklıkla monoton olarak küçülür.
             float near = -10f, far = 500f;
             for (int i = 0; i < 40; i++)
             {
@@ -135,7 +135,7 @@ namespace BusJam.Gameplay
                 if (Ndc(roof, mid, tanY) - Ndc(gridBottom, mid, tanY) > span) near = mid; else far = mid;
             }
             float distance = far;
-            // Width uses the real grid; an empty reference row band may run off the side.
+            // Genişlik gerçek gridi kullanır; boş bir referans satır bandı kenardan taşabilir.
             float half = Mathf.Max(columns, referenceColumns) * cell * .5f + sideMargin;
             int realDepth = rows > 0 ? rows : referenceRows;
             float limit = tanY * aspect * (safe.width - 2f * padding);
@@ -157,14 +157,14 @@ namespace BusJam.Gameplay
             Fitted?.Invoke();
         }
 
-        // Vertical NDC (no lens shift) of a world point for a camera dollied back by distance.
+        // distance kadar geri çekilmiş bir kamera için dünya noktasının dikey NDC'si (lens kayması yok).
         private float Ndc(Vector3 world, float distance, float tanY)
         {
             Vector3 p = Quaternion.Inverse(transform.rotation) * (world - referencePosition + transform.forward * distance);
             return p.y / (p.z * tanY);
         }
 
-        // Widest |x|/depth over grid top, grid bottom and slot row; compared against tanX * usable NDC half-width.
+        // Grid üstü, grid altı ve slot satırı üzerinde en geniş |x|/derinlik; tanX * kullanılabilir NDC yarı genişliği ile karşılaştırılır.
         private float Width(float half, int depth, float cell, float distance)
         {
             float widest = 0;

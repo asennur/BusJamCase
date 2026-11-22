@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace BusJam.UI
 {
-    /// <summary>Inspector-bound model and two standing anchors on the compact celebration bus.</summary>
+    /// <summary>Küçük kutlama otobüsünde Inspector'a bağlı model ve iki ayakta durma noktası.</summary>
     public sealed class CelebrationVehicle : MonoBehaviour
     {
         public Animator model;

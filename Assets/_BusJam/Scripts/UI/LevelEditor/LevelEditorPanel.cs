@@ -12,9 +12,9 @@ using UnityEngine.SceneManagement;
 namespace BusJam.LevelEditor
 {
     /// <summary>
-    /// Level editor model + top bar. Edits a draft copy of the selected level; the asset is written only on Save
-    /// and only if the draft validates. Board input, palette, bus order bar and popups call into this class and
-    /// redraw on <see cref="Changed"/>. Slots are not edited: they come from the level number (GameRules).
+    /// Level editörü modeli + üst çubuk. Seçili levelin taslak kopyasını düzenler; asset yalnız Save'de
+    /// ve yalnız taslak doğrulanırsa yazılır. Board girdisi, palet, otobüs sırası çubuğu ve popup'lar bu sınıfı çağırır ve
+    /// <see cref="Changed"/> ile yeniden çizer. Slotlar düzenlenmez: level numarasından gelir (GameRules).
     /// </summary>
     [ExecuteAlways, RequireComponent(typeof(UIDocument))]
     public partial class LevelEditorPanel : MonoBehaviour
@@ -46,7 +46,7 @@ namespace BusJam.LevelEditor
         public event Action<Vector2Int> TunnelSelected;
 
         public LevelData Draft => draft;
-        /// <summary>Colour picked in the palette; while set, left click places this passenger.</summary>
+        /// <summary>Paletten seçilen renk; seçiliyken sol tık bu yolcuyu yerleştirir.</summary>
         public PassengerColor? SelectedColor { get; private set; }
         public int LevelNumber => sourceIndex >= 0 ? sourceIndex + 1 : database.Count + 1;
 
@@ -114,7 +114,7 @@ namespace BusJam.LevelEditor
             Rebuild(true);
         }
 
-        // ---------- size / time ----------
+        // ---------- boyut / süre ----------
 
         public void ApplySize()
         {
@@ -144,7 +144,7 @@ namespace BusJam.LevelEditor
             }
         }
 
-        // ---------- cells ----------
+        // ---------- hücreler ----------
 
         public bool InBounds(Vector2Int cell) => cell.x >= 0 && cell.y >= 0 && cell.x < draft.width && cell.y < draft.height;
         public CellData GetCell(Vector2Int cell) => draft.GetCell(cell.x, cell.y);
@@ -155,7 +155,7 @@ namespace BusJam.LevelEditor
             return draft != null && boardView.TryPickCell(boardCamera.ScreenPointToRay(screen), out cell) && InBounds(cell);
         }
 
-        /// <summary>Click on a non-passenger tile: Tile → Void → Obstacle → Tunnel → Tile.</summary>
+        /// <summary>Yolcu olmayan karoya tık: Tile → Void → Obstacle → Tunnel → Tile.</summary>
         public void CycleTile(Vector2Int cell)
         {
             var data = GetCell(cell);
@@ -265,7 +265,7 @@ namespace BusJam.LevelEditor
             Rebuild(false);
         }
 
-        // ---------- palette selection ----------
+        // ---------- palet seçimi ----------
 
         public void ToggleSelection(PassengerColor color)
         {
@@ -290,7 +290,7 @@ namespace BusJam.LevelEditor
 
         public void Hint(string text) => SetStatus(text);
 
-        // ---------- bus order ----------
+        // ---------- otobüs sırası ----------
 
         public IReadOnlyList<PassengerColor> BusOrder => draft.busOrder;
 
@@ -315,7 +315,7 @@ namespace BusJam.LevelEditor
             Rebuild(true);
         }
 
-        // ---------- counts for the palette ----------
+        // ---------- palet için sayılar ----------
 
         public int Required(PassengerColor color)
         {
@@ -332,7 +332,7 @@ namespace BusJam.LevelEditor
             return count;
         }
 
-        /// <summary>Passengers of this colour still to place: 3 per bus, counting the grid and every tunnel queue.</summary>
+        /// <summary>Bu renkten yerleştirilecek kalan yolcular: otobüs başına 3, grid ve her tünel kuyruğu sayılarak.</summary>
         public int Remaining(PassengerColor color) => Required(color) - Placed(color);
 
         private bool CanAdd(PassengerColor color)
@@ -351,7 +351,7 @@ namespace BusJam.LevelEditor
             return material.HasProperty("_BaseColor") ? material.GetColor("_BaseColor") : material.color;
         }
 
-        // ---------- solve / auto fill / save / test ----------
+        // ---------- çöz / otomatik doldur / kaydet / test ----------
 
         public void Solve()
         {
@@ -371,7 +371,7 @@ namespace BusJam.LevelEditor
 #endif
         }
 
-        /// <summary>Generates the grid shape (holes, obstacles, a tunnel) for the size in the inputs. Clears passengers; keeps buses and time.</summary>
+        /// <summary>Girdilerdeki boyut için grid şeklini (delikler, engeller, bir tünel) üretir. Yolcuları temizler; otobüsleri ve süreyi korur.</summary>
         public void AutoGrid()
         {
             if (int.TryParse(width.value, out int w) && int.TryParse(height.value, out int h)
@@ -430,7 +430,7 @@ namespace BusJam.LevelEditor
 #endif
         }
 
-        /// <summary>Saves, then opens the game scene on this level so it can be played right away.</summary>
+        /// <summary>Kaydeder, sonra hemen oynanabilsin diye oyun sahnesini bu levelde açar.</summary>
         public void TestPlay()
         {
             if (!Save()) return;
@@ -438,7 +438,7 @@ namespace BusJam.LevelEditor
             SceneManager.LoadScene(gameSceneName);
         }
 
-        // ---------- redraw ----------
+        // ---------- yeniden çizim ----------
 
         private void Rebuild(bool busesChanged)
         {
@@ -475,7 +475,7 @@ namespace BusJam.LevelEditor
             RenderStatus();
         }
 
-        // First line: what the mouse does right now. Second line: the result of the last action.
+        // İlk satır: farenin şu an ne yaptığı. İkinci satır: son işlemin sonucu.
         private void RenderStatus()
         {
             if (status == null) return;

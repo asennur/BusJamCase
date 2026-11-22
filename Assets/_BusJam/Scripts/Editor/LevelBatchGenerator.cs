@@ -9,16 +9,16 @@ using UnityEngine;
 namespace BusJam.EditorTools
 {
     /// <summary>
-    /// Editor-only batch tool: builds levels 12-25 from a difficulty curve with the same tools the Level Editor uses
-    /// (LevelAutoGrid → LevelAutoFill → mechanics), keeps a level only if it validates and the solver finds at least
-    /// two solutions, then saves it and adds it to the LevelDatabase.
+    /// Yalnız editör toplu aracı: 12-25 arası levelleri bir zorluk eğrisinden, Level Editor'ün kullandığı araçlarla kurar
+    /// (LevelAutoGrid → LevelAutoFill → mekanikler); level yalnız doğrulanırsa ve solver en az iki çözüm bulursa
+    /// tutulur, sonra kaydedilip LevelDatabase'e eklenir.
     /// </summary>
     public static class LevelBatchGenerator
     {
         private const string DatabasePath = "Assets/_BusJam/Data/LevelDatabase.asset";
         private const string LevelFolder = "Assets/_BusJam/Data/Levels";
 
-        // One row of the difficulty curve.
+        // Zorluk eğrisinin bir satırı.
         private struct Band
         {
             public int First, Last, Width, Height, MinBuses, MaxBuses, Colors, Hidden, Ropes, Cloaks;
@@ -29,7 +29,7 @@ namespace BusJam.EditorTools
             }
         }
 
-        // Grows grid, bus count, colours and mechanics step by step; level 17 is a lighter breather level.
+        // Grid, otobüs sayısı, renkler ve mekanikler adım adım büyür; level 17 daha hafif bir nefes alma levelidir.
         private static readonly Band[] Curve =
         {
             new Band(12, 14, 5, 6, 5, 6, 3, 1, 0, 0),
@@ -102,7 +102,7 @@ namespace BusJam.EditorTools
             return null;
         }
 
-        // Random bus order from the first N colours of a shuffled palette, never the same colour twice in a row.
+        // Karıştırılmış paletin ilk N renginden rastgele otobüs sırası; aynı renk hiç art arda gelmez.
         private static List<PassengerColor> BusOrder(int count, int colorCount, System.Random random)
         {
             var palette = new List<PassengerColor>(LevelEditorPanel.Colors);
@@ -126,8 +126,8 @@ namespace BusJam.EditorTools
             return order;
         }
 
-        // Turns some placed passengers into hidden, roped or cloaked ones. Ropes only go where enough neighbours can
-        // leave (the same rule LevelData.Validate checks); a passenger never gets two mechanics.
+        // Yerleşik yolculardan bazılarını gizli, ipli ya da pelerinli yapar. İp yalnız yeterli komşunun
+        // ayrılabildiği yere konur (LevelData.Validate'in baktığı kural); bir yolcuya hiç iki mekanik verilmez.
         private static string AddMechanics(LevelData level, Band band, System.Random random)
         {
             var passengers = new List<int>();
@@ -146,7 +146,7 @@ namespace BusJam.EditorTools
             {
                 CellData cell = level.cells[index];
                 int y = index / level.width;
-                if (y == 0) continue; // keep the exit row plain so every level has an easy first move
+                if (y == 0) continue; // her levelde kolay bir ilk hamle olsun diye çıkış satırı sade kalır
 
                 if (ropes < band.Ropes)
                 {
@@ -182,7 +182,7 @@ namespace BusJam.EditorTools
             return parts.Count == 0 ? "plain" : string.Join(", ", parts);
         }
 
-        // Neighbours that are passengers (they can leave and untie one rope each).
+        // Yolcu olan komşular (ayrılabilir ve her biri bir ip çözer).
         private static int PassengerNeighbours(LevelData level, int index)
         {
             int x = index % level.width, y = index / level.width, count = 0;

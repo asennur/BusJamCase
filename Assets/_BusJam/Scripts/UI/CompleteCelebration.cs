@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace BusJam.UI
 {
-    /// <summary>One pooled side-view bus stop, sampled by the existing unscaled DOTween result timeline.</summary>
+    /// <summary>Havuzdan tek yandan görünüşlü otobüs durağı; mevcut unscaled DOTween sonuç timeline'ı ile örneklenir.</summary>
     public sealed class CompleteCelebration : IDisposable
     {
         public const float StartTime = 1.05f, Duration = 2.4f;
@@ -50,7 +50,7 @@ namespace BusJam.UI
             CelebrationVehicle vehicle = Object.Instantiate(settings.busPrefab, cast.transform);
             bus = vehicle.transform; bus.name = "Celebration Bus";
             busBody = vehicle.body; busMaterials = busBody.sharedMaterials;
-            // Keep the previous 8.44-unit bus silhouette width under Asen's authored Bus Scale.
+            // Önceki 8.44 birimlik otobüs silüeti genişliği Asen'in ayarladığı Bus Scale altında korunur.
             modelScale = 8.44f / busBody.bounds.size.x;
             driveRoot = vehicle.model.gameObject;
             int count = Mathf.Clamp(settings.riderCount, 1, 2);
@@ -61,7 +61,7 @@ namespace BusJam.UI
                 passenger.enabled = false; passenger.PrepareCelebration();
                 riders[i] = passenger.transform;
                 riders[i].SetParent(i == 0 ? vehicle.frontSeat : vehicle.rearSeat, false);
-                // Preserve the existing standing passenger size despite the imported bus scale.
+                // İçe aktarılan otobüs ölçeğine rağmen mevcut ayakta yolcu boyutu korunur.
                 Vector3 parentScale = riders[i].parent.lossyScale;
                 riders[i].localScale = new Vector3(1 / parentScale.x, 1 / parentScale.y, 1 / parentScale.z);
                 riders[i].localRotation = Quaternion.Euler(0, 180, 0);
@@ -92,7 +92,7 @@ namespace BusJam.UI
             camera.transform.localRotation = Quaternion.Euler(Motion.cameraPitch, Motion.cameraYaw, 0);
             camera.transform.localPosition = -(camera.transform.forward * Motion.cameraDistance);
             var data = cameraObject.AddComponent<UniversalAdditionalCameraData>();
-            // URP 14 post processing forces opaque alpha; keep transparent compositing and the warm key.
+            // URP 14 post processing alfayı opak yapar; şeffaf birleştirme ve sıcak ana ışık korunur.
             data.renderPostProcessing = false; data.renderShadows = false;
             data.requiresColorOption = data.requiresDepthOption = CameraOverrideOption.Off;
             data.volumeLayerMask = 0;
@@ -112,7 +112,7 @@ namespace BusJam.UI
             for (int i = 0; i < node.childCount; i++) SetLayer(node.GetChild(i), layer);
         }
 
-        // Align the rest-pose sole once. Imported cheer clips own all subsequent body motion.
+        // Rest pose taban hizası bir kez yapılır. Sonraki tüm vücut hareketi içe aktarılan cheer kliplerine aittir.
         private static void GroundOnSeat(SkinnedMeshRenderer body, Transform rider)
         {
             var mesh = body.sharedMesh;
@@ -149,7 +149,7 @@ namespace BusJam.UI
             ReleaseTarget(); width = newWidth; height = newHeight;
             target = new RenderTexture(width, height, 16, RenderTextureFormat.ARGB32)
             { name = "Celebration Screen Target", hideFlags = HideFlags.HideAndDontSave, antiAliasing = 2 };
-            // GPU memory is created only while the bus is visible (see Sample/Hide).
+            // GPU belleği yalnız otobüs görünürken oluşturulur (bkz. Sample/Hide).
             if (camera.enabled) target.Create();
             camera.targetTexture = target; camera.aspect = (float)width / height; image.image = target;
         }
@@ -174,7 +174,7 @@ namespace BusJam.UI
             if (phase >= 1) return 1;
             if (curve == null || curve.length == 0) return phase;
             float value = curve.Evaluate(phase);
-            // Preserve authored ascending or descending curve keys while traversing the arc forward.
+            // Yay ileri doğru izlenirken tasarlanmış artan ya da azalan eğri anahtarları korunur.
             if (normalize)
             {
                 float start = curve.Evaluate(0), range = curve.Evaluate(1) - start;
@@ -239,8 +239,8 @@ namespace BusJam.UI
             cast.transform.rotation = Quaternion.AngleAxis(tilt, camera.transform.forward);
             float holdTime = elapsed - motion.enterDuration;
             float exitTime = holdTime - motion.holdDuration;
-            // Drive owns wheel motion; the phase clip overlays suspension and seat bones.
-            // Arrive covers the final part of entry, Leave the first part of departure.
+            // Tekerlek hareketi Drive'a aittir; faz klibi süspansiyon ve koltuk kemiklerini üstüne ekler.
+            // Arrive girişin son kısmını, Leave kalkışın ilk kısmını kapsar.
             float arriveDuration = Mathf.Min(motion.enterDuration, settings.celebrateArrive.length);
             bool arriving = entering && elapsed >= motion.enterDuration - arriveDuration;
             bool leaving = !entering && !holding && exitTime < settings.celebrateLeave.length;
@@ -263,7 +263,7 @@ namespace BusJam.UI
         {
             if (camera.enabled) { camera.enabled = key.enabled = false; cast.SetActive(false); }
             image.style.display = DisplayStyle.None;
-            // Keep the object (and its identity) but free the full-screen MSAA surfaces between wins.
+            // Obje (ve kimliği) tutulur ama tam ekran MSAA yüzeyleri kazanmalar arasında serbest bırakılır.
             if (target != null && target.IsCreated()) target.Release();
         }
 

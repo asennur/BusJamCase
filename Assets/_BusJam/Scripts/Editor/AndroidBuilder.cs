@@ -6,8 +6,8 @@ using UnityEngine;
 namespace BusJam.EditorTools
 {
     /// <summary>
-    /// One-click Android APK build. Switching the build target reloads all scripts, so the request is remembered
-    /// in SessionState and the build continues automatically after the reload. The result is written next to the APK.
+    /// Tek tıkla Android APK build'i. Build hedefini değiştirmek tüm script'leri yeniden yükler, bu yüzden istek
+    /// SessionState'te tutulur ve build yeniden yüklemeden sonra kendiliğinden devam eder. Sonuç APK'nın yanına yazılır.
     /// </summary>
     [InitializeOnLoad]
     public static class AndroidBuilder
@@ -33,7 +33,7 @@ namespace BusJam.EditorTools
             {
                 SessionState.SetBool(PendingKey, true);
                 EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
-                return; // continues in BuildNow after the script reload
+                return; // script yeniden yüklendikten sonra BuildNow'da devam eder
             }
             BuildNow();
         }

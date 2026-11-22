@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace BusJam.Save
 {
-    /// <summary>Persists level progress, tutorials and coins in PlayerPrefs.</summary>
+    /// <summary>Level ilerlemesini, tutorial'ları ve coin'leri PlayerPrefs'te saklar.</summary>
     public static class SaveSystem
     {
         public static event System.Action ProgressReset;

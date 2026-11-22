@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace BusJam.Gameplay
 {
-    /// <summary>Applies the referenced style on load and Inspector edits; no frame loop or material instances.</summary>
+    /// <summary>Bağlı stili yüklemede ve Inspector düzenlemelerinde uygular; kare döngüsü ya da materyal instance'ı yok.</summary>
     [ExecuteAlways, DisallowMultipleComponent]
     public sealed class BackgroundStyleBinding : MonoBehaviour
     {

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace BusJam.LevelEditor
 {
-    /// <summary>Routes board clicks only when no UI Toolkit control is under the pointer.</summary>
+    /// <summary>Board tıklamalarını yalnız imlecin altında UI Toolkit kontrolü yokken iletir.</summary>
     public sealed class EditorBoardInput : MonoBehaviour
     {
         [SerializeField] private LevelEditorPanel editor;

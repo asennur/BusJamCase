@@ -7,7 +7,7 @@ using UnityEngine;
 namespace BusJam.Core
 {
     /// <summary>
-    /// Controls game state, level loading and saved progress.
+    /// Oyun durumunu, level yüklemeyi ve kayıtlı ilerlemeyi yönetir.
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -26,7 +26,7 @@ namespace BusJam.Core
         public FailReason FailReason { get; private set; }
         public LevelData CurrentLevel => currentLevel;
         public int CurrentLevelNumber { get; private set; }
-        /// <summary>True during a UI level transition: screen taps cannot start play.</summary>
+        /// <summary>UI level geçişi sırasında true: ekran dokunuşları oyunu başlatamaz.</summary>
         public bool InputLocked { get; private set; }
 
         public event Action<GameState> StateChanged;
@@ -47,7 +47,7 @@ namespace BusJam.Core
             Board = new Board();
         }
 
-        // UI and gameplay subscribe before the first level is loaded in Start.
+        // UI ve oynanış, ilk level Start'ta yüklenmeden önce abone olur.
         private void Start()
         {
             currentLevelIndex = SaveSystem.GetLevelIndex();
@@ -80,7 +80,7 @@ namespace BusJam.Core
             LevelLoaded?.Invoke(CurrentLevelNumber, currentLevel);
         }
 
-        // Ready displays the full constraint; only Playing advances the timer.
+        // Ready tam süreyi gösterir; sayacı yalnız Playing ilerletir.
         private void SetState(GameState newState)
         {
             if (newState != GameState.Playing && IsPaused) SetPaused(false);
@@ -124,7 +124,7 @@ namespace BusJam.Core
                 StartPlaying();
         }
 
-        // Unlocking also ignores a tap in the same frame.
+        // Kilit açılması aynı karedeki dokunuşu da yok sayar.
         public void SetInputLocked(bool locked)
         {
             InputLocked = locked;
@@ -138,7 +138,7 @@ namespace BusJam.Core
             PlayingStarted?.Invoke();
         }
 
-        // Winning saves the next index immediately; LoadNext builds that saved level.
+        // Kazanınca sonraki index hemen kaydedilir; LoadNext o kayıtlı leveli kurar.
         public void Complete()
         {
             currentLevelIndex++;
@@ -154,7 +154,7 @@ namespace BusJam.Core
             SetState(GameState.Fail);
         }
 
-        /// <summary>True while the in-game settings panel is open: time stops and taps are ignored.</summary>
+        /// <summary>Oyun içi ayarlar paneli açıkken true: zaman durur, dokunuşlar yok sayılır.</summary>
         public bool IsPaused { get; private set; }
 
         public void SetPaused(bool paused)
@@ -164,7 +164,7 @@ namespace BusJam.Core
             Time.timeScale = paused ? 0f : 1f;
         }
 
-        /// <summary>Restart from the settings panel: costs a life, then the level waits for Tap to start again.</summary>
+        /// <summary>Ayarlar panelinden Restart: bir can harcar, sonra level yeniden başlamak için Tap bekler.</summary>
         public void Restart()
         {
             if (State != GameState.Playing) return;
@@ -173,7 +173,7 @@ namespace BusJam.Core
             Retry();
         }
 
-        /// <summary>Main Menu from the settings panel: costs a life and returns to the start screen.</summary>
+        /// <summary>Ayarlar panelinden Main Menu: bir can harcar ve başlangıç ekranına döner.</summary>
         public void QuitToMenu()
         {
             if (State != GameState.Playing) return;

@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 namespace BusJam.Gameplay
 {
-    /// <summary>Dispatches passenger input before the screen tap that starts play.</summary>
+    /// <summary>Yolcu girdisini, oyunu başlatan ekran dokunuşundan önce dağıtır.</summary>
     public class InputHandler : MonoBehaviour
     {
         [SerializeField] private Camera cam;
@@ -21,7 +21,7 @@ namespace BusJam.Gameplay
                 HandleTap();
         }
 
-        // Passenger input runs while still Ready; the screen event then starts play.
+        // Yolcu girdisi hâlâ Ready iken çalışır; sonra ekran olayı oyunu başlatır.
         private void HandleTap()
         {
             if (IsOverUI(Input.mousePosition)) return;

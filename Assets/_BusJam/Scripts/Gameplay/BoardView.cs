@@ -76,7 +76,7 @@ namespace BusJam.Gameplay
             rimInnerPool = CreatePool(rimInnerPrefab);
         }
 
-        // Material overrides belong to pooled board visuals, never the shared kit prefabs or slots.
+        // Materyal override'ları havuzdaki board görsellerine aittir, asla paylaşılan kit prefab'larına ya da slotlara değil.
         private Transform CreateBoardVisual(Transform prefab, bool tile)
         {
             Transform visual = Instantiate(prefab, transform);
@@ -231,7 +231,7 @@ namespace BusJam.Gameplay
 
                     Vector3 corner = CellToLocal(new Vector2Int(cx, cy)) + new Vector3(-0.5f, 0f, 0.5f) * cellSize;
 
-                    // The exit opens onto the sidewalk. Finish only the side edges here, without a cross-board lip.
+                    // Çıkış kaldırıma açılır. Burada yalnız yan kenarlar bitirilir, tahta boyunca bir kenar çıkıntısı olmadan.
                     if (cy == 0)
                     {
                         if (se != sw)

@@ -5,7 +5,7 @@ namespace BusJam.Core
 {
     public enum LayoutMode { Portrait, Square, Landscape }
 
-    /// <summary>Publishes safe viewport and aspect-band changes without changing UI layout.</summary>
+    /// <summary>UI düzenini değiştirmeden güvenli viewport ve en-boy bandı değişimlerini yayınlar.</summary>
     [ExecuteAlways]
     public sealed class LayoutModeController : MonoBehaviour
     {

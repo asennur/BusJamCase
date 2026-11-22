@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace BusJam.LevelEditor
 {
-    // UI Toolkit bindings for the existing draft editor API.
+    // Mevcut taslak editör API'si için UI Toolkit bağlantıları.
     public partial class LevelEditorPanel
     {
         [Header("UI Toolkit")]
@@ -80,7 +80,7 @@ namespace BusJam.LevelEditor
             if (waitingForTree && document.rootVisualElement?.Q("editor-root") != null) OnEnable();
         }
 
-        // UIDocument may enable after this component; only cache a populated tree.
+        // UIDocument bu bileşenden sonra enable olabilir; yalnız dolu ağaç önbelleğe alınır.
         private bool CacheToolkit()
         {
             var current = document.rootVisualElement;
@@ -111,7 +111,7 @@ namespace BusJam.LevelEditor
         }
 
         private void SaveDraft() => Save();
-        // Native dropdowns are panel siblings, so they also need the shared sheet.
+        // Yerel dropdown'lar panel kardeşidir, bu yüzden onlara da ortak stil sayfası gerekir.
         private void OnPanelAttached(AttachToPanelEvent evt) => ApplyPanelTheme(evt.destinationPanel);
         private void ApplyPanelTheme(IPanel panel)
         {
@@ -185,7 +185,7 @@ namespace BusJam.LevelEditor
             uiRoot.style.paddingTop = h * (1f - safe.yMax); uiRoot.style.paddingBottom = h * safe.yMin;
         }
 
-        // Empty flex containers ignore picking, leaving the board reachable.
+        // Boş flex kapsayıcılar seçimi yok sayar, board erişilebilir kalır.
         public bool BlocksBoard(Vector2 screen)
         {
             if (documentRoot == null || documentRoot.panel == null) return false;
@@ -289,7 +289,7 @@ namespace BusJam.LevelEditor
             }
         }
 
-        // Pool chip buttons and their callbacks as bus/queue lengths change.
+        // Otobüs/kuyruk uzunlukları değiştikçe çip butonları ve callback'leri havuzlanır.
         private sealed class ChipRow
         {
             private readonly LevelEditorPanel owner;

@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace BusJam.UI
 {
-    /// <summary>Installs source-matched, non-pickable SVG decoration once per visual tree.</summary>
+    /// <summary>Kaynakla eşleşen, seçilemeyen SVG dekorasyonunu her görsel ağaçta bir kez kurar.</summary>
     public static class VectorArt
     {
         public static void Apply(VisualElement root)
@@ -52,7 +52,7 @@ namespace BusJam.UI
         }
     }
 
-    /// <summary>Keeps Button.text and native activation while drawing text above the art layers.</summary>
+    /// <summary>Button.text'i ve yerel aktivasyonu korur, metni görsel katmanların üstünde çizer.</summary>
     public sealed class VectorButton : Button
     {
         public new class UxmlFactory : UxmlFactory<VectorButton, UxmlTraits> { }
