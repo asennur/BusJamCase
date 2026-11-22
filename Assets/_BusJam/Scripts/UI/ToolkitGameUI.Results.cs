@@ -21,7 +21,7 @@ namespace BusJam.UI
         private float RetryDuration => resultTimeline.Length(ResultTrack.Retry);
         private ResultStep Step(ResultStepId id) => resultTimeline.Get(id);
         private float RetryReadyAt => Step(ResultStepId.Panel).start + Step(ResultStepId.Panel).duration;
-        private VisualElement complete, completePanel, resultHeader, rays, pile, rewardContent, rewardFlash;
+        private VisualElement complete, completePanel, resultHeader, rays, raysFront, raysBack, halo, burst, pile, rewardContent, rewardFlash;
         private VisualElement resultCoinPlate, effects, fail, failPanel, failIcon, lifeCost, noLives;
         private VisualElement buttonGlow, floatingHeart, failEffects, failHudHeart, resultBoosters;
         private Label rewardLabel, resultCoins, failReason, failLevel, noLivesCount, noLivesCountdown, failLives, failCountdown;
@@ -29,6 +29,13 @@ namespace BusJam.UI
         private readonly VisualElement[] confetti = new VisualElement[96];
         private const int ColoredConfetti = 72; // the rest are small white paper flecks
         private readonly VisualElement[] twinkles = new VisualElement[8];
+        private readonly VisualElement[] dust = new VisualElement[12];
+        // Başlık çevresindeki parıltı noktaları (başlık kutusu 739x380 ref px).
+        private static readonly Vector2[] TwinkleSpots =
+        { new Vector2(78, 92), new Vector2(648, 70), new Vector2(30, 236), new Vector2(700, 214),
+          new Vector2(206, 34), new Vector2(560, 22), new Vector2(150, 318), new Vector2(612, 330) };
+        private static readonly Color ResultDim = new Color(.03f, .03f, .17f, .86f);
+        private float idleTime;
         private readonly VisualElement[] pileGlints = new VisualElement[4];
         private readonly VisualElement[] flyingCoins = new VisualElement[FlyingCoinCount];
         private readonly string[] arrivalLabels = new string[FlyingCoinCount + 1];
@@ -60,6 +67,8 @@ namespace BusJam.UI
             celebrationImage = root.Q<Image>("celebration-bus");
             if (Application.isPlaying) InitializeCelebrationBus();
             resultHeader = root.Q("complete-title-group"); rays = root.Q("complete-rays");
+            raysFront = root.Q("rays-front"); raysBack = root.Q("rays-back");
+            halo = root.Q("complete-halo"); burst = root.Q("complete-burst");
             pile = root.Q("reward-pile"); rewardContent = root.Q("reward-content");
             rewardFlash = root.Q("reward-flash"); rewardLabel = root.Q<Label>("reward-label");
             resultCoinPlate = root.Q("result-coin-plate"); resultCoins = root.Q<Label>("result-coins");
@@ -83,9 +92,10 @@ namespace BusJam.UI
             for (int i = 0; i < twinkles.Length; i++)
             {
                 twinkles[i] = Effect(sparkleLayer, "result-sparkle");
-                twinkles[i].style.left = Length.Percent(5 + i * 12);
-                twinkles[i].style.top = Length.Percent(i % 2 == 0 ? 14 : 70);
+                MoveElement(twinkles[i], TwinkleSpots[i] - new Vector2(19, 19));
             }
+            VisualElement dustLayer = root.Q("complete-dust");
+            for (int i = 0; i < dust.Length; i++) dust[i] = Effect(dustLayer, "result-dust");
             for (int i = 0; i < pileGlints.Length; i++)
             {
                 pileGlints[i] = Effect(root.Q("pile-glints"), "result-sparkle");
@@ -176,13 +186,16 @@ namespace BusJam.UI
             var busStep = Step(ResultStepId.CelebrationBus);
             if (busStep.enabled) celebrationBus?.Sample(time);
             else celebrationBus?.Hide();
-            complete.style.backgroundColor = new Color(.12f, 0, .19f, .9f * Step(ResultStepId.Overlay).Evaluate(time));
+            var dim = ResultDim; dim.a *= Step(ResultStepId.Overlay).Evaluate(time);
+            complete.style.backgroundColor = dim;
             resultCoinPlate.style.opacity = Step(ResultStepId.CoinPlate).Evaluate(time);
             var title = Step(ResultStepId.Title);
             resultHeader.style.opacity = title.Visible(time) ? 1 : 0;
-            ScaleElement(resultHeader, Mathf.Max(.01f, title.Evaluate(time)));
-            float ray = Step(ResultStepId.Rays).Evaluate(time);
-            rays.style.opacity = .8f * ray; ScaleElement(rays, .5f + ray * 1.5f);
+            // Pop-in: küçükten taşarak oturur, hafif eğiklikten düzelir.
+            float pop = title.Evaluate(time);
+            ScaleElement(resultHeader, Mathf.Max(.01f, .3f + .7f * pop));
+            resultHeader.style.rotate = new Rotate(-6 * (1 - Mathf.Clamp01(pop)));
+            AnimateHeading();
             var pileStep = Step(ResultStepId.CoinPile);
             pile.style.opacity = pileStep.Visible(time) ? 1 : 0;
             rewardContent.style.opacity = 1;
@@ -208,18 +221,55 @@ namespace BusJam.UI
 
         private void SetCelebrationIdle(float time)
         {
-            rays.style.rotate = new Rotate(time * 5);
-            for (int i = 0; i < twinkles.Length; i++)
-            {
-                float pulse = Mathf.Pow(Mathf.Max(0, Mathf.Sin(time * 5 + i * 1.7f)), 4);
-                twinkles[i].style.opacity = Step(ResultStepId.Title).Visible(celebrationTime) ? pulse : 0;
-                ScaleElement(twinkles[i], .15f + pulse * .7f);
-            }
+            idleTime = time;
+            AnimateHeading();
             for (int i = 0; i < pileGlints.Length; i++)
             {
                 float pulse = Mathf.Pow(Mathf.Max(0, Mathf.Sin(time * 8 + i * 2.1f)), 8);
                 pileGlints[i].style.opacity = Step(ResultStepId.CoinPile).Visible(celebrationTime) ? pulse : 0;
                 ScaleElement(pileGlints[i], .15f + pulse * .7f);
+            }
+        }
+
+        /// <summary>Başlık ışığı: yumuşak hale (giriş + nefes), ters dönen iki ışın katmanı, oturma anında parlama,
+        /// yükselen toz ve yanıp sönen yıldızlar. Giriş celebrationTime'dan, döngü idleTime'dan; kapalı form, ayırma yok.</summary>
+        private void AnimateHeading()
+        {
+            var title = Step(ResultStepId.Title);
+            var rayStep = Step(ResultStepId.Rays);
+            float t = celebrationTime, idle = idleTime;
+            bool shown = title.Visible(t);
+            float open = rayStep.enabled ? 1 - Mathf.Pow(1 - rayStep.Phase(t), 3) : 1;
+            float breathe = Mathf.Sin(idle * 2.1f);
+            float land = title.start + title.duration * .6f;
+            float flash = Phase(t, land, .5f);
+            float flashPulse = t >= land ? Mathf.Sin(flash * Mathf.PI) : 0;
+
+            halo.style.opacity = shown ? Mathf.Min(1, .55f * open + .08f * breathe * open + .35f * flashPulse) : 0;
+            ScaleElement(halo, (.55f + .45f * open) * (1 + .04f * breathe));
+            rays.style.opacity = shown ? .34f * open * (.85f + .15f * breathe) : 0;
+            rays.style.scale = new Scale(new Vector3(.7f + .3f * open, (.7f + .3f * open) * .62f, 1));
+            raysFront.style.rotate = new Rotate(idle * 6);
+            raysBack.style.rotate = new Rotate(9 - idle * 4);
+            burst.style.opacity = t >= land && flash < 1 ? .9f * (1 - flash) : 0;
+            ScaleElement(burst, .4f + 1.8f * (1 - (1 - flash) * (1 - flash)));
+
+            for (int i = 0; i < dust.Length; i++)
+            {
+                float seed = (i * .618034f) % 1, period = 3.2f + seed * 1.8f;
+                float f = (idle / period + seed) % 1;
+                float x = 90 + seed * 560 + Mathf.Sin(f * 6.283f + i) * 14;
+                float y = 340 - f * 300;
+                MoveElement(dust[i], new Vector2(x - 13, y - 13));
+                dust[i].style.opacity = shown ? open * .8f * Mathf.Sin(f * Mathf.PI) : 0;
+                ScaleElement(dust[i], .35f + .5f * ((i * .414214f) % 1));
+            }
+            for (int i = 0; i < twinkles.Length; i++)
+            {
+                float pulse = Mathf.Pow(Mathf.Max(0, Mathf.Sin(idle * 3.4f + i * 1.9f)), 6);
+                twinkles[i].style.opacity = shown ? pulse * open : 0;
+                ScaleElement(twinkles[i], .2f + pulse * (i % 3 == 0 ? 1.1f : .75f));
+                twinkles[i].style.rotate = new Rotate(pulse * 45);
             }
         }
 

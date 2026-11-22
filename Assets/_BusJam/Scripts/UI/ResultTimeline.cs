@@ -167,13 +167,13 @@ namespace BusJam.UI
         }
         private static float Finite(float value) => float.IsNaN(value) || float.IsInfinity(value) ? 0 : Mathf.Max(0, value);
 
-        private static ResultStep S(ResultStepId id, float start, float duration, ResultEase ease = ResultEase.Linear, float stagger = 0)
-            => new ResultStep { id = id, enabled = true, start = start, duration = duration, ease = ease, overshoot = 1.70158f, stagger = stagger };
+        private static ResultStep S(ResultStepId id, float start, float duration, ResultEase ease = ResultEase.Linear, float stagger = 0, float overshoot = 1.70158f)
+            => new ResultStep { id = id, enabled = true, start = start, duration = duration, ease = ease, overshoot = overshoot, stagger = stagger };
         private static List<ResultStep> Defaults() => new List<ResultStep>
         {
             S(ResultStepId.Confetti, .3f, 1f, stagger: .009f),
             S(ResultStepId.Overlay, 1.05f, .2f), S(ResultStepId.CelebrationBus, 1.05f, 2.4f),
-            S(ResultStepId.Title, 1.75f, .3f, ResultEase.OutBack), S(ResultStepId.Rays, 1.75f, .3f),
+            S(ResultStepId.Title, 1.75f, .42f, ResultEase.OutBack, overshoot: 2.4f), S(ResultStepId.Rays, 1.75f, .6f),
             S(ResultStepId.CoinPile, 2.5f, .3f, ResultEase.OutBack), S(ResultStepId.CoinCount, 2.5f, .9f, ResultEase.OutQuad),
             S(ResultStepId.ContinueButton, 2.6f, .3f, ResultEase.OutBack),
             S(ResultStepId.CoinPlate, .3f, .15f), S(ResultStepId.RewardFlash, 2.5f, .45f), S(ResultStepId.IntroHold, 3.4f, .05f),
