@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3895842214840055407
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4697092150340531548}
+  - component: {fileID: 1913134647904152739}
+  m_Layer: 0
+  m_Name: Board
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4697092150340531548
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3895842214840055407}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 3.72}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1913134647904152739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3895842214840055407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a933b84b9b1fe04cbfbb351affbf88f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  passengerPrefab: {fileID: 2193731836056189059, guid: 3e2ab979d65836442b9cb5a7766e53d8, type: 3}
+  tilePrefab: {fileID: 1312243618980957560, guid: 8e9b40f9869eb974d90c91bdeb625e6d, type: 3}
+  tunnelPrefab: {fileID: 4711668801961494322, guid: d5bbb84b6b01e3944a8b0df4a1af3bea, type: 3}
+  obstaclePrefab: {fileID: 3110265379363359241, guid: 412c5557e83b3db4cb378a2612de869f, type: 3}
+  rimStraightPrefab: {fileID: 2547961605745519088, guid: 427cad135e9983b49b063b4c82ff5d72, type: 3}
+  rimOuterPrefab: {fileID: 5523746574106995505, guid: 81e319f8c2b171541be89f13c87bfff6, type: 3}
+  rimInnerPrefab: {fileID: 1468180946331627997, guid: f598a91e042127448971bebe7e46fc28, type: 3}
+  rimStraightYaw: 180
+  rimOuterYaw: 180
+  rimInnerYaw: 180
+  sidewalkEdgeExtraCells: 12
+  sidewalkJoinDepth: 0.5
+  colorMaterials:
+  - {fileID: 2100000, guid: 8704c296d4af58c4396adb0a4e87ce9c, type: 2}
+  - {fileID: 2100000, guid: 78ca3a4aed7b08c4f93012ada5fcc88c, type: 2}
+  - {fileID: 2100000, guid: 8a6356f6252d1e84b8e90163ed037e3e, type: 2}
+  - {fileID: 2100000, guid: d6eb81ed9f539b14ebcc50e7acfa024d, type: 2}
+  - {fileID: 2100000, guid: affd5ada359936549a8a712185dfce9c, type: 2}
+  - {fileID: 2100000, guid: a6f899608bbd6894c91c04e136da1c79, type: 2}
+  - {fileID: 2100000, guid: 8b0665dba53bd5247adffc0e89b986ce, type: 2}
+  hiddenMaterial: {fileID: 2100000, guid: f1807f7c66fdbc94384ba29352548984, type: 2}
+  cellSize: 1
+  baseMaterial: {fileID: 2100000, guid: 77d794c9eb61150489aa5d7967782816, type: 2}
+  sidewalkMaterial: {fileID: 2100000, guid: a894c916c1d5c674f82ca49ee0a5aa56, type: 2}

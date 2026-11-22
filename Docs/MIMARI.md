@@ -23,7 +23,7 @@ Bu dosya kodun tek tasarım kaynağıdır; kod (AI destekli) buna uyar. Kararlar
 - UI: **UI Toolkit** (`UI/GameUI.uxml`, `Theme.uss`, `GamePanelSettings`: Scale With Screen Size, referans 1080×1920, Expand). Güvenli alan `LayoutModeController.SafeViewport` ile kök elemana padding olarak verilir. UI çizimleri SVG, `AntialiasedSvgImporter` ile rasterlanır.
 - Input: eski Input Manager, `Input.GetMouseButtonDown(0)` (dokunmayı da karşılar).
 - Text: UI metinleri UI Toolkit font asset'i (Fredoka); dünyadaki metinler (tünel sayacı vb.) TextMeshPro.
-- Kamera: perspektif, yukarıdan eğik (~65°, §2 ile aynı), **sabit** (Asen kararı, Z5.1). Grid boyutu `GameRules.MaxWidth`/`MaxHeight` (7×9) ile sınırlı, bu sınırın içindeki her level sabit kadraja sığar. Otobüs ekranın üstünde, bekleme alanı ortada, grid altta.
+- Kamera: perspektif, yukarıdan eğik (~65°, §2 ile aynı), **sabit** (Asen kararı, Z5.1). Grid boyutu `GameRules.MaxWidth`/`MaxHeight` (9×9) ile sınırlı; referanstan (7×8) büyük gridde `CameraFitter` kamerayı bakış ekseninde geri çeker (Asen, 22 Kasım 2026, LE1). Otobüs ekranın üstünde, bekleme alanı ortada, grid altta.
 
 ## 2. Görseller: placeholder
 
@@ -165,6 +165,7 @@ Decision: Ready is an explicit state, and coins use a single update with a pop/p
 ## 6. Level Editor sahnesi (`Scenes/LevelEditor`)
 
 - Play modunda çalışan ayrı sahne, UI Toolkit paneli (`LevelEditorPanel`) + grid görünümü (oyunun `BoardView`'ını yeniden kullanır).
+- Karar (LE1, Asen, 22 Kasım 2026): Editör dünyası oyunla aynı prefab'lardan gelir: `Prefabs/Scene/Lighting` (Directional Light + Global Volume), `Background` (zemin, çimen, bordür), `Board`, `BusStation`, `WaitingArea`; ortam ışığı (Gradient) ve kamera ayarları Game ile aynı. Kamera oyunun `CameraFitter` kadrajını kullanır; `EditorBoardViewport` UI'daki `.editor-board-space` alanını `SetScreenArea` ile verir, kadraj o bölgeye güvenli alansız telefon ekranı gibi çizilir.
 - Var olan leveli seç/yükle ya da yeni oluştur.
 - Genişlik/yükseklik, hücreye tıklayarak boya: araç = `Void`, `Empty`, renkli yolcu, gizli aç/kapa.
 - Yolcu fırçasında ip sayısı 0–4 seçilir; diğer hücre tipleri ipsiz yazılır (Asen kuralı, 19 Kasım).
