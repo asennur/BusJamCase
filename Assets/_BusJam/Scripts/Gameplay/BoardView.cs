@@ -35,8 +35,8 @@ namespace BusJam.Gameplay
         [SerializeField] private Material[] colorMaterials;
         [SerializeField] private Material hiddenMaterial;
         [Header("Erişilemez yolcu (renk başına bir kez türetilir)")]
-        [Tooltip("Gövde parlaklığı çarpanı (HSV V); referans ~0.75-0.8.")]
-        [SerializeField, Range(0f, 1f)] private float blockedBrightness = 0.8f;
+        [Tooltip("Gövde parlaklığı çarpanı (HSV V); referans 0.72-0.87.")]
+        [SerializeField, Range(0f, 1f)] private float blockedBrightness = 0.85f;
         [Tooltip("Gövde doygunluğu çarpanı (HSV S).")]
         [SerializeField, Range(0f, 1f)] private float blockedSaturation = 0.95f;
         [Tooltip("Specular parlama çarpanı; referansta erişilemez yolcuda parlama yok.")]

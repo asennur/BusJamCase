@@ -65,6 +65,11 @@ MonoBehaviour:
   - {fileID: 2100000, guid: a6f899608bbd6894c91c04e136da1c79, type: 2}
   - {fileID: 2100000, guid: 8b0665dba53bd5247adffc0e89b986ce, type: 2}
   hiddenMaterial: {fileID: 2100000, guid: f1807f7c66fdbc94384ba29352548984, type: 2}
+  blockedBrightness: 0.85
+  blockedSaturation: 0.95
+  blockedSpecular: 0
+  thinOutlineScale: 0.4
+  thinOutlineBrightness: 0.4
   cellSize: 1
   baseMaterial: {fileID: 2100000, guid: 77d794c9eb61150489aa5d7967782816, type: 2}
   sidewalkMaterial: {fileID: 2100000, guid: a894c916c1d5c674f82ca49ee0a5aa56, type: 2}
