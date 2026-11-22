@@ -34,7 +34,7 @@ namespace BusJam.UI
         private static readonly Vector2[] TwinkleSpots =
         { new Vector2(78, 92), new Vector2(648, 70), new Vector2(30, 236), new Vector2(700, 214),
           new Vector2(206, 34), new Vector2(560, 22), new Vector2(150, 318), new Vector2(612, 330) };
-        private static readonly Color ResultDim = new Color(.03f, .03f, .17f, .86f);
+        private static readonly Color ResultDim = new Color(.03f, .04f, .19f, .9f);
         private float idleTime;
         private readonly VisualElement[] pileGlints = new VisualElement[4];
         private readonly VisualElement[] flyingCoins = new VisualElement[FlyingCoinCount];
@@ -245,9 +245,9 @@ namespace BusJam.UI
             float flash = Phase(t, land, .5f);
             float flashPulse = t >= land ? Mathf.Sin(flash * Mathf.PI) : 0;
 
-            halo.style.opacity = shown ? Mathf.Min(1, .55f * open + .08f * breathe * open + .35f * flashPulse) : 0;
+            halo.style.opacity = shown ? Mathf.Min(1, .75f * open + .08f * breathe * open + .25f * flashPulse) : 0;
             ScaleElement(halo, (.55f + .45f * open) * (1 + .04f * breathe));
-            rays.style.opacity = shown ? .34f * open * (.85f + .15f * breathe) : 0;
+            rays.style.opacity = shown ? .12f * open * (.85f + .15f * breathe) : 0;
             rays.style.scale = new Scale(new Vector3(.7f + .3f * open, (.7f + .3f * open) * .62f, 1));
             raysFront.style.rotate = new Rotate(idle * 6);
             raysBack.style.rotate = new Rotate(9 - idle * 4);
