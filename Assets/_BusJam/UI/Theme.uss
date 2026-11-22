@@ -126,8 +126,8 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 .rays-back { -unity-background-image-tint-color: #7fb2ff; scale: 1.18 1.18; }
 .result-burst { position: absolute; left: 89px; top: 10px; width: 560px; height: 360px; background-image: url("Vector/glow_soft.svg"); -unity-background-scale-mode: stretch-to-fill; -unity-background-image-tint-color: #f4fbff; }
 .result-dust { width: 26px; height: 26px; background-image: url("Vector/glow_soft.svg"); -unity-background-image-tint-color: #fff4c8; }
-.reward-content { position: absolute; left: 0; right: 0; top: 776px; height: 320px; align-items: center; justify-content: flex-start; }
-.reward-pile { width: 300px; height: 235px; margin-bottom: -26px; background-image: url("Vector/coin_pile.svg"); -unity-background-scale-mode: scale-to-fit; }
+.reward-content { position: absolute; left: 0; right: 0; top: 700px; height: 400px; align-items: center; justify-content: flex-start; }
+.reward-pile { width: 560px; height: 280px; margin-bottom: -6px; background-image: url("Vector/coin_pile.svg"); -unity-background-scale-mode: scale-to-fit; }
 .reward-label { font-size: 88px; color: rgb(246, 244, 250); margin: 0; padding: 0; -unity-text-outline-color: #190e1e; -unity-text-outline-width: 6px; text-shadow: 3px 7px 0 #08060c; }
 .reward-flash { background-image: url("Vector/glow_soft.svg"); -unity-background-scale-mode: scale-to-fit; }
 .pooled-effect { position: absolute; left: 0; top: 0; -unity-background-scale-mode: scale-to-fit; }

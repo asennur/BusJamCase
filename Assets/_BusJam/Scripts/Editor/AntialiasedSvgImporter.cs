@@ -52,9 +52,9 @@ public sealed class AntialiasedSvgImporter : SVGImporter
         if (name == "surface_result_modal") return 1024;
         if (name == "surface_result_inner" || name == "surface_result_header") return 512;
         if (name == "panel_tip" || name == "hud_counter") return 512; // hud_counter: USS dilimleri 85/88 texel
-        if (name == "result_rays") return 1024;
+        if (name == "result_rays" || name == "coin_pile") return 1024;
         if (name == "title_complete" || name == "ribbon_blue") return 1536;
-        if (name == "fx_tap_hand" || name == "glow_soft" || name == "coin_pile" || name.StartsWith("icon_heart")) return 512;
+        if (name == "fx_tap_hand" || name == "glow_soft" || name.StartsWith("icon_heart")) return 512;
         return 256;
     }
 
