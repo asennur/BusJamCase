@@ -77,7 +77,6 @@ namespace BusJam.Gameplay
         internal ParticleSystem Exhaust { get; set; }
         public PassengerColor Color { get; private set; }
         internal Renderer PresentationBody => body;
-        internal Transform PresentationSeat(int index) => seatPoints[index];
         public bool IsReservedFull => reservedCount >= seatPoints.Length;
         public Transform DoorEntry => doorEntry;
         public bool CanApproach { get; private set; }

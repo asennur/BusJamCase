@@ -107,7 +107,6 @@ namespace BusJam.UI
         public CelebrationChoreography Celebration => celebration;
         [NonSerialized] private ResultStep[] lookup;
         [NonSerialized] private readonly float[] lengths = new float[4];
-        public IReadOnlyList<ResultStep> Steps => steps;
         public int Revision { get; private set; }
         public string ValidationMessage { get; private set; }
         public float Length(ResultTrack track) => lengths[(int)track];

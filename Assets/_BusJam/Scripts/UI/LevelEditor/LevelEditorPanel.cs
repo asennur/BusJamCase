@@ -48,7 +48,6 @@ namespace BusJam.LevelEditor
         public LevelData Draft => draft;
         /// <summary>Colour picked in the palette; while set, left click places this passenger.</summary>
         public PassengerColor? SelectedColor { get; private set; }
-        public Camera BoardCamera => boardCamera;
         public int LevelNumber => sourceIndex >= 0 ? sourceIndex + 1 : database.Count + 1;
 
         private readonly Board board = new Board();

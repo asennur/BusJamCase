@@ -33,7 +33,6 @@ namespace BusJam.Gameplay
         private bool hasLevel;
         public event System.Action Fitted;
         public Bounds CurrentBounds => hasLevel ? levelBounds : playBounds;
-        public Vector3 ReferencePosition => referencePosition;
 
         private void OnEnable()
         {

@@ -8,7 +8,6 @@ namespace BusJam.Core
     {
         public const float ReferenceHeight = 1600f;
         public const float ReferenceAspect = 739f / 1600f;
-        public const float ColumnWidth = 739f;
         public const float HudTop = 72f;       // Level card top edge
         public const float NotchGap = -17f;    // the reference card overlaps the status-bar strip by 17 px
         public const float BannerHeight = 93f; // ad banner placeholder, sits on the bottom safe inset

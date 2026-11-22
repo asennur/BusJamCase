@@ -72,7 +72,6 @@ namespace BusJam.Gameplay
         public PassengerColor Color { get; private set; }
         internal Renderer PresentationBody => body;
         internal Animator PresentationAnimator => animator;
-        internal Vector3 PresentationSeatRotation => seatRotation;
 
         // The isolated presentation reuses the prefab without gameplay state, feedback or input.
         internal void PrepareCelebration()
