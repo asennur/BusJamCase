@@ -24,12 +24,16 @@ Material:
     serializedVersion: 3
     m_TexEnvs: []
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _AmbientStrength: 0.25
+    - _RampSmooth: 0.06
+    - _RampThreshold: 0.45
     m_Colors:
-    - _Grass: {r: 0.62, g: 0.88, b: 0.12, a: 1}
-    - _Grout: {r: 0.3, g: 0.25, b: 0.52, a: 1}
-    - _Road: {r: 0.51, g: 0.445, b: 0.78, a: 1}
-    - _Sidewalk: {r: 0.8, g: 0.735, b: 0.895, a: 1}
-    - _TileDark: {r: 0.5, g: 0.44, b: 0.75, a: 1}
-    - _TileLight: {r: 0.6, g: 0.52, b: 0.84, a: 1}
+    - _Grass: {r: 0.61459714, g: 0.85968, b: 0.115375005, a: 1}
+    - _Grout: {r: 0.29738572, g: 0.24422726, b: 0.4999584, a: 1}
+    - _Road: {r: 0.5055557, g: 0.43472454, b: 0.74993753, a: 1}
+    - _ShadeColor: {r: 0.72, g: 0.7, b: 0.88, a: 1}
+    - _Sidewalk: {r: 0.7930286, g: 0.7180282, b: 0.8605053, a: 1}
+    - _TileDark: {r: 0.49564287, g: 0.42984, b: 0.72109383, a: 1}
+    - _TileLight: {r: 0.59477144, g: 0.50799274, b: 0.80762506, a: 1}
   m_BuildTextureStacks: []

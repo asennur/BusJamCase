@@ -19,13 +19,17 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties:
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _AmbientStrength: 0.25
     - _GroundHeight: -0.3
+    - _RampSmooth: 0.06
+    - _RampThreshold: 0.45
     m_Colors:
-    - _Sidewalk: {r: 0.8, g: 0.735, b: 0.895, a: 1}
+    - _ShadeColor: {r: 0.72, g: 0.7, b: 0.88, a: 1}
+    - _Sidewalk: {r: 0.7930286, g: 0.7180282, b: 0.8605053, a: 1}
   m_BuildTextureStacks: []

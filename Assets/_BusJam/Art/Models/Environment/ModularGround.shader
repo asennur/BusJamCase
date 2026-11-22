@@ -1,3 +1,4 @@
+// Prosedürel oyun zemini (karo, kaldırım, yol, çimen); düz yüzey, ortak toon ışığı vertex'te.
 Shader "BusJam/Modular Ground"
 {
     Properties
@@ -8,6 +9,10 @@ Shader "BusJam/Modular Ground"
         _Sidewalk ("Sidewalk", Color) = (0.77,0.72,0.87,1)
         _Road ("Road", Color) = (0.47,0.40,0.74,1)
         _Grass ("Grass", Color) = (0.61,0.86,0.12,1)
+        _ShadeColor ("Toon Shade Tint", Color) = (0.72, 0.7, 0.88, 1)
+        _RampThreshold ("Toon Ramp Threshold", Range(0, 1)) = 0.45
+        _RampSmooth ("Toon Ramp Smooth", Range(0.001, 0.5)) = 0.06
+        _AmbientStrength ("Toon Ambient", Range(0, 1)) = 0.25
     }
     SubShader
     {
@@ -18,12 +23,13 @@ Shader "BusJam/Modular Ground"
             #pragma vertex Vert
             #pragma fragment Frag
             #pragma multi_compile_instancing
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "../../../Shaders/ToonLighting.hlsl"
             #include "../../../Shaders/BackgroundTone.hlsl"
             struct Attributes { float4 positionOS:POSITION; float2 band:TEXCOORD1; UNITY_VERTEX_INPUT_INSTANCE_ID };
-            struct Varyings { float4 positionCS:SV_POSITION; float2 ground:TEXCOORD0; float band:TEXCOORD1; UNITY_VERTEX_INPUT_INSTANCE_ID };
+            struct Varyings { float4 positionCS:SV_POSITION; float2 ground:TEXCOORD0; float band:TEXCOORD1; half3 light:TEXCOORD2; UNITY_VERTEX_INPUT_INSTANCE_ID };
             CBUFFER_START(UnityPerMaterial)
                 half4 _TileLight, _TileDark, _Grout, _Sidewalk, _Road, _Grass;
+                half4 _ShadeColor; half _RampThreshold, _RampSmooth, _AmbientStrength;
             CBUFFER_END
             Varyings Vert(Attributes input)
             {
@@ -31,7 +37,8 @@ Shader "BusJam/Modular Ground"
                 UNITY_SETUP_INSTANCE_ID(input); UNITY_TRANSFER_INSTANCE_ID(input,output);
                 float3 world=TransformObjectToWorld(input.positionOS.xyz);
                 output.positionCS=TransformWorldToHClip(world);
-                output.ground=world.xz; output.band=input.band.x; return output;
+                output.ground=world.xz; output.band=input.band.x;
+                output.light=ToonVertexLight(half3(0, 1, 0), _ShadeColor.rgb, _RampThreshold, _RampSmooth, _AmbientStrength); return output;
             }
             float Stripe(float coordinate, float center, float halfWidth)
             {
@@ -71,7 +78,7 @@ Shader "BusJam/Modular Ground"
                 }
                 else if(input.band<3.5) color=_Grass.rgb;
                 else color=half3(.96,.96,1);
-                return half4(MuteBackground(color),1);
+                return half4(MuteBackground(color*input.light),1);
             }
             ENDHLSL
         }
