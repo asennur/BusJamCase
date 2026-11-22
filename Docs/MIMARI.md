@@ -9,19 +9,20 @@ Bu dosya kodun tek tasarım kaynağıdır; kod (AI destekli) buna uyar. Kararlar
 - Her karede çalışan kodda allocation yok: LINQ, `new List`, string birleştirme, `GetComponent` yok. Boştaki sistem `Update` kullanmaz.
 - Sık yaratılan nesneler (yolcu, otobüs) `UnityEngine.Pool.ObjectPool` ile havuzdan gelir.
 - Yorumlar kısa: sınıf ve gerekli metot başına bir iki cümle, Türkçe. Satır satır yorum yok.
-- Namespace: `BusJam.Core`, `BusJam.Level`, `BusJam.Gameplay`, `BusJam.UI`, `BusJam.Save`, `BusJam.LevelEditor`.
+- Namespace: `BusJam.Core`, `BusJam.Level` (veri, `LevelSolver`, otomatik doldurma), `BusJam.Gameplay`, `BusJam.UI`, `BusJam.Save`, `BusJam.LevelEditor` (editör sahnesi UI'ı), `BusJam.EditorTools` (`Scripts/Editor`). İstisna: `AntialiasedSvgImporter` global kalır; SVG `.meta` dosyalarındaki importer override'ı tip adının hash'ini tutar, ad değişirse override kopar.
+- Asset'ler `Resources.Load` ile değil Inspector referansıyla gelir; `_BusJam/Resources` klasörü yok (DOTween'in kendi `Assets/Resources/DOTweenSettings.asset`'i hariç). Karar: R7 temizliği, `CelebrationSettings` `Settings/` altında ve `ToolkitGameUI`'a bağlı (22 Kasım 2026).
 - İsimlendirme: `PascalCase` tip/metot/property, `camelCase` alan, `[SerializeField] private` tercih edilir.
 - Kod `Assets/_BusJam/Scripts/{Core,Level,Gameplay,UI,Save,Editor}` altında. Editor-only kod `Editor` klasöründe ya da `#if UNITY_EDITOR` içinde.
 
 ## 1. Platform: dikey mobil
 
-- Render: **URP 14.x**, Unity 2022.3.19f1. One mobile pipeline asset: HDR off, MSAA 2x, all shadows off, one warm directional light, Gradient ambient fill, SRP Batcher on. Gameplay materials (passengers, buses, board kit) use the keyword-free `BusJam/Toon` shader (stepped diffuse, hard specular, top rim; SRP Batcher + instancing). Everything else that is lit uses the same light model from `Shaders/ToonLighting.hlsl` (half-Lambert single step + SH ambient): procedural ground, board sidewalk and menu ground light flat surfaces in the vertex stage, the moving menu scenery/road share `MenuMoving.hlsl`; menu, celebration and decor materials are `BusJam/Toon`. Only the outline hull, TMP/UI text, sprites, the menu sky and editor helpers stay unlit. Decision: one toon light model for the whole game (T1b, 22 November 2026). Decision: toon look, no realtime shadows, game key light (50,150,0) (T1, 22 November 2026). A single global `PP_Game` profile provides light LDR grading, quarter-resolution low-quality Bloom and a subtle vignette. UI stays in Screen Space Overlay; the background camera canvas may be graded. Decision: no realtime or fake shadow geometry (ZLIGHT, 20 November 2026). Exact values and cost are in `ZLIGHT-Report.md`.
+- Render: **URP 14.x**, Unity 2022.3.19f1. One mobile pipeline asset: HDR off, MSAA 2x, all shadows off, one warm directional light, Gradient ambient fill, SRP Batcher on. Gameplay materials (passengers, buses, board kit) use the keyword-free `BusJam/Toon` shader (stepped diffuse, hard specular, top rim; SRP Batcher + instancing). Everything else that is lit uses the same light model from `Shaders/ToonLighting.hlsl` (half-Lambert single step + SH ambient): procedural ground, board sidewalk and menu ground light flat surfaces in the vertex stage, the moving menu scenery/road share `MenuMoving.hlsl`; menu, celebration and decor materials are `BusJam/Toon`. Only the outline hull, TMP/UI text, sprites, the menu sky and editor helpers stay unlit. Decision: one toon light model for the whole game (T1b, 22 November 2026). Decision: toon look, no realtime shadows, game key light (50,150,0) (T1, 22 November 2026). A single global `Settings/GameVolumeProfile` (menu: `MenuVolumeProfile`) provides light LDR grading, quarter-resolution low-quality Bloom and a subtle vignette. UI stays in Screen Space Overlay; the background camera canvas may be graded. Decision: no realtime or fake shadow geometry (ZLIGHT, 20 November 2026). Exact values and cost are in `ZLIGHT-Report.md`.
 
-- Player Settings: Default Orientation **Portrait**, yalnız portrait izinli.
+- Player Settings: tasarım dikey (Portrait); ZRES kararıyla otomatik döndürme ve yeniden boyutlandırılabilir pencere açık, geniş ekranda kadraj ZRES kararına göre uyarlanır (bkz. ZRES Decision).
 - Game view referansı **1080×1920**. `Application.targetFrameRate = 60` (GameManager Awake).
-- UI: Canvas Scaler **Scale With Screen Size**, referans 1080×1920, match 0.5. HUD bir `SafeArea` paneli içinde.
+- UI: **UI Toolkit** (`UI/GameUI.uxml`, `Theme.uss`, `GamePanelSettings`: Scale With Screen Size, referans 1080×1920, Expand). Güvenli alan `LayoutModeController.SafeViewport` ile kök elemana padding olarak verilir. UI çizimleri SVG, `AntialiasedSvgImporter` ile rasterlanır.
 - Input: eski Input Manager, `Input.GetMouseButtonDown(0)` (dokunmayı da karşılar).
-- Text: TextMeshPro.
+- Text: UI metinleri UI Toolkit font asset'i (Fredoka); dünyadaki metinler (tünel sayacı vb.) TextMeshPro.
 - Kamera: perspektif, yukarıdan eğik (~65°, §2 ile aynı), **sabit** (Asen kararı, Z5.1). Grid boyutu `GameRules.MaxWidth`/`MaxHeight` (7×9) ile sınırlı, bu sınırın içindeki her level sabit kadraja sığar. Otobüs ekranın üstünde, bekleme alanı ortada, grid altta.
 
 ## 2. Görseller: placeholder
@@ -70,7 +71,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 
 - Five lives maximum, one life every 20 minutes (serialized settings). UTC regeneration persists in PlayerPrefs (`Lives`, `LastRegenUtc` ticks as a string); startup and resume recover offline time. A one-second InvokeRepeating publishes changed counts/seconds without Update polling.
 - Fail spends one life once. The HUD Restart button spends one life and retries; Fail Retry does not spend again. Starting with zero lives is blocked.
-- StartPanel remains visible at zero lives, including the existing life count/countdown. A blocked Play raises `GameManager.PlayBlockedNoLives`; UIManager overlays NoLivesPanel for a serialized 3.5 unscaled seconds after the latest press. One active coroutine observes a shared deadline; repeated presses allocate no new coroutine. Regeneration, leaving Start or disabling UI hides the warning. The translucent warning is above StartPanel and does not intercept repeated Play presses.
+- The Start screen remains visible at zero lives, including the existing life count/countdown. A blocked Play raises `GameManager.PlayBlockedNoLives`; `ToolkitGameUI` shows the no-lives overlay for a serialized 3.5 unscaled seconds after the latest press. One reusable timer tween checks a shared deadline; repeated presses allocate nothing. Regeneration, leaving Start or disabling UI hides the warning. The translucent warning is above StartPanel and does not intercept repeated Play presses.
 - Clock rollback rebases LastRegenUtc once and persists a UTC high-water guard (`LivesUtcHighWater`); returning the clock forward grants no rebound lives. Normal elapsed intervals continue below the guard, and startup preserves valid partial progress even with a future saved guard. Production uses server time.
 - Decision: Preserve the full 1.4x standing passenger world size when seated, including inverse seat-parent scale; loop imported exhaust on a smoke-only Animator layer and shake only the bus model child (ZPAX2, 19 November 2026).
 - Decision: Implement the authorized five-life / 20-minute rule and event-driven start gating (Asen rule, 19 November 2026).
@@ -109,8 +110,8 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 | `InputHandler` (Gameplay) | MonoBehaviour | Tap → kamera raycast (yolcu layer'ı) → event `PassengerTapped`, `ScreenTapped`. Kamera bir kez cache'lenir. |
 | `LevelTimer` (Gameplay) | MonoBehaviour | Yalnız çalışırken `enabled`. Görünen saniye değişince `TimeChanged`, 0'da `Expired`. |
 | `SaveSystem` (Save) | static | PlayerPrefs: son level indeksi. |
-| `UIManager` (UI) | MonoBehaviour | `StateChanged`'i dinler, panelleri açar/kapar. Paneller birbirini bilmez. |
-| `StartPanel`, `ReadyPanel`, `HudPanel`, `CompletePanel`, `FailPanel` (UI) | MonoBehaviour | Start: Level button. Ready: centered pulsing Fredoka Bold "Tap to start" over a light dim. HUD: level and timer. Complete: immediate +25 pop; flying coins credit once at the final arrival, with one counter punch and one save. Fail: reason and Retry. |
+| `ToolkitGameUI` (UI) | MonoBehaviour, partial | `StateChanged`'i dinler, UI Toolkit ekranlarını açar/kapar. Dosyalar: ana (HUD, Start/Ready, ayarlar, pause), `.Layout` (yerleşim), `.Results` (Complete/Fail, `ResultTimeline` ile örneklenen sonuç animasyonu, kutlama otobüsü), `.Transition` (geçiş karartması), `.Preview` (yalnız editör önizlemesi). `CelebrationSettings` ve `ResultTimeline` Inspector'dan. |
+| Ekranlar (`GameUI.uxml`) | UXML | Start: Level button. Ready: centered pulsing Fredoka Bold "Tap to start" over a light dim. HUD: level and timer. Complete: immediate +25 pop; flying coins credit once at the final arrival, with one counter punch and one save. Fail: reason and Retry. |
 
 Flow: `GameManager` loads the saved level into `Start` (menu). The Level button checks lives and enters `Ready`: board, buses and HUD are visible with the full stopped timer. The next tap anywhere enters `Playing`, removes the overlay and starts the timer. Passenger input runs before screen input, so this tap cannot move a passenger. The menu activation frame cannot also start play. Retry, Restart and Next load into `Ready`; zero lives returns to the normal Start menu. `PlayingStarted` shows unseen Level 1/6/8 tutorials after the ready tap and arms Level 3 to wait for the green bus.
 
@@ -161,7 +162,7 @@ Decision: Ready is an explicit state, and coins use a single update with a pop/p
 
 ## 6. Level Editor sahnesi (`Scenes/LevelEditor`)
 
-- Play modunda çalışan ayrı sahne, uGUI paneli + grid görünümü (oyunun `BoardView`'ını yeniden kullanır).
+- Play modunda çalışan ayrı sahne, UI Toolkit paneli (`LevelEditorPanel`) + grid görünümü (oyunun `BoardView`'ını yeniden kullanır).
 - Var olan leveli seç/yükle ya da yeni oluştur.
 - Genişlik/yükseklik, hücreye tıklayarak boya: araç = `Void`, `Empty`, renkli yolcu, gizli aç/kapa.
 - Yolcu fırçasında ip sayısı 0–4 seçilir; diğer hücre tipleri ipsiz yazılır (Asen kuralı, 19 Kasım).
@@ -181,4 +182,4 @@ Decision: ZRES overrides the fixed-camera and portrait-only rules: preserve the 
 
 Decision: ZSCN-2 replaces the Game background image quad with world-locked procedural tile/road bands and the approved EnvironmentKit layout; retain the inactive image, use combined static scenery meshes and event-driven landscape-only side variants (21 November 2026). Camera, gameplay anchors, lighting and grading stay authored; evidence and Edit-mode background budgets are in `ZSCN-Report.md`.
 
-Decision: ZSCN-3 renders Start with the extracted MenuKit world at (1000,0,1000), a cover-fit MenuSky camera quad, and Idle OtobusMenu. Keep the enabled gameplay camera as an unstacked URP Overlay during Start so existing Camera.main bindings survive; restore Base for every other state. Fit menu lenses by aspect band: portrait 52 degrees / 32 units, square 54 / 30, landscape 58 / 24 (21 November 2026). See `ZSCN-Report.md`.
+Decision: ZSCN-3 renders Start with the extracted MenuKit world at (1000,0,1000), a cover-fit MenuSky camera quad, and Idle BusMenu. Keep the enabled gameplay camera as an unstacked URP Overlay during Start so existing Camera.main bindings survive; restore Base for every other state. Fit menu lenses by aspect band: portrait 52 degrees / 32 units, square 54 / 30, landscape 58 / 24 (21 November 2026). See `ZSCN-Report.md`.
