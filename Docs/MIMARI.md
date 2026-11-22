@@ -172,6 +172,7 @@ Decision: Ready is an explicit state, and coins use a single update with a pop/p
 - Yolcu fırçasında pelerin: yok / açık başlar / kapalı başlar. `hidden` ile birlikte boyama hata verir; diğer hücre tiplerinde pelerin temizlenir (Asen kuralı, 19 Kasım).
 - Otobüs sırası: renk ekle/sil/sırala. Süre alanı (slot sayısı sabit, editörden ayarlanmaz).
 - Kaydet: `Validate` geçmezse hatayı göster, kaydetme. Geçerse `#if UNITY_EDITOR` ile `EditorUtility.SetDirty` + `AssetDatabase.SaveAssets`; yeni level `AssetDatabase.CreateAsset` + `LevelDatabase.Add`.
+- Karar (LE2, 22 Kasım 2026): Editör UI oyunun görsel dilinde (Fredoka, vektör butonlar, mavi popup + soket dokuları, yeni doku yok), metinler İngilizce. Dokunmatikte tek parmakla çalışır: karoya dokun = Tile > Hole > Obstacle > Tunnel, yolcuya/tünele dokun = düzenleme popup'ı (sağ/orta tık kısayol). Otobüs sırası ve tünel kuyruğu çip seç → < > Remove. Kaydedilmemiş değişiklikte New/Load ikinci basışta uygulanır. Test Play oyunda "Editor" butonu/Esc ile aynı levelde editöre döner (`EditorReturn`).
 
 Çöz: yalnız Unity Editor derlemesindeki `LevelSolver`, taslağı level numarasından hesaplanan slotlarla tarar; DFS + tam durum anahtarlı memo, en fazla üç farklı kazanan dokunuş dizisi, 200.000 durum / 5 saniye sınırı. Sınır aşımı çözülemez sayılmaz. Statik giriş `LevelSolver.SolveAll()`, sıra doğrulama `ReplaySettled`. Oyuncu build'ine çözücü girmez (ZM2b, 19 Kasım 2026).
 
