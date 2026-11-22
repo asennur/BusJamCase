@@ -166,6 +166,7 @@ Decision: Ready is an explicit state, and coins use a single update with a pop/p
 
 - Play modunda çalışan ayrı sahne, UI Toolkit paneli (`LevelEditorPanel`) + grid görünümü (oyunun `BoardView`'ını yeniden kullanır).
 - Karar (LE1, Asen, 22 Kasım 2026): Editör dünyası oyunla aynı prefab'lardan gelir: `Prefabs/Scene/Lighting` (Directional Light + Global Volume), `Background` (zemin, çimen, bordür), `Board`, `BusStation`, `WaitingArea`; ortam ışığı (Gradient) ve kamera ayarları Game ile aynı. Kamera oyunun `CameraFitter` kadrajını kullanır; `EditorBoardViewport` UI'daki `.editor-board-space` alanını `SetScreenArea` ile verir, kadraj o bölgeye güvenli alansız telefon ekranı gibi çizilir.
+- Karar (CAM, 22 Kasım 2026): Editör kamerası level boyutundan bağımsız 9×9 kadrajını kullanır (`CameraFitter.SetMinimumGrid`, `EditorBoardViewport` verir); oyun kadrajı değişmedi. `LayoutModeController` güvenli alanı `UnityEngine.Device.Screen` ölçüsünden `Screen`'e oranla taşır ve ekrana kırpar (editörde Simulator sekmesi açıkken Game view'a cihaz pikselleri geliyordu).
 - Var olan leveli seç/yükle ya da yeni oluştur.
 - Genişlik/yükseklik, hücreye tıklayarak boya: araç = `Void`, `Empty`, renkli yolcu, gizli aç/kapa.
 - Yolcu fırçasında ip sayısı 0–4 seçilir; diğer hücre tipleri ipsiz yazılır (Asen kuralı, 19 Kasım).
