@@ -33,7 +33,7 @@ ScriptedImporter:
   maxTangentAngleEnabled: 1
   maxTangentAngle: 25
   keepTextureAspectRatio: 1
-  textureSize: 2048
+  textureSize: 1536
   textureWidth: 256
   textureHeight: 256
   wrapMode: 1

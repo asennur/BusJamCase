@@ -5,7 +5,7 @@ using UnityEditor.AssetImporters;
 using UnityEngine;
 
 /// <summary>Opt-in SVG raster output, retaining the SVG source and the package's edge dilation.</summary>
-[ScriptedImporter(2, new string[0], new[] { "svg" })]
+[ScriptedImporter(4, new string[0], new[] { "svg" })]
 public sealed class AntialiasedSvgImporter : SVGImporter
 {
     public override void OnImportAsset(AssetImportContext context)
@@ -43,16 +43,21 @@ public sealed class AntialiasedSvgImporter : SVGImporter
         return TextureFormat.RGBA32;
     }
 
+    // Largest on-screen use (1440x3200 phone, 2048x2732 tablet) times ~1-1.25; soft glows go lower. USS slice
+    // margins are in texels, so a size change here must rescale the matching -unity-slice-* values.
     private static int RasterSize(string name)
     {
-        if (name.StartsWith("button_")) return 1536;
-        if (name == "surface_modal" || name == "surface_result_modal" || name == "surface_lives_modal") return 2048;
-        if (name == "surface_white" || name == "surface_result_inner") return 1536;
-        if (name == "surface_header" || name == "surface_result_header") return 1024;
-        if (name.StartsWith("title_") || name.StartsWith("logo") || name == "ribbon_purple" || name == "panel_tip" || name.EndsWith("rays")) return 2048;
-        if (name == "coin_pile") return 1536;
-        if (name == "fx_tap_hand" || name == "glow_soft") return 1024;
-        return name.StartsWith("fx_") ? 256 : 512;
+        if (name.StartsWith("button_")) return 768;
+        if (name == "surface_lives_modal") return 1536;
+        if (name == "surface_modal" || name == "surface_result_modal") return 1024;
+        if (name == "surface_white" || name == "surface_result_inner") return 512;
+        if (name == "surface_header" || name == "surface_result_header") return 512;
+        if (name == "panel_tip" || name == "hud_counter") return 512; // hud_counter: USS slices 85/88 texels
+        if (name == "result_rays" || name == "glow_rays") return 1024;
+        if (name.StartsWith("title_") || name == "ribbon_purple" || name == "coin_pile") return 1536;
+        if (name.StartsWith("logo")) return 2048;
+        if (name == "fx_tap_hand" || name == "glow_soft" || name.StartsWith("icon_heart")) return 512;
+        return 256;
     }
 
     [MenuItem("Bus Jam/Reimport Antialiased SVGs")]
