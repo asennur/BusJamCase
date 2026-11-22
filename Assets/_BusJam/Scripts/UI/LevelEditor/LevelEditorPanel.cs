@@ -56,10 +56,14 @@ namespace BusJam.LevelEditor
         private LevelData draft;
         private int sourceIndex = -1;
         private string lastMessage = "";
+        private static int returnIndex = -1;
 
         private void Start()
         {
             if (!Application.isPlaying) return;
+            // Test Play'den dönünce aynı level açılır.
+            if (returnIndex >= 0 && returnIndex < database.Count) sourceIndex = returnIndex;
+            returnIndex = -1;
             RefreshLevelList();
             if (database.Count > 0) LoadSelected();
             else NewLevel();
@@ -92,7 +96,7 @@ namespace BusJam.LevelEditor
 
         public void LoadSelected()
         {
-            if (database.Count > 0) Open(database.Get(levelList.index), levelList.index, false);
+            if (levelList.index >= 0 && levelList.index < database.Count) Open(database.Get(levelList.index), levelList.index, false);
         }
 
         private void Open(LevelData asset, int index, bool isNew)
@@ -109,9 +113,12 @@ namespace BusJam.LevelEditor
             width.SetValueWithoutNotify(draft.width.ToString());
             height.SetValueWithoutNotify(draft.height.ToString());
             seconds.SetValueWithoutNotify(draft.timeLimit.ToString("0", CultureInfo.InvariantCulture));
-            SetStatus(isNew ? "New level. Set the size, paint the grid, add buses, then drag passengers in." : $"Loaded Level {LevelNumber}.");
+            // Yeni level listede yok; seçici onu adıyla gösterir.
+            if (isNew) levelList.SetValueWithoutNotify($"New level {LevelNumber} (not saved)");
+            SetStatus(isNew ? "New level. Set the size, add buses, then place passengers." : $"Loaded Level {LevelNumber}.");
             if (solverResult != null) solverResult.text = "";
             Rebuild(true);
+            MarkSaved();
         }
 
         // ---------- boyut / süre ----------
@@ -400,6 +407,7 @@ namespace BusJam.LevelEditor
         {
 #if UNITY_EDITOR
             ApplyTime();
+            if (draft.busOrder.Count == 0) { SetStatus("Cannot save: add at least one bus."); return false; }
             if (!draft.Validate(out string error)) { SetStatus($"Cannot save: {error}"); return false; }
             if (source == null)
             {
@@ -423,6 +431,7 @@ namespace BusJam.LevelEditor
             }
             UnityEditor.AssetDatabase.SaveAssets();
             SetStatus($"Saved as Level {LevelNumber}.");
+            MarkSaved();
             return true;
 #else
             SetStatus("Saving works in the Unity Editor.");
@@ -435,6 +444,8 @@ namespace BusJam.LevelEditor
         {
             if (!Save()) return;
             SaveSystem.SetLevelIndex(sourceIndex);
+            returnIndex = sourceIndex;
+            EditorReturn.Begin(SceneManager.GetActiveScene().name);
             SceneManager.LoadScene(gameSceneName);
         }
 
@@ -480,8 +491,8 @@ namespace BusJam.LevelEditor
         {
             if (status == null) return;
             string help = SelectedColor.HasValue
-                ? $"<b>Placing {SelectedColor.Value}</b> ({Remaining(SelectedColor.Value)} left): left-click a tile to place · click {SelectedColor.Value} again or Esc to stop · middle-click a passenger to remove · right-click a passenger for options"
-                : "<b>Tiles</b>: left-click cycles Tile > Hole > Obstacle > Tunnel · right-click a tunnel to rotate / fill it · right-click a passenger for options · middle-click removes a passenger · pick a colour on the left to place passengers";
+                ? $"<b>Placing {SelectedColor.Value}</b> ({Remaining(SelectedColor.Value)} left): tap tiles to place · tap {SelectedColor.Value} again or Esc to stop"
+                : "<b>Tap a tile</b>: Tile > Hole > Obstacle > Tunnel · tap a tunnel or passenger to edit it · pick a colour on the left to place passengers";
             status.text = string.IsNullOrEmpty(lastMessage) ? help : $"{help}\n<color=#FFE066>{lastMessage}</color>";
         }
 

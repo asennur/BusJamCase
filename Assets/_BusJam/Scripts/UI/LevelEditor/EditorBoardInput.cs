@@ -10,7 +10,7 @@ namespace BusJam.LevelEditor
         private void Update()
         {
             if (editor.Draft == null) return;
-            if (Input.GetKeyDown(KeyCode.Escape)) editor.ClearSelection();
+            if (Input.GetKeyDown(KeyCode.Escape) && !editor.ClosePopups()) editor.ClearSelection();
             if (editor.TunnelIsOpen && Input.GetKeyDown(KeyCode.R)) editor.RotateTunnel(editor.OpenTunnelCell);
             int button = Input.GetMouseButtonDown(0) ? 0 : Input.GetMouseButtonDown(1) ? 1 : Input.GetMouseButtonDown(2) ? 2 : -1;
             if (button >= 0) ProcessClick(Input.mousePosition, button);
@@ -23,7 +23,9 @@ namespace BusJam.LevelEditor
             {
                 case 0:
                     if (editor.SelectedColor.HasValue) editor.PlacePassenger(cell, editor.SelectedColor.Value);
-                    else if (data.type == CellType.Passenger) editor.Hint("This is a passenger: right-click for its options, middle-click to remove it.");
+                    // Dokunmatikte sağ/orta tık yok: yolcu ve tünel dokununca düzenleme paneli açılır.
+                    else if (data.type == CellType.Passenger) editor.ShowPassenger(cell);
+                    else if (data.type == CellType.Tunnel) editor.ShowTunnel(cell);
                     else editor.CycleTile(cell);
                     break;
                 case 1:
