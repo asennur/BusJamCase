@@ -103,3 +103,4 @@ Kaynak dosyalar: `C:\Users\Kullanici\Downloads\WhatsApp Image 2026-11-22 at 00.1
 - 22.11 — Push: 4046074 (LE4 + Level_28). Asen: R9 (ip katmanı = boğum sayısı, en çok 3) ve U1 (Playing alt 4 kilitli booster butonu silinsin, board kaymasın) başladı. Sonra: Asen diğer testleri bitirince performans testi.
 - 22.11 — U1 bitti (1b0308f): booster çubuğu + 2 SVG silindi, görünmez bar-space kaldı (konfeti çıkış noktası), board konumu değişmedi (L2/L10, 1080×1920/2400 cmp). R9 sürüyor.
 - 22.11 — R9 bitti (13c9318, ab94a51, d5fedaf): her ip ayrı halka + krem düğüm (1/2/3), MaxRopes=3 (editör, Validate, Solver); hiçbir levelde 3+ ip yoktu, değişen level yok. Sırada: Asen testleri → performans testi.
+- 22.11 — Asen: sarı düğümler olmasın → R9b bitti (6c89b71, 6129cf5): yalnız halkalar, M_Rope düz renk, RopePalette silindi.
