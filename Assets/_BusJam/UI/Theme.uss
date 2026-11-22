@@ -411,17 +411,17 @@ Button { border-width: 0; margin: 0; padding: 0; background-color: transparent; 
 /* ZHUD-2: live level caption above the counter surface. */
 .timer-level { position: absolute; left: 42px; right: 0; top: -18px; height: 27px; margin: 0; padding: 0; font-size: 21px; color: white; -unity-text-outline-color: #10121c; -unity-text-outline-width: 1.2px; text-shadow: 0 2px 0 #081423; }
 
-/* T2: reference phone HUD. Values are reference pixels (739x1600 capture); ToolkitGameUI.Layout scales the columns by screen height. */
+/* T2: reference phone HUD (G2: timer 20% larger, same centre). Values are reference pixels (739x1600 capture); ToolkitGameUI.Layout scales the columns by screen height. */
 .hud-column { position: absolute; left: 50%; width: 739px; translate: -50% 0; }
 .hud-top { top: 0; height: 100px; transform-origin: 50% 0; }
 .hud-top > .level-badge { position: absolute; left: 90px; top: 0; width: 100px; height: 100px; padding-top: 2px; }
 .hud-top .level-title { height: 26px; font-size: 26px; color: #1d3c91; -unity-text-outline-width: 0; text-shadow: 0 0 0 transparent; }
 .hud-top .level-number { height: 52px; font-size: 54px; color: white; -unity-text-outline-color: #15141d; -unity-text-outline-width: 3px; text-shadow: 0 2px 0 rgba(21, 20, 29, 0.45); }
-.hud-top > .timer-counter { position: absolute; left: 289px; top: 22px; width: 160px; height: 56px; padding-right: 8px; }
-.hud-top .clock-icon { width: 54px; height: 56px; }
-.hud-top .timer-text { font-size: 30px; }
+.hud-top > .timer-counter { position: absolute; left: 273px; top: 16px; width: 192px; height: 67px; padding-right: 10px; }
+.hud-top .clock-icon { width: 65px; height: 67px; }
+.hud-top .timer-text { font-size: 36px; }
 .hud-top .timer-level { display: none; }
-.hud-top > .timer-counter > .raster-panel-art.vector-header { left: 28px; top: 8px; bottom: 6px; -unity-slice-scale: .24px; }
+.hud-top > .timer-counter > .raster-panel-art.vector-header { left: 34px; top: 10px; bottom: 7px; -unity-slice-scale: .29px; }
 .hud-top > .gear { position: absolute; left: 575px; top: 17px; width: 79px; height: 81px; }
 .booster-bar { height: 111px; flex-direction: row; padding-left: 70px; transform-origin: 50% 100%; }
 .booster-track { position: absolute; left: 48px; right: 49px; top: 18px; height: 86px; background-image: url("Vector/booster_bar.svg"); -unity-background-scale-mode: stretch-to-fill; }
