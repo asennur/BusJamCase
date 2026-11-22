@@ -67,7 +67,13 @@
                 <ui:VisualElement name="complete-body" class="result-body" picking-mode="Ignore">
                     <ui:VisualElement name="complete-panel" class="result-content ref-column" picking-mode="Ignore">
                         <ui:VisualElement name="complete-heading" class="result-heading" picking-mode="Ignore">
-                            <ui:VisualElement name="complete-rays" class="fill result-rays" picking-mode="Ignore" usage-hints="DynamicTransform" />
+                            <ui:VisualElement name="complete-halo" class="result-halo" picking-mode="Ignore" usage-hints="DynamicTransform" />
+                            <ui:VisualElement name="complete-rays" class="result-rays-frame" picking-mode="Ignore" usage-hints="DynamicTransform">
+                                <ui:VisualElement name="rays-back" class="fill result-rays rays-back" picking-mode="Ignore" usage-hints="DynamicTransform" />
+                                <ui:VisualElement name="rays-front" class="fill result-rays" picking-mode="Ignore" usage-hints="DynamicTransform" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="complete-burst" class="result-burst" picking-mode="Ignore" usage-hints="DynamicTransform" />
+                            <ui:VisualElement name="complete-dust" class="fill" picking-mode="Ignore" />
                             <ui:VisualElement name="complete-title-group" class="fill" picking-mode="Ignore" usage-hints="DynamicTransform">
                                 <ui:VisualElement class="complete-ribbon" picking-mode="Ignore" />
                                 <ui:VisualElement name="complete-title" class="complete-title" picking-mode="Ignore" tooltip="Level Completed!" />
