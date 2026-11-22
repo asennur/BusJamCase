@@ -35,4 +35,6 @@ Thumbs.db
 __pycache__/
 *.pyc
 *.tmp
+*.orig
+*~
 Docs/Takip/EDITOR.lock
