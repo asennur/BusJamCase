@@ -6,18 +6,32 @@ namespace BusJam.LevelEditor
 {
     /// <summary>
     /// Test Play sırasında oyun sahnesine "Editor" butonu ekler; buton ya da Esc editör sahnesine,
-    /// test edilen levele döner. Yalnız editörden açılan testte vardır, sahnelere dokunmaz.
+    /// test edilen levele döner. Oynanan level taslağın kopyasıdır (GameManager.TestLevel); asset'e ve LevelDatabase'e
+    /// dokunulmaz, kopya bu nesneyle birlikte silinir. Yalnız editörden açılan testte vardır.
     /// </summary>
     public sealed class EditorReturn : MonoBehaviour
     {
         private string editorScene;
         private Button button;
+        private BusJam.Level.LevelData testLevel;
 
-        public static void Begin(string editorSceneName)
+        public static void Begin(string editorSceneName, BusJam.Level.LevelData level, int levelNumber)
         {
+            // Sahne geçişindeki UnloadUnusedAssets kopyayı silmesin.
+            level.hideFlags = HideFlags.DontUnloadUnusedAsset;
+            BusJam.Core.GameManager.TestLevel = level;
+            BusJam.Core.GameManager.TestLevelNumber = levelNumber;
             var go = new GameObject("EditorReturn");
             DontDestroyOnLoad(go);
-            go.AddComponent<EditorReturn>().editorScene = editorSceneName;
+            var editorReturn = go.AddComponent<EditorReturn>();
+            editorReturn.editorScene = editorSceneName;
+            editorReturn.testLevel = level;
+        }
+
+        private void OnDestroy()
+        {
+            if (BusJam.Core.GameManager.TestLevel == testLevel) BusJam.Core.GameManager.TestLevel = null;
+            if (testLevel != null) Destroy(testLevel);
         }
 
         private void OnEnable() => SceneManager.sceneLoaded += OnSceneLoaded;

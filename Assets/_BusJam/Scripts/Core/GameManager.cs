@@ -34,6 +34,10 @@ namespace BusJam.Core
         public event Action PlayBlockedNoLives;
         public event Action<int, LevelData> LevelLoaded;
 
+        /// <summary>Level editörünün Test Play'i: doluysa database yerine bu taslak kopyası oynanır, ilerleme kaydedilmez.</summary>
+        public static LevelData TestLevel;
+        public static int TestLevelNumber;
+
         private void Awake()
         {
             if (levelDatabase == null || boardView == null || inputHandler == null || levelTimer == null || livesSystem == null)
@@ -50,7 +54,7 @@ namespace BusJam.Core
         // UI ve oynanış, ilk level Start'ta yüklenmeden önce abone olur.
         private void Start()
         {
-            currentLevelIndex = SaveSystem.GetLevelIndex();
+            currentLevelIndex = TestLevel != null ? TestLevelNumber - 1 : SaveSystem.GetLevelIndex();
             LoadLevel(currentLevelIndex);
             SetState(GameState.Start);
         }
@@ -73,7 +77,7 @@ namespace BusJam.Core
 
         private void LoadLevel(int index)
         {
-            currentLevel = levelDatabase.Get(index);
+            currentLevel = TestLevel != null ? TestLevel : levelDatabase.Get(index);
             Board.Setup(currentLevel);
             boardView.Build(currentLevel, Board);
             CurrentLevelNumber = currentLevelIndex + 1;
@@ -141,8 +145,11 @@ namespace BusJam.Core
         // Kazanınca sonraki index hemen kaydedilir; LoadNext o kayıtlı leveli kurar.
         public void Complete()
         {
-            currentLevelIndex++;
-            SaveSystem.SetLevelIndex(currentLevelIndex);
+            if (TestLevel == null)
+            {
+                currentLevelIndex++;
+                SaveSystem.SetLevelIndex(currentLevelIndex);
+            }
             SetState(GameState.Complete);
         }
 

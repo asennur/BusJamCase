@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
 using BusJam.Core;
 using BusJam.Gameplay;
 using BusJam.Level;
@@ -13,7 +15,8 @@ namespace BusJam.LevelEditor
 {
     /// <summary>
     /// Level editörü modeli + üst çubuk. Seçili levelin taslak kopyasını düzenler; asset yalnız Save'de
-    /// ve yalnız taslak doğrulanırsa yazılır. Board girdisi, palet, otobüs sırası çubuğu ve popup'lar bu sınıfı çağırır ve
+    /// ve yalnız taslak doğrulanıp solver çözüm bulursa yazılır. Solve/Save/Auto Fill solver'ı arka plan thread'inde
+    /// taslağın kopyasıyla çalıştırır; Test Play kaydetmeden taslağın kopyasını oynatır. Board girdisi, palet, otobüs sırası çubuğu ve popup'lar bu sınıfı çağırır ve
     /// <see cref="Changed"/> ile yeniden çizer. Slotlar düzenlenmez: level numarasından gelir (GameRules).
     /// </summary>
     [ExecuteAlways, RequireComponent(typeof(UIDocument))]
@@ -56,14 +59,30 @@ namespace BusJam.LevelEditor
         private LevelData draft;
         private int sourceIndex = -1;
         private string lastMessage = "";
+        // Taslağın her değişikliğinde artar; arka plan sonucu eski taslağa aitse yok sayılır.
+        private int revision;
+        // Test Play'e giderken taslak, level index'i ve kayıtlı anlık görüntü burada bekler.
+        private static LevelData returnDraft;
         private static int returnIndex = -1;
+        private static string returnSnapshot;
 
         private void Start()
         {
             if (!Application.isPlaying) return;
-            // Test Play'den dönünce aynı level açılır.
-            if (returnIndex >= 0 && returnIndex < database.Count) sourceIndex = returnIndex;
-            returnIndex = -1;
+            if (returnDraft != null)
+            {
+                // Test Play'den dönüş: kaydedilmemiş değişiklikleriyle aynı taslak.
+                var level = returnDraft;
+                returnDraft = null;
+                level.hideFlags = HideFlags.None;
+                int index = returnIndex >= 0 && returnIndex < database.Count ? returnIndex : -1;
+                sourceIndex = index;
+                RefreshLevelList();
+                Edit(level, index);
+                savedSnapshot = returnSnapshot;
+                SetStatus(HasUnsavedChanges ? "Back from Test Play. Your changes are kept, not saved yet." : "Back from Test Play.");
+                return;
+            }
             RefreshLevelList();
             if (database.Count > 0) LoadSelected();
             else NewLevel();
@@ -71,11 +90,14 @@ namespace BusJam.LevelEditor
 
         private void OnDestroy()
         {
-            if (draft != null)
-            {
-                if (Application.isPlaying) Destroy(draft);
-                else DestroyImmediate(draft);
-            }
+            CancelJob();
+            if (draft != null && draft != returnDraft) DestroyLevel(draft);
+        }
+
+        private static void DestroyLevel(LevelData level)
+        {
+            if (Application.isPlaying) Destroy(level);
+            else DestroyImmediate(level);
         }
 
         private void RefreshLevelList()
@@ -101,24 +123,27 @@ namespace BusJam.LevelEditor
 
         private void Open(LevelData asset, int index, bool isNew)
         {
-            if (draft != null)
-            {
-                if (Application.isPlaying) Destroy(draft);
-                else DestroyImmediate(draft);
-            }
-            source = isNew ? null : asset;
-            sourceIndex = isNew ? -1 : index;
+            Edit(isNew ? asset : Instantiate(asset), isNew ? -1 : index);
+            SetStatus(isNew ? "New level. Set the size, add buses, then place passengers." : $"Loaded Level {LevelNumber}.");
+            MarkSaved();
+        }
+
+        // Verilen taslağı düzenlemeye açar; index -1 kaydedilmemiş yeni level.
+        private void Edit(LevelData level, int index)
+        {
+            CancelJob();
+            if (draft != null && draft != level) DestroyLevel(draft);
+            source = index >= 0 ? database.Get(index) : null;
+            sourceIndex = index;
             SelectedColor = null;
-            draft = isNew ? asset : Instantiate(asset);
+            draft = level;
             width.SetValueWithoutNotify(draft.width.ToString());
             height.SetValueWithoutNotify(draft.height.ToString());
             seconds.SetValueWithoutNotify(draft.timeLimit.ToString("0", CultureInfo.InvariantCulture));
             // Yeni level listede yok; seçici onu adıyla gösterir.
-            if (isNew) levelList.SetValueWithoutNotify($"New level {LevelNumber} (not saved)");
-            SetStatus(isNew ? "New level. Set the size, add buses, then place passengers." : $"Loaded Level {LevelNumber}.");
+            if (index < 0) levelList.SetValueWithoutNotify($"New level {LevelNumber} (not saved)");
             if (solverResult != null) solverResult.text = "";
             Rebuild(true);
-            MarkSaved();
         }
 
         // ---------- boyut / süre ----------
@@ -363,16 +388,10 @@ namespace BusJam.LevelEditor
         public void Solve()
         {
 #if UNITY_EDITOR
+            if (Busy) return;
             if (!draft.Validate(out string error)) { ShowSolver($"Not valid yet: {error}"); return; }
-            var result = LevelSolver.Solve(draft, LevelNumber, 400000, 6000, false, maxSolutionsShown);
-            if (result.SolutionCount == 0)
-                ShowSolver(result.Limited ? "Search limit reached before a solution was found (too complex)." : "No solution. Players would always get stuck.");
-            else
-            {
-                string count = result.SolutionCount >= maxSolutionsShown ? $"{maxSolutionsShown}+" : result.SolutionCount.ToString();
-                string plural = result.SolutionCount == 1 ? "solution" : "solutions";
-                ShowSolver($"{count} {plural} found.\nExample taps: {LevelSolver.Format(result.Solutions[0], draft.width)}");
-            }
+            StartJob(Job.Solve);
+            ShowSolver("Solving…");
 #else
             ShowSolver("The solver runs in the Unity Editor.");
 #endif
@@ -395,20 +414,167 @@ namespace BusJam.LevelEditor
         public void AutoFill()
         {
 #if UNITY_EDITOR
-            bool ok = LevelAutoFill.Fill(draft, LevelNumber, out string message);
-            ShowSolver(message);
-            if (ok) Rebuild(true);
+            if (Busy) return;
+            StartJob(Job.AutoFill);
+            ShowSolver("Filling and solving…");
 #else
             ShowSolver("Auto fill runs in the Unity Editor.");
 #endif
         }
 
-        public bool Save()
+        /// <summary>Doğrular, sonra arka planda çözer; yalnız çözüm bulunursa asset'i yazar (yeni level listenin sonuna).</summary>
+        public void Save()
         {
 #if UNITY_EDITOR
+            if (Busy) return;
             ApplyTime();
-            if (draft.busOrder.Count == 0) { SetStatus("Cannot save: add at least one bus."); return false; }
-            if (!draft.Validate(out string error)) { SetStatus($"Cannot save: {error}"); return false; }
+            if (draft.busOrder.Count == 0) { SetStatus("Cannot save: add at least one bus."); return; }
+            if (!draft.Validate(out string error)) { SetStatus($"Cannot save: {error}"); return; }
+            StartJob(Job.Save);
+            SetStatus("Checking the level can be solved…");
+            ShowSolver("Solving…");
+#else
+            SetStatus("Saving works in the Unity Editor.");
+#endif
+        }
+
+        /// <summary>Kaydetmeden oyun sahnesinde taslağın kopyasını oynatır; dönüşte taslak aynen geri gelir.</summary>
+        public void TestPlay()
+        {
+            ApplyTime();
+            if (draft.busOrder.Count == 0) { SetStatus("Cannot test: add at least one bus."); return; }
+            if (!draft.Validate(out string error)) { SetStatus($"Cannot test: {error}"); return; }
+            CancelJob();
+            var test = Instantiate(draft);
+            test.name = source != null ? source.name : "Test level";
+            draft.hideFlags = HideFlags.DontUnloadUnusedAsset;
+            returnDraft = draft;
+            returnIndex = sourceIndex;
+            returnSnapshot = savedSnapshot;
+            EditorReturn.Begin(SceneManager.GetActiveScene().name, test, LevelNumber);
+            SceneManager.LoadScene(gameSceneName);
+        }
+
+#if UNITY_EDITOR
+        // ---------- arka plan solver işi ----------
+
+        private enum Job { None, Solve, Save, AutoFill }
+
+        private sealed class JobResult
+        {
+            public LevelSolver.Result Solve;
+            public bool Filled;
+            public string Message;
+        }
+
+        private Job job;
+        private Task<JobResult> task;
+        private CancellationTokenSource cancel;
+        private LevelData jobLevel;
+        private int jobRevision;
+
+        public bool Busy => task != null;
+
+        // Taslağın kopyası ana thread'de alınır; thread yalnız bu kopyanın alanlarını okur/yazar, Unity API'sine dokunmaz.
+        private void StartJob(Job kind)
+        {
+            CancelJob();
+            job = kind;
+            jobRevision = revision;
+            jobLevel = Instantiate(draft);
+            cancel = new CancellationTokenSource();
+            var level = jobLevel;
+            var token = cancel.Token;
+            int number = LevelNumber, shown = maxSolutionsShown;
+            task = kind switch
+            {
+                Job.Solve => Task.Run(() => new JobResult { Solve = LevelSolver.Solve(level, number, 400000, 6000, false, shown, token) }, token),
+                Job.Save => Task.Run(() => new JobResult { Solve = LevelSolver.Solve(level, number, 400000, 6000, false, 1, token) }, token),
+                _ => Task.Run(() => new JobResult { Filled = LevelAutoFill.Fill(level, number, out string message, 40, token), Message = message }, token)
+            };
+            SetBusy(true);
+        }
+
+        // Yeni iş, level değişimi ya da sahne kapanışı: çalışan iş iptal edilir, sonucu yok sayılır.
+        private void CancelJob()
+        {
+            if (task == null) return;
+            cancel.Cancel();
+            cancel.Dispose();
+            cancel = null;
+            task = null;
+            job = Job.None;
+            if (jobLevel != null) DestroyLevel(jobLevel);
+            jobLevel = null;
+            SetBusy(false);
+        }
+
+        // Update'ten çağrılır: iş bittiyse sonucu ana thread'de uygular.
+        private void PollJob()
+        {
+            if (task == null || !task.IsCompleted) return;
+            var finished = task;
+            var kind = job;
+            var level = jobLevel;
+            task = null; job = Job.None; jobLevel = null;
+            cancel.Dispose(); cancel = null;
+            SetBusy(false);
+            try
+            {
+                if (finished.IsFaulted)
+                {
+                    Debug.LogException(finished.Exception.GetBaseException());
+                    ShowSolver("The solver failed. See the Console.");
+                    if (kind == Job.Save) SetStatus("Not saved: the solver failed.");
+                    return;
+                }
+                if (finished.IsCanceled) return;
+                if (jobRevision != revision)
+                {
+                    ShowSolver("The level changed while solving. Try again.");
+                    if (kind == Job.Save) SetStatus("The level changed while checking. Not saved: press Save again.");
+                    return;
+                }
+                var result = finished.Result;
+                if (kind == Job.Solve) ShowSolveResult(result.Solve);
+                else if (kind == Job.Save) FinishSave(result.Solve);
+                else
+                {
+                    ShowSolver(result.Message);
+                    if (!result.Filled) return;
+                    draft.cells = level.cells;
+                    draft.busOrder = level.busOrder;
+                    draft.tunnels = level.tunnels;
+                    Rebuild(true);
+                }
+            }
+            finally
+            {
+                if (level != null) DestroyLevel(level);
+            }
+        }
+
+        private void ShowSolveResult(LevelSolver.Result result)
+        {
+            if (result.SolutionCount == 0)
+                ShowSolver(result.Limited ? "Search limit reached before a solution was found (too complex)." : "No solution. Players would always get stuck.");
+            else
+            {
+                string count = result.SolutionCount >= maxSolutionsShown ? $"{maxSolutionsShown}+" : result.SolutionCount.ToString();
+                string plural = result.SolutionCount == 1 ? "solution" : "solutions";
+                ShowSolver($"{count} {plural} found.\nExample taps: {LevelSolver.Format(result.Solutions[0], draft.width)}");
+            }
+        }
+
+        private void FinishSave(LevelSolver.Result result)
+        {
+            if (result.Error != null) { SetStatus($"Cannot save: {result.Error}"); ShowSolver(result.Error); return; }
+            if (result.SolutionCount == 0)
+            {
+                string message = result.Limited ? "Could not verify solvable (too complex) — not saved." : "No solution — level not saved.";
+                SetStatus(message); ShowSolver(message);
+                return;
+            }
             if (source == null)
             {
                 string path = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(
@@ -430,29 +596,21 @@ namespace BusJam.LevelEditor
                 UnityEditor.EditorUtility.SetDirty(source);
             }
             UnityEditor.AssetDatabase.SaveAssets();
-            SetStatus($"Saved as Level {LevelNumber}.");
+            SetStatus($"Saved as Level {LevelNumber} ({source.name}). The solver found a solution.");
+            ShowSolver($"Solvable.\nExample taps: {LevelSolver.Format(result.Solutions[0], draft.width)}");
             MarkSaved();
-            return true;
+        }
 #else
-            SetStatus("Saving works in the Unity Editor.");
-            return false;
+        public bool Busy => false;
+        private void CancelJob() { }
+        private void PollJob() { }
 #endif
-        }
-
-        /// <summary>Kaydeder, sonra hemen oynanabilsin diye oyun sahnesini bu levelde açar.</summary>
-        public void TestPlay()
-        {
-            if (!Save()) return;
-            SaveSystem.SetLevelIndex(sourceIndex);
-            returnIndex = sourceIndex;
-            EditorReturn.Begin(SceneManager.GetActiveScene().name);
-            SceneManager.LoadScene(gameSceneName);
-        }
 
         // ---------- yeniden çizim ----------
 
         private void Rebuild(bool busesChanged)
         {
+            revision++;
             board.Setup(draft);
             boardView.Build(draft, board);
             DrawVoidMarkers();

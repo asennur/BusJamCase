@@ -22,7 +22,7 @@ namespace BusJam.LevelEditor
         private Label busSummary, passengerTitle, ropeLabel, tunnelTitle, tunnelCount;
         private Toggle hiddenPassenger;
         private DropdownField cloakList;
-        private Button[] buttons, directionButtons;
+        private Button[] buttons, directionButtons, solverButtons;
         private Action[] actions;
         private PaletteEntry[] palette;
         private ChipRow buses, tunnelQueue;
@@ -87,6 +87,7 @@ namespace BusJam.LevelEditor
         private void Update()
         {
             if (waitingForTree && document.rootVisualElement?.Q("editor-root") != null) OnEnable();
+            PollJob();
         }
 
         // UIDocument bu bileşenden sonra enable olabilir; yalnız dolu ağaç önbelleğe alınır.
@@ -110,11 +111,12 @@ namespace BusJam.LevelEditor
             ghost = uiRoot.Q("passenger-ghost");
             string[] names = { "load", "new", "save", "test", "apply", "auto-grid", "solve", "auto-fill", "passenger-close", "ropes-minus", "ropes-plus",
                 "delete-passenger", "tunnel-close", "delete-tunnel", "face-Up", "face-Down", "face-Left", "face-Right" };
-            actions = new Action[] { RequestLoad, RequestNew, SaveDraft, TestPlay, ApplySize, AutoGrid, Solve, AutoFill, HidePassenger, RemoveRope, AddRope,
+            actions = new Action[] { RequestLoad, RequestNew, Save, TestPlay, ApplySize, AutoGrid, Solve, AutoFill, HidePassenger, RemoveRope, AddRope,
                 DeletePassenger, HideTunnel, DeleteTunnel, () => FaceOpenTunnel(Direction.Up), () => FaceOpenTunnel(Direction.Down),
                 () => FaceOpenTunnel(Direction.Left), () => FaceOpenTunnel(Direction.Right) };
             buttons = new Button[names.Length];
             for (int i = 0; i < names.Length; i++) buttons[i] = uiRoot.Q<Button>(names[i]);
+            solverButtons = new[] { uiRoot.Q<Button>("save"), uiRoot.Q<Button>("solve"), uiRoot.Q<Button>("auto-fill") };
             directionButtons = new Button[Directions.Length];
             for (int i = 0; i < Directions.Length; i++) directionButtons[i] = uiRoot.Q<Button>("face-" + Directions[i]);
             buses = new ChipRow(this, uiRoot, "bus", AddBus, RemoveBusAt, MoveBus);
@@ -125,7 +127,12 @@ namespace BusJam.LevelEditor
             return true;
         }
 
-        private void SaveDraft() => Save();
+        // Arka planda solver çalışırken Save/Solve/Auto Fill kilitlenir.
+        private void SetBusy(bool busy)
+        {
+            if (solverButtons == null) return;
+            foreach (var button in solverButtons) button.SetEnabled(!busy);
+        }
         private void MarkSaved() { savedSnapshot = draft != null ? JsonUtility.ToJson(draft) : null; pendingDiscard = null; }
 
         // Kaydedilmemiş iş varsa ilk basış uyarır, aynı isteğin ikinci basışı uygular.

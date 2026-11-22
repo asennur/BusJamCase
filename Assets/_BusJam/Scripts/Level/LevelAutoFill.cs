@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace BusJam.Level
@@ -14,7 +15,8 @@ namespace BusJam.Level
     {
         public const int SeatsPerBus = 3;
 
-        public static bool Fill(LevelData level, int levelNumber, out string message, int attempts = 40)
+        /// <summary>Unity API'sine dokunmaz: editör arka plan thread'inde taslağın kopyasıyla çağırır.</summary>
+        public static bool Fill(LevelData level, int levelNumber, out string message, int attempts = 40, CancellationToken cancel = default)
         {
             var free = FreeCells(level);
             if (level.busOrder == null) level.busOrder = new List<PassengerColor>();
@@ -52,7 +54,7 @@ namespace BusJam.Level
             List<List<PassengerColor>> bestQueues = null;
             int bestCount = 0;
             var random = new System.Random();
-            for (int attempt = 0; attempt < attempts; attempt++)
+            for (int attempt = 0; attempt < attempts && !cancel.IsCancellationRequested; attempt++)
             {
                 var cells = (CellData[])original.Clone();
                 Shuffle(free, random);
@@ -65,7 +67,7 @@ namespace BusJam.Level
                     cells[free[i]] = new CellData { type = CellType.Passenger, color = needed[next++] };
 
                 level.cells = cells;
-                var result = LevelSolver.Solve(level, levelNumber, 60000, 1200, false, 2);
+                var result = LevelSolver.Solve(level, levelNumber, 60000, 1200, false, 2, cancel);
                 if (result.SolutionCount > bestCount)
                 {
                     bestCount = result.SolutionCount;

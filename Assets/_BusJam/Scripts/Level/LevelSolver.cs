@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using BusJam.Core;
 using UnityEngine;
 
@@ -79,13 +80,16 @@ namespace BusJam.Level
         private readonly int slotCount, stateLimit, maxSolutions;
         private readonly double milliseconds;
         private readonly bool findLoss;
+        private readonly CancellationToken cancel;
         private readonly Stopwatch watch = new Stopwatch();
         private readonly Dictionary<string, Paths> memo = new Dictionary<string, Paths>();
         private bool limited;
         private int states;
 
-        private LevelSolver(Level.LevelData level, int levelNumber, int stateLimit, double milliseconds, bool findLoss, int maxSolutions)
+        private LevelSolver(Level.LevelData level, int levelNumber, int stateLimit, double milliseconds, bool findLoss, int maxSolutions,
+            CancellationToken cancel = default)
         {
+            this.cancel = cancel;
             this.level = level;
             this.maxSolutions = Mathf.Max(1, maxSolutions);
             this.stateLimit = stateLimit;
@@ -95,11 +99,12 @@ namespace BusJam.Level
                 if (GameRules.IsSlotUnlocked(i, levelNumber)) slotCount++;
         }
 
+        /// <summary>Unity API'sine dokunmaz; editör bunu arka plan thread'inde taslağın kopyasıyla çağırır. İptal, sınır aşımı gibi Limited döner.</summary>
         public static Result Solve(Level.LevelData level, int levelNumber, int stateLimit = 200000,
-            double milliseconds = 5000, bool findLosingSequence = false, int maxSolutions = 3)
+            double milliseconds = 5000, bool findLosingSequence = false, int maxSolutions = 3, CancellationToken cancel = default)
         {
             if (!level.Validate(out string error)) return new Result { Error = "Invalid: " + error };
-            var solver = new LevelSolver(level, levelNumber, stateLimit, milliseconds, findLosingSequence, maxSolutions);
+            var solver = new LevelSolver(level, levelNumber, stateLimit, milliseconds, findLosingSequence, maxSolutions, cancel);
             var start = new State
             {
                 Cells = (Level.CellData[])level.cells.Clone(), Slots = new int[solver.slotCount],
@@ -174,7 +179,7 @@ namespace BusJam.Level
         private Paths Search(State state)
         {
             var result = new Paths();
-            if (states >= stateLimit || watch.Elapsed.TotalMilliseconds >= milliseconds)
+            if (states >= stateLimit || watch.Elapsed.TotalMilliseconds >= milliseconds || cancel.IsCancellationRequested)
             {
                 limited = true;
                 return result;
