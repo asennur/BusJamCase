@@ -39,7 +39,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 - Kızgın yüz: yolcunun üstünde kısa süre görünen kırmızı ikon/quad (DOTween ile zıplar, kaybolur).
 - Gizli yolcu: gri materyal + başın üstünde dünya uzayında "?" mesh'i (beyaz dolgu, koyu kontur; renk açılınca gerçek materyal, "?" kalkar).
 - Tünel: hücreyi kaplayan lila-gri yuvarlak blok, ağız tarafında koyu lacivert kapak; üstünde beyaz dolgu + siyah konturlu kalan yolcu sayısı. Yolcu çıkınca blok esner, yolcu içeriden büyüyerek ağıza kayar.
-- Engel: `Void` karo yok, delik (grid dışı ya da ortada boşluk, hiçbir şey çizilmez); `Obstacle` referanstaki tahta boşluğu gibi çizilir: karo yok, zemin görünür, krem çerçeve etrafından dolaşır. Karar: engel modülü referansla aynı, ayrı kasa/çukur modeli yok (Asen, 22 Kasım 2026).
+- Engel: `Void` karo yok, delik (grid dışı ya da ortada boşluk, hiçbir şey çizilmez); `Obstacle` referanstaki tahta boşluğu gibi çizilir: karo yok, zemin görünür, krem çerçeve etrafından dolaşır. Karar: engel modülü referansla aynı, ayrı kasa/çukur modeli yok (Asen, 22 Kasım 2026). Karar (G1, Asen, 22 Kasım 2026): `Obstacle` tahtanın içinde kalır (taban ve çerçeve onu da kapsar, delik kesilmez); karo yerine yuvarlak kenarlı lila-gri kubbe (`Kit_Obstacle`, `M_KitObstacle`). Tahta tabanı çıkış kenarından kaldırıma `sidewalkJoinDepth` kadar bindirilir (kaldırımla arada zemin şeridi kalmaz).
 - **Complete:** grid üstünde konfeti patlaması → "Level Completed" paneli (Continue). **Fail:** "Level Failed" paneli (Try Again). Coin and ad offers remain outside scope; lives follow the rule in §3.
 
 ## 3. Oyun kuralları
@@ -82,7 +82,7 @@ Model yok. Unity primitive + düz renkli materyal. Referans: Asen'in oyun videos
 ## 4. Veri (`BusJam.Level`)
 
 - `PassengerColor : byte` enum: `Red, Pink, Purple, Blue, Green, Yellow, White` (videodaki 7 renk).
-- `CellType : byte` → `Empty`, `Passenger`, `Void` (karo yok, delik, çizilmez), `Tunnel`, `Obstacle` (yürünmez engel; görünümü tahta boşluğu). Yeni değerler sona eklenir ki var olan level asset'lerindeki sayılar kaymasın.
+- `CellType : byte` → `Empty`, `Passenger`, `Void` (karo yok, delik, çizilmez), `Tunnel`, `Obstacle` (yürünmez engel; tahta içinde kubbe). Yeni değerler sona eklenir ki var olan level asset'lerindeki sayılar kaymasın.
 - `TunnelData` (serializable class) → `Vector2Int cell`, `Direction facing` (`Up, Down, Left, Right`), `List<PassengerColor> queue`. `LevelData.tunnels` listesinde; hücre tipi `Tunnel` olur.
 - `CellData` struct → `type`, `color`, `hidden`, `byte ropes`, en sonda `Cloak cloak`. `Cloak : byte { None, StartsOpen, StartsClosed }`; eski assetlerde 0 = pelerinsiz/ipsiz (Asen kuralı, 19 Kasım).
 - `LevelData : ScriptableObject` → `width`, `height`, `CellData[] cells` (`index = y * width + x`), `timeLimit`, `List<PassengerColor> busOrder`. `Resize` örtüşen hücreleri korur. Bekleme slotu sayısı level verisinde **tutulmaz**: ekranda her zaman 7 sabit slot vardır, uçtaki ikisi level numarasına göre açılır (`GameRules.VisibleSlotCount/FirstSlotUnlockLevel/LastSlotUnlockLevel`, Asen kuralı 19 Kasım).

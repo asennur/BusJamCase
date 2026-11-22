@@ -1344,6 +1344,7 @@ MonoBehaviour:
   rimStraightYaw: 180
   rimOuterYaw: 180
   rimInnerYaw: 180
+  sidewalkJoinDepth: 0.5
   colorMaterials:
   - {fileID: 2100000, guid: 8704c296d4af58c4396adb0a4e87ce9c, type: 2}
   - {fileID: 2100000, guid: 78ca3a4aed7b08c4f93012ada5fcc88c, type: 2}

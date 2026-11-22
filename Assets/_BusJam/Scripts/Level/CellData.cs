@@ -4,7 +4,7 @@ namespace BusJam.Level
 {
     /// <summary>
     /// Empty varsayılan kalır ki yeni grid boş başlasın. Void: karo yok, delik (grid dışı ya da ortada boşluk).
-    /// Tunnel: engel, kendi kuyruğundan yolcu çıkarır. Obstacle: yürünmez engel, tahtada boşluk olarak çizilir.
+    /// Tunnel: engel, kendi kuyruğundan yolcu çıkarır. Obstacle: yürünmez engel, tahtanın içinde karo yerine bombe olarak çizilir.
     /// Yeni değer sona eklendi ki var olan level asset'lerindeki sayılar kaymasın.
     /// </summary>
     public enum CellType : byte
