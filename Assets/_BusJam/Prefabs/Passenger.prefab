@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 22781834043332816}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0.05, z: 0}
   m_LocalScale: {x: 1.4, y: 1.4, z: 1.4}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1015,8 +1015,8 @@ SkinnedMeshRenderer:
   m_BlendShapeWeights: []
   m_RootBone: {fileID: 4524501170449985701}
   m_AABB:
-    m_Center: {x: 0, y: -0.000000014901161, z: 0.42047435}
-    m_Extent: {x: 0.23015492, y: 0.14999996, z: 0.42952555}
+    m_Center: {x: -0.0000097686425, y: -0.00037370616, z: 0.0027370034}
+    m_Extent: {x: 0.0029551834, y: 0.0022267106, z: 0.0042483807}
   m_DirtyAABB: 0
 --- !u!1 &6927448729252775956
 GameObject:
@@ -1271,6 +1271,7 @@ MonoBehaviour:
   - {fileID: 2894196540621308260}
   - {fileID: 4221414964396201605}
   - {fileID: 6121695041083124406}
+  ropeBurstDuration: 0.14
   cloakVisual: {fileID: 9166329861621240738}
   cloakMaterial: {fileID: 2100000, guid: 389b16c177672ca4488d9914bac1b969, type: 2}
   cloakDuration: 0.18
@@ -1284,6 +1285,7 @@ MonoBehaviour:
   halfWave: 0.14
   seatRotation: {x: 270.01978, y: 179.99998, z: 0}
   seatedScale: 1
+  seatedVisualHeight: 0
 --- !u!1001 &945332770017905765
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1294,15 +1296,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.3
+      value: 1.15
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
       propertyPath: m_LocalScale.y
-      value: 1.3
+      value: 1.15
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1.3
+      value: 1.15
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5b10341802df5b84ca353d8f1d9b230d, type: 3}
       propertyPath: m_LocalPosition.x

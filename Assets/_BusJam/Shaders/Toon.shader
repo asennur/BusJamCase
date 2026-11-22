@@ -1,4 +1,5 @@
 // Mobil toon: iki tonlu basamak diffuse + sert specular nokta + üstten rim. Ana ışık + SH ambient, keyword yok.
+// İsteğe bağlı silüet koyulaştırma (Edge) aynı tonda ince kontur verir.
 // SRP Batcher uyumlu (tüm alanlar UnityPerMaterial'da); instancing açık. Kontur ayrı OutlineHull materyalinde.
 Shader "BusJam/Toon"
 {
@@ -16,6 +17,9 @@ Shader "BusJam/Toon"
         _RimColor ("Rim Color", Color) = (1, 1, 1, 1)
         _RimThreshold ("Rim Threshold", Range(0, 1)) = 0.62
         _RimStrength ("Rim Strength", Range(0, 1)) = 0.35
+        _EdgeColor ("Edge Tint", Color) = (0.45, 0.4, 0.5, 1)
+        _EdgeThreshold ("Edge Threshold", Range(0, 1)) = 0.78
+        _EdgeStrength ("Edge Strength", Range(0, 1)) = 0
     }
     SubShader
     {
@@ -40,6 +44,7 @@ Shader "BusJam/Toon"
                 half4 _ShadeColor;
                 half4 _SpecColor;
                 half4 _RimColor;
+                half4 _EdgeColor;
                 half _RampThreshold;
                 half _RampSmooth;
                 half _AmbientStrength;
@@ -47,6 +52,8 @@ Shader "BusJam/Toon"
                 half _SpecStrength;
                 half _RimThreshold;
                 half _RimStrength;
+                half _EdgeThreshold;
+                half _EdgeStrength;
             CBUFFER_END
 
             struct Attributes
@@ -102,6 +109,10 @@ Shader "BusJam/Toon"
                 // Silüet kenarında, üste bakan yüzeylerde açık bant.
                 half rim = smoothstep(_RimThreshold, _RimThreshold + 0.08h, 1.0h - saturate(dot(n, v))) * saturate(n.y + 0.3h);
                 color = lerp(color, _RimColor.rgb, rim * _RimStrength);
+
+                // Silüette ince koyu, aynı tonlu kontur (yolcular); 0 gücünde etkisiz.
+                half edge = smoothstep(_EdgeThreshold, _EdgeThreshold + 0.06h, 1.0h - saturate(dot(n, v)));
+                color = lerp(color, color * _EdgeColor.rgb, edge * _EdgeStrength);
 
                 return half4(color, 1.0h);
             }
