@@ -25,9 +25,9 @@ Shader "BusJam/Modular Ground"
             #pragma vertex Vert
             #pragma fragment Frag
             #pragma multi_compile_instancing
-            #include "../../../Shaders/ToonLighting.hlsl"
-            #include "../../../Shaders/BackgroundTone.hlsl"
-            #include "../../../Shaders/SidewalkSpots.hlsl"
+            #include "ToonLighting.hlsl"
+            #include "BackgroundTone.hlsl"
+            #include "SidewalkSpots.hlsl"
             struct Attributes { float4 positionOS:POSITION; float2 band:TEXCOORD1; UNITY_VERTEX_INPUT_INSTANCE_ID };
             struct Varyings { float4 positionCS:SV_POSITION; float2 ground:TEXCOORD0; float band:TEXCOORD1; half3 light:TEXCOORD2; UNITY_VERTEX_INPUT_INSTANCE_ID };
             CBUFFER_START(UnityPerMaterial)

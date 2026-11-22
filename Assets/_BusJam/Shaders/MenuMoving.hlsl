@@ -2,7 +2,7 @@
 #define BUSJAM_MENU_MOVING_INCLUDED
 // Menü kayan dünyası: dekor uzakta yumuşakça belirir, yol dokusu ve şeridi _MenuMotion ile kayar.
 // Işık ortak toon modeli; MENU_ROAD bir #define (keyword değil), iki shader dosyası bu gövdeyi paylaşır.
-#include "../../../Shaders/ToonLighting.hlsl"
+#include "ToonLighting.hlsl"
 
 TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
 CBUFFER_START(UnityPerMaterial)

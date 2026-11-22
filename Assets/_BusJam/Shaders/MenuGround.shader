@@ -20,7 +20,7 @@ Shader "BusJam/Menu Ground"
             #pragma vertex Vert
             #pragma fragment Frag
             #pragma multi_compile_instancing
-            #include "../../../Shaders/ToonLighting.hlsl"
+            #include "ToonLighting.hlsl"
             CBUFFER_START(UnityPerMaterial)
                 half4 _BaseColor;
                 half4 _ShadeColor; half _RampThreshold, _RampSmooth, _AmbientStrength;
