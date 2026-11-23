@@ -24,6 +24,10 @@ namespace BusJam.UI
         private Bus firstBus;
         private Vector2Int tunnelMouth;
         private bool tunnelLessonActive;
+        private Passenger hiddenPassenger;
+
+        // Gizli yolcular ilk kez Level_02'de görünür.
+        private const int HiddenIntroduction = 2;
 
         // LevelDatabase tünelleri ilk kez Level_03'te tanıtır.
         private const int TunnelIntroduction = 3;
@@ -69,7 +73,7 @@ namespace BusJam.UI
         {
             Hide();
             int level = gameManager.CurrentLevelNumber;
-            if ((level != 1 && level != TunnelIntroduction && level != 6 && level != 8)
+            if ((level != 1 && level != HiddenIntroduction && level != TunnelIntroduction && level != 6 && level != 8)
                 || SaveSystem.TutorialSeen(level)) return;
             introduction = level;
             if (level == 1)
@@ -83,6 +87,11 @@ namespace BusJam.UI
                 tiedPassenger = FindRopeLesson();
                 guided = tiedPassenger != null;
                 target = guided ? FindTappableNeighbor(tiedPassenger) : gameplay.FirstTappablePassenger();
+            }
+            else if (level == HiddenIntroduction)
+            {
+                target = FindHiddenLesson();
+                guided = target != null;
             }
             else if (level == TunnelIntroduction)
             {
@@ -98,7 +107,8 @@ namespace BusJam.UI
             // Desteklenmeyen düzenler serbest oyunu açık tutar ve tamamlanmış ders kaydetmez.
             if (target == null) { Hide(); return; }
             if (guided) gameplay.TapFilter = AllowsTap;
-            hint.text = level == 6 ? "Free tied passengers by moving their neighbours."
+            hint.text = level == HiddenIntroduction ? "Hidden passengers show their colour once a path opens."
+                : level == 6 ? "Free tied passengers by moving their neighbours."
                 : level == 8 ? "Cloaked passengers can only move when their colour shows." : "";
             ShowTip(level != 1);
             PointAt(target);
@@ -183,6 +193,27 @@ namespace BusJam.UI
             return null;
         }
 
+        // Yolu açılınca rengi görünecek gizli yolcuyu ve onun dokunulabilir komşusunu seçer; otobüs rengi önceliklidir.
+        private Passenger FindHiddenLesson()
+        {
+            Board board = gameManager.Board;
+            Bus bus = busStation.ActiveBus;
+            Passenger fallback = null;
+            for (int i = 0; i < board.CellCount; i++)
+            {
+                Passenger hidden = board.GetOccupant(i);
+                if (hidden == null || !hidden.IsHidden) continue;
+                for (int j = 0; j < board.CellCount; j++)
+                {
+                    Passenger neighbor = board.GetOccupant(j);
+                    if (!IsNeighbor(hidden, neighbor) || neighbor.IsHidden || !gameplay.CanTapPassenger(neighbor)) continue;
+                    if (bus != null && neighbor.Color == bus.Color) { hiddenPassenger = hidden; return neighbor; }
+                    if (fallback == null) { hiddenPassenger = hidden; fallback = neighbor; }
+                }
+            }
+            return fallback;
+        }
+
         private Passenger FindTappableNeighbor(Passenger tied)
         {
             Board board = gameManager.Board;
@@ -222,6 +253,14 @@ namespace BusJam.UI
                         if (next == null) Hide();
                         else PointAt(next);
                     }
+                    return;
+                }
+                if (introduction == HiddenIntroduction)
+                {
+                    // Reveal TapAccepted'dan önce çalışır; açılan yolcu dokunulabilirse el ona geçer.
+                    if (passenger != hiddenPassenger && !hiddenPassenger.IsHidden && gameplay.CanTapPassenger(hiddenPassenger))
+                        PointAt(hiddenPassenger);
+                    else Complete();
                     return;
                 }
                 if (introduction == TunnelIntroduction)
@@ -265,6 +304,7 @@ namespace BusJam.UI
             tiedPassenger = null;
             firstBus = null;
             tunnelLessonActive = false;
+            hiddenPassenger = null;
             target = null;
             HideHand();
             ShowTip(false);

@@ -36,6 +36,7 @@ namespace BusJam.Save
             PlayerPrefs.SetInt(LevelIndexKey, 0);
             PlayerPrefs.SetInt("Coins", 0);
             PlayerPrefs.DeleteKey(TutorialKey(1));
+            PlayerPrefs.DeleteKey(TutorialKey(2));
             PlayerPrefs.DeleteKey(TutorialKey(3));
             PlayerPrefs.DeleteKey(TutorialKey(6));
             PlayerPrefs.DeleteKey(TutorialKey(8));
