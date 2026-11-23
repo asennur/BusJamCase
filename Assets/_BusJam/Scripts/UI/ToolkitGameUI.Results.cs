@@ -353,7 +353,8 @@ namespace BusJam.UI
         {
             if (!rewardPending || rewardCredited) return;
             rewardCredited = true;
-            if (Application.isPlaying) SaveSystem.AddCoins(coinReward);
+            // Level editörünün Test Play'i gerçek kayda coin yazmaz.
+            if (Application.isPlaying && GameManager.TestLevel == null) SaveSystem.AddCoins(coinReward);
         }
 
         private void FinishCelebration()

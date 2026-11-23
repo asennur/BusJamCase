@@ -58,6 +58,8 @@ namespace BusJam.Gameplay
         [SerializeField] private float pickObstacleHeight = 0.3f;
         [SerializeField, Range(0.3f, 0.5f)] private float pickHalfWidth = 0.42f;
         [SerializeField] private float pickTileTop = 0.05f;
+        [Tooltip("Boş/delik karonun bu yarıçaptaki orta bölgesine dokunmak, önündeki yolcu kutusuna değse de karoyu seçer.")]
+        [SerializeField, Range(0f, 0.5f)] private float pickTileCenterHalfWidth = 0.3f;
 
         private Mesh baseMesh;
         private readonly List<Vector3> baseVertices = new List<Vector3>();
@@ -434,13 +436,26 @@ namespace BusJam.Gameplay
         /// <summary>
         /// Level editörü seçimi: dokunulan noktada görünen hücre. Yolcu (gövde + baş kutusu), tünel ve engel boylarıyla kutu olarak sınanır,
         /// kameraya en yakın kutu kazanır (eğik kamerada uzun yolcu arkadaki hücreyi örter). Kutuya değmezse karo üst
-        /// yüzeyi düzleminden hücre hesaplanır (Void dahil). Collider kullanmaz; oyundaki dokunuş bu yolu kullanmaz.
+        /// yüzeyi düzleminden hücre hesaplanır (Void dahil). Boş/delik karonun orta bölgesi kutulardan önce gelir: kutular
+        /// modelden geniş olduğu için arkadaki karonun ortasını örtmemeli. Collider kullanmaz; oyundaki dokunuş bu yolu kullanmaz.
         /// </summary>
         public bool TryPickCell(Ray ray, LevelData level, out Vector2Int cell)
         {
             cell = default;
             Vector3 origin = transform.InverseTransformPoint(ray.origin);
             Vector3 direction = transform.InverseTransformVector(ray.direction);
+            bool onSurface = TrySurfaceCell(origin, direction, out Vector2Int surfaceCell, out Vector2 surfaceOffset);
+            if (onSurface && surfaceCell.x >= 0 && surfaceCell.x < level.width && surfaceCell.y >= 0 && surfaceCell.y < level.height)
+            {
+                CellType surfaceType = level.GetCell(surfaceCell.x, surfaceCell.y).type;
+                float center = pickTileCenterHalfWidth * cellSize;
+                if ((surfaceType == CellType.Empty || surfaceType == CellType.Void)
+                    && Mathf.Abs(surfaceOffset.x) <= center && Mathf.Abs(surfaceOffset.y) <= center)
+                {
+                    cell = surfaceCell;
+                    return true;
+                }
+            }
             float half = pickHalfWidth * cellSize;
             float best = float.MaxValue;
             bool hit = false;
@@ -484,6 +499,15 @@ namespace BusJam.Gameplay
             if (hit)
                 return true;
 
+            cell = surfaceCell;
+            return onSurface;
+        }
+
+        // Işının karo üst yüzeyine değdiği hücre ve noktanın hücre merkezine göre kayması.
+        private bool TrySurfaceCell(Vector3 origin, Vector3 direction, out Vector2Int cell, out Vector2 offset)
+        {
+            cell = default;
+            offset = default;
             float surface = pickTileTop * cellSize;
             if (Mathf.Abs(direction.y) < 1e-6f)
                 return false;
@@ -494,6 +518,8 @@ namespace BusJam.Gameplay
             Vector3 local = origin + direction * distance;
             cell = new Vector2Int(Mathf.RoundToInt(local.x / cellSize + (width - 1) * 0.5f),
                 Mathf.RoundToInt(-local.z / cellSize));
+            Vector3 center = CellToLocal(cell);
+            offset = new Vector2(local.x - center.x, local.z - center.z);
             return true;
         }
 

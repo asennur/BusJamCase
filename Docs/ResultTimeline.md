@@ -2,7 +2,7 @@
 
 Select `Assets/_BusJam/Data/ResultTimeline.asset` in the Project window. Expand **Celebration** to manage the bus choreography; every control has an English tooltip. Expand a named step in the Inspector and edit **Enabled, Start, Duration, Ease, Overshoot** (OutBack only) or **Stagger** (confetti/coin flight). Times are unscaled seconds. Change Start to change appearance order; dragging list entries only organizes the Inspector. Keep one entry per name. For CelebrationBus, only Enabled is authored in the named step; Start and Duration are derived from Celebration.
 
-Open **Bus Jam > Result Timeline Preview**. **Play Complete** and **Play Fail** animate in Edit mode; **Pause** and the **Time** slider allow scrubbing. **Coin Flight** previews Continue's collection; **Retry Fade** previews Retry. **Edit Timings** selects the asset. Choose 580×1250, 1080×1920 or 2560×1080. The preview uses a disposable scene and never saves Game.unity or player progress.
+Edits are checked in Play mode (Complete/Fail screens). The Edit-mode preview window was removed before submission (23 November 2026) to keep the project lean.
 
 Tracks and named steps:
 

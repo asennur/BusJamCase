@@ -16,7 +16,6 @@ namespace BusJam.EditorTools
             DrawDefaultInspector();
             if (!string.IsNullOrEmpty(timeline.ValidationMessage)) EditorGUILayout.HelpBox(timeline.ValidationMessage, MessageType.Warning);
             foreach (ResultTrack track in System.Enum.GetValues(typeof(ResultTrack))) EditorGUILayout.LabelField(track + " length", timeline.Length(track).ToString("0.###") + " s");
-            if (GUILayout.Button("Open Result Timeline Preview")) ResultTimelinePreview.Open(timeline);
         }
     }
 

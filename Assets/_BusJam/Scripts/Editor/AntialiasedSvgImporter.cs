@@ -57,13 +57,5 @@ public sealed class AntialiasedSvgImporter : SVGImporter
         if (name == "fx_tap_hand" || name == "glow_soft" || name.StartsWith("icon_heart")) return 512;
         return 256;
     }
-
-    [MenuItem("Bus Jam/Reimport Antialiased SVGs")]
-    public static void Configure()
-    {
-        foreach (string path in System.IO.Directory.GetFiles("Assets/_BusJam/UI/Vector", "*.svg"))
-            AssetDatabase.SetImporterOverride<AntialiasedSvgImporter>(path.Replace('\\','/'));
-        AssetDatabase.ImportAsset("Assets/_BusJam/UI/Theme.uss", ImportAssetOptions.ForceUpdate);
-    }
 }
 #endif
