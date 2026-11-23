@@ -1,0 +1,42 @@
+# SK1 — Son kontrol (statik), 23 Kasım 2026
+
+**Özet**
+- **Teslimi engelleyen bulgu yok.** Runtime kodunda korumasız `UnityEditor` yok; Editor-only tiplere runtime referansı yok; build sahne listesi doğru (0 Game, 1 LevelEditor).
+- Kod hijyeni temiz: runtime'da `Debug.Log` yok, TODO/FIXME/HACK yok, yorumdaki ölü kod yok, kullanılmayan script yok, her karede allocation yok.
+- Asıl dikkat edilecekler: **yön ayarı çelişkisi** (ProjectSettings AutoRotation, `AndroidBuilder` Portrait yazıyor), **README yok**, **uygulama ikonu yok**, **repo büyük** (pack 471 MB; Docs/Takip görüntüleri 149 MB), **unity-mcp git paketi** manifest'te.
+- Kapsam: yalnız diskten okuma. Editör, derleme ve Play yapılmadı; build'in derlendiği bu kontrolde doğrulanmadı.
+
+## Bulgular (önem sırasıyla)
+
+### Düzeltilmeli
+
+1. **Yön ayarı çelişkisi** · `ProjectSettings/ProjectSettings.asset:11` (`defaultScreenOrientation: 4` = AutoRotation, 61-64 dört yön açık) ve `Assets/_BusJam/Scripts/Editor/AndroidBuilder.cs:67` (`defaultInterfaceOrientation = UIOrientation.Portrait`). MIMARI §1 ZRES kararı otomatik döndürmeyi açık tutuyor, ama menüden "Bus Jam/Build/Android APK" alınırsa ayar Portrait'e kilitlenip ProjectSettings'e yazılıyor. · Öneri: tek karar ver. ZRES geçerliyse 67. satırı sil. Teslim için kilit isteniyorsa ProjectSettings'i Portrait yap ve MIMARI'ye karar satırı ekle.
+2. **README yok** · depo kökünde yalnız `.gitignore` izleniyor (`AGENTS.md`, `CLAUDE.md`, `thumbnail.png` `.git/info/exclude` ile dışarıda). · Öneri: kökte README: Unity 2022.3.19f1, açılış sahnesi `Assets/_BusJam/Scenes/Game.unity`, LevelEditor sahnesi ve kullanımı (Solve/Save/AutoFill yalnız editörde çalışıyor, build'de mesaj gösteriyor), özellikler, 3. parti listesi (aşağıda 5. madde), mimari özeti (`Docs/MIMARI.md`'ye link).
+3. **Uygulama ikonu atanmamış** · `ProjectSettings/ProjectSettings.asset:285` `m_BuildTargetIcons: []`, platform ikonlarında hiç doku yok. APK Unity varsayılan ikonuyla çıkar. · Öneri: Player Settings > Icon'a bir ikon ata (Codex işi), ör. `ArtSource/UI/logo_source.png` türevi.
+4. **`com.coplaydev.unity-mcp` git paketi** · `Packages/manifest.json:3` (GitHub URL, `#v10.3.0`). Projeyi açan değerlendiricide git ve ağ gerekir, çözülemezse paket hatası çıkar. Ayrıca geliştirme aracı, oyunla ilgisi yok. Assets/ProjectSettings içinde kod referansı yok. · Öneri: editör ajanları bitince teslim commit'inden önce manifest'ten ve `packages-lock.json`'dan çıkar.
+5. **UI görsellerinin kaynağı belirtilmemiş** · `Docs/CREDITS.md` ses, font ve DOTween/TMP'yi listeliyor. `ArtSource/UI/*.png` (Downloads'tan staged; kaynak `Docs/UI-Assets.md`) ve Blender modellerinin kaynağı yazmıyor. · Öneri: README/CREDITS'e "modeller: kendi Blender işi (`ArtSource/*.blend`); UI çizimleri: <kaynak>" satırı ekle. Kaynağı ben doğrulayamadım, Asen bilir.
+6. **Repo/klon boyutu** · `git count-objects -vH`: pack 471.4 MB. İzlenen dosyalar toplam 217.7 MB; bunun **148.8 MB'ı `Docs/Takip` altındaki 527 görüntü** (Docs toplam 149.5 MB). `ArtSource` 29 MB. · Öneri: geçmişi yeniden yazmak bu saatte riskli. Teslim zip ise `.git` ve `Docs/Takip/*-shots` hariç tutulabilir. Repo linki verilecekse boyut kabul edilebilir, README'de "Docs/Takip geliştirme kayıtları" diye not düş.
+
+### Önemsiz
+
+7. **Son APK eski** · `C:\Users\Kullanici\Documents\BusJamCase_Builds\Android\BusJamCase.apk` 19 Kasım 21:03 (28 MB, `build_result.txt`: Succeeded). Sonraki commit'ler APK'da yok. · Öneri: APK teslim edilecekse 1. madde kararından sonra yeniden al.
+8. **Editor-only serialized alan** · `Assets/_BusJam/Scripts/UI/LevelEditor/LevelEditorPanel.cs:46-49` `[SerializeField] maxSolutionsShown` `#if UNITY_EDITOR` içinde. Player build'de serileştirme düzeni farklı oluyor. Normal sahne build'inde genelde sorun çıkmaz, ama doğrulamadım. · Öneri: alanı guard dışına al (`int` maliyeti yok) ya da build sonrası LevelEditor sahnesinin player'da açıldığını gör.
+9. **LevelEditor sahnesi build'de ama oyundan erişilmiyor** · `EditorBuildSettings.asset` index 1. Game sahnesinden LevelEditor'a `LoadScene` yok, yalnız editörden test dönüşü var (`EditorReturn.cs:61`). · Öneri: bilinçli tercihse README'de söyle. Değilse build listesinde kalması zararsız.
+10. **MIMARI §0 küçük aykırılık** · `Assets/_BusJam/Scripts/UI/LevelEditor/EditorReturn.cs:43` `FindObjectOfType<UIDocument>()`. Her karede değil, sahne yüklenince bir kez çalışıyor ve yalnız editör test akışında. · Öneri: dokunma ya da README'de istisna olarak an.
+11. **Okunurluk** · `Assets/_BusJam/Scripts/Editor/ResultTimelinePreview.cs` boşluksuz, satıra çok ifade sığdıran sıkıştırılmış stilde yazılmış ve UITK iç API'sine reflection kullanıyor (135-142). 180 karakterden uzun satırlar: `UI/ResultTimeline.cs` (5), `Editor/ResultTimelineEditor.cs` (4). Yalnız editör aracı, build'i etkilemez. · Öneri: zaman kalırsa formatla, kalmazsa bırak.
+12. **Sabit kullanıcı yolu** · `AndroidBuilder.cs:16` `C:\Users\Kullanici\Documents\BusJamCase_Builds\Android`. Sahne listesi de 47. satırda elle yazılmış (EditorBuildSettings ile aynı, şu an tutarlı). · Öneri: değerlendirici için önemsiz. İstenirse proje köküne göre göreli yol (`Builds/` zaten ignore'da).
+13. **Android en-boy oranı** · `ProjectSettings.asset:161-162` `androidSupportedAspectRatio: 1` (SuperWideScreen, max 2.1). `androidResizableWindow: 1` olduğu için yeni cihazlarda etkisi muhtemelen yok, ama 20:9 cihazda kontrol etmedim. · Öneri: Player Settings'te "Native Aspect Ratio" seç.
+14. **Kullanılmayan built-in modüller** · manifest'te cloth, terrain, terrainphysics, vehicles, vr, xr, wind, umbra, video, ai, tilemap vb. `stripEngineCode: 1` açık, build'e etkisi az. · Öneri: dokunma.
+15. **Yorum dili karışık** · AGENTS/MIMARI "yorumlar Türkçe" diyor. Bazı dosyalarda İngilizce yorum var (ör. `UI/ToolkitGameUI.Preview.cs:10,17`). · Öneri: dokunma.
+
+## Doğrulanan, sorun yok
+
+- **UnityEditor kullanımı:** Editor klasörü dışındaki 4 dosyada da guard var. `Level/LevelSolver.cs` ve `Level/LevelAutoFill.cs` dosyanın tamamı `#if UNITY_EDITOR` içinde. Bunlara referans veren tek runtime dosyası `LevelEditorPanel.cs`, o da 501-650 arası guard içinde ve `#else` stub'ları var (`Busy`, `CancelJob`, `PollJob`). `MenuWorldPresentation.cs` ve DOTween modülü de korumalı. asmdef yok; her şey Assembly-CSharp ve Assembly-CSharp-Editor'da. Runtime'da `BusJam.EditorTools` referansı yok. `ToolkitGameUI.Preview.cs` metotları yalnız `Editor/ResultTimelinePreview.cs`'ten çağrılıyor.
+- **Build sahneleri:** `Assets/_BusJam/Scenes/Game.unity` (0) ve `LevelEditor.unity` (1), ikisi de etkin, yollar mevcut.
+- **PlayerSettings:** company `Asen`, product `Bus Jam Case`, package `com.asen.busjamcase`, version 1.0 / code 1, min API 24, target API 0 (otomatik en yüksek), IL2CPP, ARM64, `DefaultCompany` yok. Keystore debug, case için yeterli. Splash açık (Personal lisansta zorunlu olabilir).
+- **Hijyen:** runtime'da `Debug.Log`/`LogWarning` yok; 2 `LogError` hata raporu. `Debug.Log` yalnız `Editor/AndroidBuilder.cs` ve `Editor/LevelBatchGenerator.cs`'te. TODO/FIXME/HACK yok, yorumda ölü kod yok. Boş dosya yok: en küçükler `FailReason`, `GameState`, `PassengerColor` enum'ları.
+- **Kullanılmayan script yok:** her MonoBehaviour/ScriptableObject GUID'i sahne, prefab veya asset YAML'ında geçiyor. `EditorReturn` koddan ekleniyor. Diğer sınıflar koddan referanslı.
+- **Her karede çalışan kod:** 11 Update/LateUpdate gövdesi tek tek okundu. Kare başı `new`, LINQ, string birleştirme, `GetComponent`, `Find` yok. `LevelTimer` yalnız saniye değişince event atıyor; liste alanları `readonly` ve tekrar kullanılıyor. `Q("…")` çağrıları yalnız `waitingForTree` sırasında çalışıyor. `using System.Linq`, singleton, `Resources.Load` yok.
+- **.gitignore:** Library, Temp, Obj, Build, Builds, Logs, UserSettings, csproj/sln, apk/aab, blend1 ve `Docs/Takip/EDITOR.lock` var. `git ls-files` bunların hiçbirini içermiyor. Eksik/yetim `.meta` yok. `Packages/manifest.json` ve `packages-lock.json` izleniyor. Kökte dağınıklık yok.
+- **5 MB üstü izlenen dosyalar:** `Art/Fonts/Fredoka-Bold SDF.asset` 8.1 MB, `Art/Models/Menu/Generated/MenuLeft.asset` 7.7 MB, `MenuRight.asset` 5.9 MB. Üçü de kullanılıyor, normal.
+- **Lisanslar:** Fredoka ve Baloo2 OFL dosyaları `Assets/_BusJam/Art/Fonts/` altında, LiberationSans OFL TMP içinde, DOTween `readme.txt` mevcut. Sesler Pixabay, CREDITS'te. Baloo2 yalnız Fredoka UITK font asset'inin fallback'i olarak kullanılıyor. `com.unity.vectorgraphics` preview paketi SVG importer için gerekli.
