@@ -1,6 +1,0 @@
-p1080_L6 card x +0 y -0 w +0 | gear c +1,-1 | bar top +58 | banner top +65 | bus top +0 grid top +3 grid8 bottom +58 | slot y +25
-p1170_L21 card x +0 y +0 w -0 | gear c +1,+0 | bar top -7 | banner top +1 | bus top +0 grid top -22 grid8 bottom -10 | slot y +6
-p1170_L6 card x +0 y +0 w -0 | gear c +1,+0 | bar top -7 | banner top +1 | bus top +0 grid top -21 grid8 bottom -6 | slot y +7
-t1536_L21 card x -1 y -0 w +2 | gear c +1,+0 | bar top +58 | banner top +64 | bus top +0 grid top +3 grid8 bottom +58 | slot y +25
-t1668_L21 card x -0 y -0 w +2 | gear c +1,-0 | bar top +31 | banner top +37 | bus top +0 grid top -7 grid8 bottom +31 | slot y +18
-t1668_L6 card x -0 y -0 w +2 | gear c +1,-0 | bar top +31 | banner top +37 | bus top +0 grid top -7 grid8 bottom +31 | slot y +18
