@@ -23,7 +23,8 @@ namespace BusJam.Gameplay
         public Vector2Int Cell { get; private set; }
 
         private void Awake()
-        {            badgeRotation = badge.rotation;
+        {
+            badgeRotation = badge.rotation;
             modelScale = model.localScale;
         }
 
