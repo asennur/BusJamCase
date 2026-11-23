@@ -28,6 +28,7 @@ namespace BusJam.UI
 
         // Gizli yolcular ilk kez Level_02'de görünür.
         private const int HiddenIntroduction = 2;
+        private const float HeadTipHeight = 1.5f;
 
         // LevelDatabase tünelleri ilk kez Level_03'te tanıtır.
         private const int TunnelIntroduction = 3;
@@ -316,7 +317,9 @@ namespace BusJam.UI
         }
         private void PositionHand()
         {
-            Vector3 screen = worldCamera.WorldToScreenPoint(target.transform.position + Vector3.up * 1.6f);
+            // Parmak ucu başın hemen üstünde: model ölçek 1'de 1,41 boyunda, board ölçeğiyle büyür.
+            Vector3 head = target.transform.position + Vector3.up * (HeadTipHeight * target.transform.lossyScale.y);
+            Vector3 screen = worldCamera.WorldToScreenPoint(head);
             desiredPosition = overlay.WorldToLocal(RuntimePanelUtils.ScreenToPanel(overlay.panel, new Vector2(screen.x, Screen.height - screen.y)));
             if (handVisible && !travelling && (desiredPosition - handPosition).sqrMagnitude > 4) TravelToTarget();
         }
