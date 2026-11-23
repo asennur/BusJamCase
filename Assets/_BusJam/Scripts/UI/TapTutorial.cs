@@ -27,7 +27,7 @@ namespace BusJam.UI
 
         // LevelDatabase tünelleri ilk kez Level_03'te tanıtır.
         private const int TunnelIntroduction = 3;
-        // Level_03 ağızda Green, içeride Yellow, Yellow, Green ile başlar.
+        // Level_03 tüneli Green, Yellow, Yellow, Green sırasıyla çıkarır.
         private const PassengerColor TunnelColor = PassengerColor.Green;
 
         private void Awake()

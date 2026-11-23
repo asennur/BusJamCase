@@ -15,85 +15,134 @@ MonoBehaviour:
   width: 5
   height: 5
   timeLimit: 75
-  waitingSlotCount: 4
   cells:
   - type: 2
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 0
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 3
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 3
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 0
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 4
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 0
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 5
     hidden: 0
-  - type: 1
-    color: 3
-    hidden: 1
+    ropes: 0
+    cloak: 0
+  - type: 0
+    color: 0
+    hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 2
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 3
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 5
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   busOrder: 0003040205
   tunnels:
   - cell: {x: 2, y: 4}
     facing: 0
-    queue: 020205
+    queue: 03020205

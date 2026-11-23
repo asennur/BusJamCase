@@ -126,8 +126,8 @@ MonoBehaviour:
     hidden: 0
     ropes: 0
     cloak: 0
-  - type: 1
-    color: 4
+  - type: 0
+    color: 0
     hidden: 0
     ropes: 0
     cloak: 0
@@ -230,4 +230,4 @@ MonoBehaviour:
   tunnels:
   - cell: {x: 1, y: 4}
     facing: 0
-    queue: 000202
+    queue: 04000202

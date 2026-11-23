@@ -15,157 +15,254 @@ MonoBehaviour:
   width: 7
   height: 7
   timeLimit: 95
-  waitingSlotCount: 4
   cells:
   - type: 2
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 1
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 4
     hidden: 1
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 3
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 1
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 1
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 1
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 1
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 1
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 1
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 1
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 3
     hidden: 1
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 5
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 5
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 5
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 5
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 0
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 5
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 0
     hidden: 1
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 3
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 3
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 3
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 2
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 2
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 2
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 2
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 2
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 2
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 2
     hidden: 1
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 6
     hidden: 0
-  - type: 1
-    color: 6
+    ropes: 0
+    cloak: 0
+  - type: 0
+    color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 3
     color: 6
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 6
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 6
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 6
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 6
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 2
     hidden: 1
+    ropes: 0
+    cloak: 0
   - type: 0
     color: 0
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 1
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   - type: 2
     color: 4
     hidden: 0
+    ropes: 0
+    cloak: 0
   busOrder: 0401030500020604
   tunnels:
   - cell: {x: 5, y: 5}
     facing: 2
-    queue: 060404
+    queue: 06060404
