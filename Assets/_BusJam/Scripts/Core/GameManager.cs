@@ -113,7 +113,7 @@ namespace BusJam.Core
         {
             livesSystem.Refresh();
             if (State != GameState.Start) return;
-            if (livesSystem.Lives == 0)
+            if (!HasLives)
             {
                 PlayBlockedNoLives?.Invoke();
                 return;
@@ -153,10 +153,14 @@ namespace BusJam.Core
             SetState(GameState.Complete);
         }
 
+        // Level editörünün Test Play'i gerçek canı harcamaz ve can kontrolüne takılmaz.
+        private bool SpendLife() => TestLevel != null || livesSystem.TrySpendLife();
+        private bool HasLives => TestLevel != null || livesSystem.Lives > 0;
+
         public void Fail(FailReason reason)
         {
             if (State != GameState.Playing) return;
-            livesSystem.TrySpendLife();
+            SpendLife();
             FailReason = reason;
             SetState(GameState.Fail);
         }
@@ -178,7 +182,7 @@ namespace BusJam.Core
         {
             if (State != GameState.Playing) return;
             SetPaused(false);
-            if (!livesSystem.TrySpendLife()) return;
+            if (!SpendLife()) return;
             Retry();
         }
 
@@ -187,7 +191,7 @@ namespace BusJam.Core
         {
             if (State != GameState.Playing) return;
             SetPaused(false);
-            livesSystem.TrySpendLife();
+            SpendLife();
             LoadLevel(currentLevelIndex);
             SetState(GameState.Start);
         }
@@ -207,7 +211,7 @@ namespace BusJam.Core
         private void PrepareLoadedLevel()
         {
             livesSystem.Refresh();
-            SetState(livesSystem.Lives > 0 ? GameState.Ready : GameState.Start);
+            SetState(HasLives ? GameState.Ready : GameState.Start);
         }
 
         public void ResetProgress()

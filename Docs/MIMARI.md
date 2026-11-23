@@ -18,7 +18,7 @@ Bu dosya kodun tek tasarım kaynağıdır; kod (AI destekli) buna uyar. Kararlar
 
 - Render: **URP 14.x**, Unity 2022.3.19f1. One mobile pipeline asset: HDR off, MSAA 2x, all shadows off, one warm directional light, Gradient ambient fill, SRP Batcher on. Gameplay materials (passengers, buses, board kit) use the keyword-free `BusJam/Toon` shader (stepped diffuse, hard specular, top rim; SRP Batcher + instancing). Everything else that is lit uses the same light model from `Shaders/ToonLighting.hlsl` (half-Lambert single step + SH ambient): procedural ground, board sidewalk and menu ground light flat surfaces in the vertex stage, the moving menu scenery/road share `MenuMoving.hlsl`; menu, celebration and decor materials are `BusJam/Toon`. Only the outline hull, TMP/UI text, sprites, the menu sky and editor helpers stay unlit. Decision: one toon light model for the whole game (T1b, 22 November 2026). Decision: toon look, no realtime shadows, game key light (50,150,0) (T1, 22 November 2026). A single global `Settings/GameVolumeProfile` (menu: `MenuVolumeProfile`) provides light LDR grading, quarter-resolution low-quality Bloom and a subtle vignette. UI stays in Screen Space Overlay; the background camera canvas may be graded. Decision: no realtime or fake shadow geometry (ZLIGHT, 20 November 2026). Exact values and cost are in `ZLIGHT-Report.md`.
 
-- Player Settings: tasarım dikey (Portrait); ZRES kararıyla otomatik döndürme ve yeniden boyutlandırılabilir pencere açık, geniş ekranda kadraj ZRES kararına göre uyarlanır (bkz. ZRES Decision).
+- Player Settings: mobilde dikeye kilitli (Portrait, otomatik döndürme kapalı; Asen, 23 Kasım 2026). Yeniden boyutlandırılabilir pencere ve geniş ekran kadraj uyarlaması ZRES kararıyla korunur (masaüstü/editör).
 - Game view referansı **1080×1920**. `Application.targetFrameRate = 60` (GameManager Awake).
 - UI: **UI Toolkit** (`UI/GameUI.uxml`, `Theme.uss`, `GamePanelSettings`: Scale With Screen Size, referans 1080×1920, Expand). Güvenli alan `LayoutModeController.SafeViewport` ile kök elemana padding olarak verilir. UI çizimleri SVG, `AntialiasedSvgImporter` ile rasterlanır.
 - Input: eski Input Manager, `Input.GetMouseButtonDown(0)` (dokunmayı da karşılar).
@@ -190,6 +190,8 @@ Decision: Ready is an explicit state, and coins use a single update with a pop/p
 - Küçük, anlamlı commit; Türkçe mesaj.
 
 Decision: ZRES overrides the fixed-camera and portrait-only rules: preserve the exact 1080x1920 camera pose, fit larger levels and changed safe viewports along its view axis at FOV 40, offset the projection toward the free area on wider aspects, and use world-locked ground artwork with tiled extensions. Enable auto-rotation, resizable windows and native-size UI art/atlases; existing UI layout stays unchanged in this scope (20 November 2026). Evidence: `ZRES-World-Report.md`.
+
+Karar: Mobil yön dikeye kilitlendi (`defaultScreenOrientation` Portrait); ZRES'in otomatik döndürme kısmı geri alındı, kadraj uyarlaması kalır (Asen, 23 Kasım 2026).
 
 Decision: ZSCN-2 replaces the Game background image quad with world-locked procedural tile/road bands and the approved EnvironmentKit layout; retain the inactive image, use combined static scenery meshes and event-driven landscape-only side variants (21 November 2026). Camera, gameplay anchors, lighting and grading stay authored; evidence and Edit-mode background budgets are in `ZSCN-Report.md`.
 
