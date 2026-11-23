@@ -46,15 +46,25 @@ namespace BusJam.Gameplay
         public event Action<Bus> BusDeparting;
         public event Action AllBusesDone;
 
+        // Kuyruk + kalkıştaki iki otobüs baştan üretilir; oyun ortasında Instantiate takılması olmaz.
         private void EnsurePool()
         {
             if (busPool != null)
                 return;
 
             busPool = new ObjectPool<Bus>(
-                () => { Bus bus = Instantiate(busPrefab, transform); bus.Exhaust = exhaust; return bus; },
+                CreateBus,
                 b => b.gameObject.SetActive(true),
                 b => { b.gameObject.SetActive(false); b.transform.SetParent(transform, false); });
+            for (int i = 0; i < visibleQueueCount + 2; i++)
+                busPool.Release(CreateBus());
+        }
+
+        private Bus CreateBus()
+        {
+            Bus bus = Instantiate(busPrefab, transform);
+            bus.Exhaust = exhaust;
+            return bus;
         }
 
         public void Setup(List<PassengerColor> busOrder)

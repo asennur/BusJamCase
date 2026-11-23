@@ -164,11 +164,13 @@ namespace BusJam.Core
         /// <summary>Oyun içi ayarlar paneli açıkken true: zaman durur, dokunuşlar yok sayılır.</summary>
         public bool IsPaused { get; private set; }
 
+        // Duraklatma ekranı sabit; 30 FPS uzun oturumda ısınmayı ve pil tüketimini azaltır.
         public void SetPaused(bool paused)
         {
             if (paused && State != GameState.Playing) return;
             IsPaused = paused;
             Time.timeScale = paused ? 0f : 1f;
+            Application.targetFrameRate = paused ? 30 : 60;
         }
 
         /// <summary>Ayarlar panelinden Restart: bir can harcar, sonra level yeniden başlamak için Tap bekler.</summary>
