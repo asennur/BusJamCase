@@ -72,7 +72,7 @@ Assets/_BusJam/Scripts/
    - Pick a colour to place passengers. In the passenger brush you can set hidden, ropes (0–3) and cloak.
    - Tap a passenger or a tunnel to edit it. For a tunnel you can set its direction and its passenger queue.
 4. Set the size, the **time limit** and the **bus order**.
-5. **Solve** checks solvability. **Auto Fill** completes colours and bus order. **Test Play** plays the current draft without saving anything, and the "Editor" button returns to the draft.
+5. **Solve** checks solvability. **Auto Fill** places the passengers the bus order still needs on empty tiles and retries until the solver finds solutions. **Test Play** plays the current draft without saving anything, and the "Editor" button returns to the draft.
 6. **Save** writes the asset only if it passes `Validate` and the solver finds a solution. A new level is added to the end of `LevelDatabase` as `Level_NN`.
 
 ## Performance
@@ -95,7 +95,7 @@ Third-party content is listed in `Docs/CREDITS.md`:
 **AI usage (open disclosure):**
 - **Code:** written with AI coding assistants (Claude Code, OpenAI Codex). I wrote the design rules (`Docs/ARCHITECTURE.md`), made every gameplay and architecture decision, and reviewed and play-tested the results.
 - **3D models** (bus, passenger, board kit, menu scene): created in Blender with AI-written Python (bpy) scripts. The source `.blend` files are in `ArtSource/`.
-- **UI art:** the reference PNG kit (`ArtSource/UI/`) was generated in ChatGPT with OpenAI's image model (gpt-image); the files carry C2PA provenance metadata. The in-game UI uses vector SVG versions built from that kit.
+- **UI art:** the first PNG UI kit (`ArtSource/UI/`) was generated in ChatGPT with OpenAI's image model (gpt-image); the files carry C2PA provenance metadata. The in-game UI (`Assets/_BusJam/UI/Vector/*.svg`) was then written as SVG code by Codex: most elements were redrawn from scratch to match the reference gameplay video's style, and a few (tap hand, sparkle, glow) were traced from the ChatGPT kit.
 - **App icon:** generated with OpenAI image generation (through Codex). Rounded corners were added afterwards.
 
 No assets were taken from the original Bus Jam game.
