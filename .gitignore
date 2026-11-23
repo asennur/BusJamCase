@@ -38,3 +38,6 @@ __pycache__/
 *.orig
 *~
 Docs/Takip/EDITOR.lock
+
+# Android build artefacts
+*_BurstDebugInformation_DoNotShip/

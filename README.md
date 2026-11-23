@@ -10,7 +10,7 @@ Tap passengers to send them to the bus of their colour. If their bus isn't at th
 1. Clone the repository and open the folder with **Unity 2022.3.19f1** (Unity Hub > Add > select the folder).
 2. Package resolution needs **git** on PATH. `com.coplaydev.unity-mcp` is an editor-only development tool fetched from GitHub; the game doesn't use it.
 3. Open `Assets/_BusJam/Scenes/Game.unity` and press Play. Set the Game view to **1080×1920** (portrait), or use the Device Simulator.
-4. Android build: File > Build Settings > Android > Build. Scenes in the build: `Game` (0) and `LevelEditor` (1).
+4. Android build: File > Build Settings > Android > Build. Only `Game` is in the player build; `LevelEditor` is an editor-time tool (saving levels uses `AssetDatabase`) and is opened from the Project window.
 
 ## Scenes
 
