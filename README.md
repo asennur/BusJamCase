@@ -95,7 +95,7 @@ Third-party content is listed in `Docs/CREDITS.md`:
 **AI usage (open disclosure):**
 - **Code:** written with AI coding assistants (Claude Code, OpenAI Codex). I wrote the design rules (`Docs/ARCHITECTURE.md`), made every gameplay and architecture decision, and reviewed and play-tested the results.
 - **3D models** (bus, passenger, board kit, menu scene): created in Blender with AI-written Python (bpy) scripts. The source `.blend` files are in `ArtSource/`.
-- **UI art:** the reference PNG kit was generated with AI image generation (`ArtSource/UI/`). The in-game UI uses vector SVG versions built from it.
-- **App icon:** generated with AI image generation (OpenAI, via Codex). Rounded corners were added afterwards.
+- **UI art:** the reference PNG kit (`ArtSource/UI/`) was generated in ChatGPT with OpenAI's image model (gpt-image); the files carry C2PA provenance metadata. The in-game UI uses vector SVG versions built from that kit.
+- **App icon:** generated with OpenAI image generation (through Codex). Rounded corners were added afterwards.
 
 No assets were taken from the original Bus Jam game.
